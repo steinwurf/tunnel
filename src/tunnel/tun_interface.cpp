@@ -12,26 +12,62 @@
 
 namespace tunnel
 {
-tun_interface::tun_interface()
+
+// Helper function for creating error codes
+std::error_code make_error_code(int value)
 {
+    return std::error_code(value, std::generic_category());
 }
 
+// Helper function for converting boost errors to std errors
+std::error_code to_std_error_code(const boost::system::error_code& error)
+{
+    return std::error_code(error.value(), std::generic_category());
+}
+
+void io_handler_proxy(const tun_interface::io_handler& callback,
+                      const boost::system::error_code& error,
+                      uint32_t bytes_transferred)
+{
+    callback(to_std_error_code(error), bytes_transferred);
+}
+
+// Helper function for reading flags from interface
+struct ifreq read_interface_flags(int socket_fd,
+                                  const std::string& name,
+                                  std::error_code& error)
+{
+    struct ifreq ifr;
+
+    std::strncpy(ifr.ifr_name, name.c_str(), name.size());
+
+    if (ioctl(socket_fd, SIOCGIFFLAGS, &ifr) == -1)
+    {
+        error = make_error_code(errno);
+        return ifr;
+    }
+
+    return ifr;
+}
+
+
+// @param io the io service to be used for async operation
 // @param devname: the name of an interface. May be an empty string. In this
 // case, the kernel chooses the interface name and sets devname to this.
 // @return the tun file descriptor
-int tun_interface::create_tun_interface(std::string& devname)
+std::unique_ptr<tun_interface> tun_interface::make_tun_interface(
+    boost::asio::io_service& io,
+    std::string& devname,
+    std::error_code& error)
 {
-    int kernel_socket = -1;
-    kernel_socket = socket(AF_INET, SOCK_STREAM, 0);
-
     struct ifreq ifr;
-    int fd, err;
     const char* clonedev = "/dev/net/tun";
-
+    int fd;
     // open the clone device
     if ((fd = open(clonedev, O_RDWR)) < 0)
     {
-        return fd;
+        error = make_error_code(errno);
+        return nullptr;
     }
 
     // preparation of the struct ifr, of type "struct ifreq"
@@ -48,10 +84,11 @@ int tun_interface::create_tun_interface(std::string& devname)
     }
 
     // try to create the device
-    if ((err = ioctl(fd, TUNSETIFF, (void*) &ifr)) < 0)
+    if (ioctl(fd, TUNSETIFF, (void*) &ifr) < 0)
     {
         close(fd);
-        return err;
+        error = make_error_code(errno);
+        return nullptr;
     }
 
     // if the operation was successful, write back the name of the
@@ -60,24 +97,148 @@ int tun_interface::create_tun_interface(std::string& devname)
     // code below)
     devname = std::string(ifr.ifr_name);
 
-    // Set the device up
-    std::cout << "Getting flags from " << devname << std::endl;
+    return std::make_unique<tun_interface>(io, fd, devname);
+}
 
-    // Get flags from interface
-    if ((err = ioctl(kernel_socket, SIOCGIFFLAGS, &ifr)) == -1)
+tun_interface::tun_interface(boost::asio::io_service& io,
+                             int tun_fd,
+                             const std::string& devname)
+    : m_name(devname),
+      m_kernel_socket(socket(AF_INET, SOCK_STREAM, 0)),
+      m_tun_fd(tun_fd),
+      m_tun_stream(io)
+{
+    m_tun_stream.assign(m_tun_fd);
+}
+
+tun_interface::~tun_interface()
+{
+    m_tun_stream.cancel();
+    m_tun_stream.close();
+    m_tun_stream.release();
+    close(m_kernel_socket);
+    close(m_tun_fd);
+}
+
+bool tun_interface::is_up(std::error_code& error) const
+{
+    struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
+
+    return (ifr.ifr_flags & IFF_UP) != 0;
+}
+
+void tun_interface::up(std::error_code& error)
+{
+    struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
+
+    if (error)
     {
-        close(fd);
-        return err;
+        return;
     }
 
     ifr.ifr_flags |= IFF_UP;
 
-    if ((err = ioctl(kernel_socket, SIOCSIFFLAGS, &ifr)) < 0)
+    if (ioctl(m_kernel_socket, SIOCSIFFLAGS, &ifr) == -1)
     {
-        close(fd);
-        return err;
+        error = make_error_code(errno);
+        return;
     }
+}
 
-    return fd;
+bool tun_interface::is_down(std::error_code& error) const
+{
+    return !is_up(error);
+}
+
+void tun_interface::down(std::error_code& error)
+{
+    struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
+
+    ifr.ifr_flags &= ~IFF_UP;
+
+    if (ioctl(m_kernel_socket, SIOCSIFFLAGS, &ifr) == -1)
+    {
+        error = make_error_code(errno);
+        return;
+    }
+}
+
+void tun_interface::set_ipv4(const std::string& address, std::error_code& error)
+{
+    boost::system::error_code ec;
+    auto addr = boost::asio::ip::address_v4::from_string(address, ec);
+    if (ec)
+    {
+        error = to_std_error_code(ec);
+        return;
+    }
+    auto mask = boost::asio::ip::address_v4::netmask(addr);
+    auto bcast = boost::asio::ip::address_v4::broadcast(addr, mask);
+
+    struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
+
+    struct sockaddr_in* addr_in = (struct sockaddr_in*) &ifr.ifr_addr;
+
+    addr_in->sin_family = AF_INET;
+
+    std::vector<std::pair<int, boost::asio::ip::address_v4>> addr_config = {
+        {SIOCSIFADDR, addr}, {SIOCSIFNETMASK, mask}, {SIOCSIFBRDADDR, bcast}};
+
+    for (const auto& pair : addr_config)
+    {
+        int res = inet_pton(
+            AF_INET, pair.second.to_string().c_str(), &addr_in->sin_addr);
+        if (res == 0)
+        {
+            error = std::make_error_code(std::errc::invalid_argument);
+            return;
+        }
+        else if (res < 0)
+        {
+            error = make_error_code(errno);
+            return;
+        }
+
+        if (ioctl(m_kernel_socket, pair.first, &ifr) != 0)
+        {
+            error = make_error_code(errno);
+            return;
+        }
+
+        std::cout << "Setting config " << pair.second << std::endl;
+    }
+}
+
+std::string tun_interface::name() const
+{
+    return m_name;
+}
+
+// @param buffer the buffer into which the data will be read.
+// Ownership of the buffer is retained by the caller, which must guarantee it
+// remain valid until the callback is called
+// @param callback The callback to be called when the read operation
+// completes. Copies will be made of the handler as required.
+void tun_interface::async_read(std::vector<uint8_t>& buffer,
+                               io_handler callback)
+{
+    m_tun_stream.async_read_some(boost::asio::buffer(buffer),
+                                 std::bind(io_handler_proxy,
+                                           callback,
+                                           std::placeholders::_1,
+                                           std::placeholders::_2));
+
+
+}
+
+void tun_interface::async_write(const std::vector<uint8_t>& buffer,
+                                io_handler callback)
+{
+    boost::asio::async_write(m_tun_stream,
+                             boost::asio::buffer(buffer),
+                             std::bind(io_handler_proxy,
+                                       callback,
+                                       std::placeholders::_1,
+                                       std::placeholders::_2));
 }
 }
