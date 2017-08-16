@@ -5,6 +5,6 @@ bld.stlib(
     features='cxx',
     source=bld.path.ant_glob('**/*.cpp'),
     target='tunnel',
-    use=[],
+    use=['boost_includes', 'boost_system'],
     export_includes=['..']
 )

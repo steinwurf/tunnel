@@ -11,42 +11,72 @@
 #include <thread>
 #include <vector>
 
+#include <boost/asio.hpp>
+
 int main()
 {
-    tunnel::tun_interface t;
-
     std::string name("testtun");
+    boost::asio::io_service io;
+    std::error_code error;
 
-    auto fd = t.create_tun_interface(name);
-    if (fd < 0)
+    auto t = tunnel::tun_interface::make_tun_interface(io, name, error);
+    if (error)
     {
-        perror("Allocating interface");
-        close(fd);
-        exit(1);
+        std::cout << "Error creating tun interface: " << error.message()
+                  << std::endl;
+        return error.value();
     }
 
-    (void) fd;
 
-    std::cout << "Created tun interface " << name << std::endl;
-
-    std::vector<char> buffer(2000);
-
-    while (true)
+    t->up(error);
+    if (error)
     {
-        std::cout << "Reading from interface" << std::endl;
-        // Note that "buffer" should be at least the MTU size of the interface,
-        // eg 1500 bytes
-        int nread = read(fd, buffer.data(), buffer.size());
+        std::cout << "Error setting tun interface up: " << error.message()
+                  << std::endl;
+        return error.value();
+    }
 
-        if (nread < 0)
+    uint32_t max_buffer_size = 65600;
+    std::vector<uint8_t> buffer(max_buffer_size);
+
+    t->async_read(buffer, [&](auto error, auto bytes) {
+        if (error && error != std::errc::operation_canceled)
         {
-            perror("Reading from interface");
-            close(fd);
-            exit(1);
+            std::cout << "Error on async read: " << error.message()
+                      << std::endl;
+        }
+        else if (error != std::errc::operation_canceled)
+        {
+            std::cout << "Read a packet of " << bytes << " bytes"
+                      << " from the interface " << std::endl;
         }
 
-        /* Do whatever with the data */
-        printf("Read %d bytes from device %s\n", nread, name.c_str());
+        buffer.resize(bytes);
+
+        t->async_write(buffer, [&](auto error, auto bytes) {
+            if (error && error != std::errc::operation_canceled)
+            {
+                std::cout << "Error on async send: " << error.message()
+                          << std::endl;
+            }
+            else if (error != std::errc::operation_canceled)
+            {
+                std::cout << "Wrote a packet of " << bytes << " bytes"
+                          << " to the interface " << std::endl;
+            }
+
+            io.stop();
+        });
+    });
+
+    io.run();
+
+    t->down(error);
+    if (error)
+    {
+        std::cout << "Error setting tun interface down: " << error.message()
+                  << std::endl;
+        return error.value();
     }
 
     return 0;

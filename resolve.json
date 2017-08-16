@@ -13,5 +13,12 @@
         "method": "semver",
         "major": 4,
         "sources": ["github.com/steinwurf/gtest.git"]
+    },
+    {
+        "name": "boost",
+        "resolver": "git",
+        "method": "semver",
+        "major": 3,
+        "sources": ["github.com/steinwurf/boost.git"]
     }
 ]
