@@ -36,17 +36,19 @@ namespace tunnel
                       int tun_fd,
                       const std::string& devname);
 
+        ~tun_interface();
+
         static std::unique_ptr<tun_interface> make_tun_interface(
             boost::asio::io_service& io,
             std::string& devname,
             std::error_code& error);
 
-        // void set_ipv4(const std::string& address);
+        void set_ipv4(const std::string& address, std::error_code& error);
 
-        // void is_up();
+        bool is_up(std::error_code& error) const;
         void up(std::error_code& error);
 
-        // void is_down();
+        bool is_down(std::error_code& error) const;
         void down(std::error_code& error);
 
         std::string name() const;

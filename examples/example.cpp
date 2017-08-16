@@ -19,7 +19,7 @@ int main()
     boost::asio::io_service io;
     std::error_code error;
 
-    auto t = tunnel::tun_interface::make_tun_interface(io, name, error);
+    auto tun = tunnel::tun_interface::make_tun_interface(io, name, error);
     if (error)
     {
         std::cout << "Error creating tun interface: " << error.message()
@@ -27,8 +27,8 @@ int main()
         return error.value();
     }
 
-
-    t->up(error);
+    // Set interface up
+    tun->up(error);
     if (error)
     {
         std::cout << "Error setting tun interface up: " << error.message()
@@ -39,7 +39,8 @@ int main()
     uint32_t max_buffer_size = 65600;
     std::vector<uint8_t> buffer(max_buffer_size);
 
-    t->async_read(buffer, [&](auto error, auto bytes) {
+    // Setup a single async read that in turn will do a write of the read buffer
+    tun->async_read(buffer, [&](auto error, auto bytes) {
         if (error && error != std::errc::operation_canceled)
         {
             std::cout << "Error on async read: " << error.message()
@@ -53,7 +54,7 @@ int main()
 
         buffer.resize(bytes);
 
-        t->async_write(buffer, [&](auto error, auto bytes) {
+        tun->async_write(buffer, [&](auto error, auto bytes) {
             if (error && error != std::errc::operation_canceled)
             {
                 std::cout << "Error on async send: " << error.message()
@@ -69,9 +70,18 @@ int main()
         });
     });
 
+    // "Set IP address"
+    tun->set_ipv4("10.0.0.2", error);
+    if (error)
+    {
+        std::cout << "Error setting ipv4 on tun interface: " << error.message()
+                  << std::endl;
+        return error.value();
+    }
+
     io.run();
 
-    t->down(error);
+    tun->down(error);
     if (error)
     {
         std::cout << "Error setting tun interface down: " << error.message()

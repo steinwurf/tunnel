@@ -20,7 +20,7 @@ std::error_code make_error_code(int value)
 }
 
 // Helper function for converting boost errors to std errors
-std::error_code to_std_error_code(boost::system::error_code error)
+std::error_code to_std_error_code(const boost::system::error_code& error)
 {
     return std::error_code(error.value(), std::generic_category());
 }
@@ -111,6 +111,22 @@ tun_interface::tun_interface(boost::asio::io_service& io,
     m_tun_stream.assign(m_tun_fd);
 }
 
+tun_interface::~tun_interface()
+{
+    m_tun_stream.cancel();
+    m_tun_stream.close();
+    m_tun_stream.release();
+    close(m_kernel_socket);
+    close(m_tun_fd);
+}
+
+bool tun_interface::is_up(std::error_code& error) const
+{
+    struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
+
+    return (ifr.ifr_flags & IFF_UP) != 0;
+}
+
 void tun_interface::up(std::error_code& error)
 {
     struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
@@ -129,6 +145,11 @@ void tun_interface::up(std::error_code& error)
     }
 }
 
+bool tun_interface::is_down(std::error_code& error) const
+{
+    return !is_up(error);
+}
+
 void tun_interface::down(std::error_code& error)
 {
     struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
@@ -139,6 +160,52 @@ void tun_interface::down(std::error_code& error)
     {
         error = make_error_code(errno);
         return;
+    }
+}
+
+void tun_interface::set_ipv4(const std::string& address, std::error_code& error)
+{
+    boost::system::error_code ec;
+    auto addr = boost::asio::ip::address_v4::from_string(address, ec);
+    if (ec)
+    {
+        error = to_std_error_code(ec);
+        return;
+    }
+    auto mask = boost::asio::ip::address_v4::netmask(addr);
+    auto bcast = boost::asio::ip::address_v4::broadcast(addr, mask);
+
+    struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
+
+    struct sockaddr_in* addr_in = (struct sockaddr_in*) &ifr.ifr_addr;
+
+    addr_in->sin_family = AF_INET;
+
+    std::vector<std::pair<int, boost::asio::ip::address_v4>> addr_config = {
+        {SIOCSIFADDR, addr}, {SIOCSIFNETMASK, mask}, {SIOCSIFBRDADDR, bcast}};
+
+    for (const auto& pair : addr_config)
+    {
+        int res = inet_pton(
+            AF_INET, pair.second.to_string().c_str(), &addr_in->sin_addr);
+        if (res == 0)
+        {
+            error = std::make_error_code(std::errc::invalid_argument);
+            return;
+        }
+        else if (res < 0)
+        {
+            error = make_error_code(errno);
+            return;
+        }
+
+        if (ioctl(m_kernel_socket, pair.first, &ifr) != 0)
+        {
+            error = make_error_code(errno);
+            return;
+        }
+
+        std::cout << "Setting config " << pair.second << std::endl;
     }
 }
 
@@ -161,7 +228,7 @@ void tun_interface::async_read(std::vector<uint8_t>& buffer,
                                            std::placeholders::_1,
                                            std::placeholders::_2));
 
-    
+
 }
 
 void tun_interface::async_write(const std::vector<uint8_t>& buffer,
@@ -174,6 +241,4 @@ void tun_interface::async_write(const std::vector<uint8_t>& buffer,
                                        std::placeholders::_1,
                                        std::placeholders::_2));
 }
-
-
 }
