@@ -5,12 +5,10 @@
 // The copyright notice above does not evidence any
 // actual or intended publication of such source code.
 
-#include "some.hpp"
+#include <tunnel/tun_interface.hpp>
+#include <gtest/gtest.h>
 
-namespace tunnel
+TEST(test_tun_interface, construct)
 {
-    bool some::some_method()
-    {
-        return true;
-    }
+    tunnel::tun_interface t;
 }
