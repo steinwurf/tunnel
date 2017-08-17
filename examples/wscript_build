@@ -11,4 +11,4 @@ bld.program(
     features='cxx',
     source=['udp_tunnel.cpp'],
     target='udp_tunnel',
-    use=['tunnel', 'links'])
+    use=['tunnel', 'links','boost_program_options'])

@@ -25,6 +25,7 @@ std::error_code to_std_error_code(const boost::system::error_code& error)
     return std::error_code(error.value(), std::generic_category());
 }
 
+// Proxy function for converting boost error codes to std error codes
 void io_handler_proxy(const tun_interface::io_handler& callback,
                       const boost::system::error_code& error,
                       uint32_t bytes_transferred)
@@ -227,8 +228,6 @@ void tun_interface::async_read(std::vector<uint8_t>& buffer,
                                            callback,
                                            std::placeholders::_1,
                                            std::placeholders::_2));
-
-
 }
 
 void tun_interface::async_write(const std::vector<uint8_t>& buffer,
@@ -241,4 +240,12 @@ void tun_interface::async_write(const std::vector<uint8_t>& buffer,
                                        std::placeholders::_1,
                                        std::placeholders::_2));
 }
+
+void tun_interface::write(const std::vector<uint8_t>& buffer, std::error_code& error)
+{
+    boost::system::error_code ec;
+    boost::asio::write(m_tun_stream, boost::asio::buffer(buffer), ec);
+    error = to_std_error_code(ec);
+}
+
 }

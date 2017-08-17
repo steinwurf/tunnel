@@ -62,6 +62,10 @@ namespace tunnel
         void async_write(const std::vector<uint8_t>& buffer,
                          io_handler callback);
 
+        // Write buffers / packets to the kernel from this interface.
+        // That is, "inbound traffic".
+        void write(const std::vector<uint8_t>& buffer, std::error_code& error);
+
     private:
 
         // The dev name
