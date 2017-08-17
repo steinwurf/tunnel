@@ -38,8 +38,9 @@ struct ifreq read_interface_flags(int socket_fd,
                                   const std::string& name,
                                   std::error_code& error)
 {
-    struct ifreq ifr;
+    assert(!error);
 
+    struct ifreq ifr;
     std::strncpy(ifr.ifr_name, name.c_str(), name.size());
 
     if (ioctl(socket_fd, SIOCGIFFLAGS, &ifr) == -1)
@@ -51,7 +52,6 @@ struct ifreq read_interface_flags(int socket_fd,
     return ifr;
 }
 
-
 // @param io the io service to be used for async operation
 // @param devname: the name of an interface. May be an empty string. In this
 // case, the kernel chooses the interface name and sets devname to this.
@@ -61,17 +61,18 @@ std::unique_ptr<tun_interface> tun_interface::make_tun_interface(
     std::string& devname,
     std::error_code& error)
 {
+    assert(!error);
+
     struct ifreq ifr;
-    const char* clonedev = "/dev/net/tun";
+    const char* tundev = "/dev/net/tun";
     int fd;
-    // open the clone device
-    if ((fd = open(clonedev, O_RDWR)) < 0)
+
+    if ((fd = open(tundev, O_RDWR)) < 0)
     {
         error = make_error_code(errno);
         return nullptr;
     }
 
-    // preparation of the struct ifr, of type "struct ifreq"
     std::memset(&ifr, 0, sizeof(ifr));
 
     ifr.ifr_flags = IFF_TUN;
@@ -123,6 +124,8 @@ tun_interface::~tun_interface()
 
 bool tun_interface::is_up(std::error_code& error) const
 {
+    assert(!error);
+
     struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
 
     return (ifr.ifr_flags & IFF_UP) != 0;
@@ -130,6 +133,8 @@ bool tun_interface::is_up(std::error_code& error) const
 
 void tun_interface::up(std::error_code& error)
 {
+    assert(!error);
+
     struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
 
     if (error)
@@ -148,11 +153,15 @@ void tun_interface::up(std::error_code& error)
 
 bool tun_interface::is_down(std::error_code& error) const
 {
+    assert(!error);
+
     return !is_up(error);
 }
 
 void tun_interface::down(std::error_code& error)
 {
+    assert(!error);
+
     struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
 
     ifr.ifr_flags &= ~IFF_UP;
@@ -166,6 +175,8 @@ void tun_interface::down(std::error_code& error)
 
 void tun_interface::set_ipv4(const std::string& address, std::error_code& error)
 {
+    assert(!error);
+
     boost::system::error_code ec;
     auto addr = boost::asio::ip::address_v4::from_string(address, ec);
     if (ec)
@@ -243,6 +254,8 @@ void tun_interface::async_write(const std::vector<uint8_t>& buffer,
 
 void tun_interface::write(const std::vector<uint8_t>& buffer, std::error_code& error)
 {
+    assert(!error);
+
     boost::system::error_code ec;
     boost::asio::write(m_tun_stream, boost::asio::buffer(buffer), ec);
     error = to_std_error_code(ec);
