@@ -104,11 +104,11 @@ int main(int argc, char* argv[])
 {
     namespace bpo = boost::program_options;
 
-    std::string local_ip;    // = "10.0.0.1";
-    std::string remote_ip;   //"10.0.0.2";
-    uint16_t port;           // 0xbeef;
-    std::string tunnel_ip;   //"10.0.1.1";
-    std::string tunnel_name; //("tunwurf");
+    std::string local_ip;
+    std::string remote_ip;
+    uint16_t port;
+    std::string tunnel_ip;
+    std::string tunnel_name;
 
     // Parse the prorgram options
     bpo::options_description options("Commandline Options");
