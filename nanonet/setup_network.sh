@@ -24,13 +24,13 @@ function finish {
     fi
 
     # Reset IP forward to original setting
-    if [ -n "${FORWARD_SET}" && -n "{$FORWARD}" ]; then
+    if [[ -n "${FORWARD_SET}" && -n "{$FORWARD}" ]]; then
         echo "Reverting IP forwarding"
         echo $FORWARD > /proc/sys/net/ipv4/ip_forward
     fi
 
     # Revert rp_filter default value
-    if [ -n "${RP_FILTER_SET}" && -n "${RP_FILTER}" ]; then
+    if [[ -n "${RP_FILTER_SET}" && -n "${RP_FILTER}" ]]; then
         echo "Reverting reverse path filter"
         echo $RP_FILTER > /proc/sys/net/ipv4/conf/default/rp_filter
     fi
@@ -38,7 +38,7 @@ function finish {
 trap finish EXIT
 
 # Save IP Forward setting
-FORWARD="${cat /proc/sys/net/ipv4/ip_forward}"
+FORWARD="$(cat /proc/sys/net/ipv4/ip_forward)"
 
 # Enable IP forwarding
 echo "Setting up IP forwarding"
@@ -46,7 +46,7 @@ echo 1 > /proc/sys/net/ipv4/ip_forward
 FORWARD_SET="True"
 
 # Save rp_filter setting
-RP_FILTER="${cat /proc/sys/net/ipv4/conf/default/rp_filter}"
+RP_FILTER="$(cat /proc/sys/net/ipv4/conf/default/rp_filter)"
 echo "Setting reverse path routing filter to \"loose\""
 echo 2 > /proc/sys/net/ipv4/conf/default/rp_filter
 RP_FILTER_SET="True"
