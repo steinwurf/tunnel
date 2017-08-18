@@ -197,6 +197,8 @@ int main(int argc, char* argv[])
         return error.value();
     }
 
+    std::cout << "Setting up default route through tunnel interface."
+              << std::endl;
     // Set default route through tunnel interface
     tun->set_default_route(error);
     if (error)

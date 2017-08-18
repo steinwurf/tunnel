@@ -190,6 +190,10 @@ void tun_interface::set_ipv4(const std::string& address, std::error_code& error)
     auto bcast = boost::asio::ip::address_v4::broadcast(addr, mask);
 
     struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
+    if (error)
+    {
+        return;
+    }
 
     struct sockaddr_in* addr_in = (struct sockaddr_in*) &ifr.ifr_addr;
 
