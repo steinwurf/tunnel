@@ -36,6 +36,9 @@ void udp_receive_handler(tunnel::tun_interface& tun,
 
     rx_buffer.resize(bytes);
 
+    std::cout << "Received buffer of size " << bytes << " bytes on udp"
+              << std::endl;
+
     // Write buffer to tun interface
     std::error_code error;
     tun.write(rx_buffer, error);
@@ -77,6 +80,8 @@ void tun_read_handler(tunnel::tun_interface& tun,
     }
 
     tx_buffer.resize(bytes);
+
+    std::cout << "Sending buffer of size " << bytes << " bytes on udp" << std::endl;
 
     // Send buffer to udp link
     std::error_code error;
@@ -127,7 +132,7 @@ int main(int argc, char* argv[])
         bpo::value<uint16_t>(&port)->default_value(0xbeef),
         "Set the port to use for the udp tunnel")(
         "name,n",
-        bpo::value<std::string>(&tunnel_name)->default_value("wurf"),
+        bpo::value<std::string>(&tunnel_name)->default_value("tunwurf"),
         "Set the tunnel interface name")("help,h", "Print this help message");
 
     bpo::variables_map opts;
@@ -183,8 +188,6 @@ int main(int argc, char* argv[])
         return error.value();
     }
 
-    std::vector<uint8_t> buffer(max_buffer_size);
-
     // "Set IP address"
     tun->set_ipv4(tunnel_ip, error);
     if (error)
@@ -193,6 +196,19 @@ int main(int argc, char* argv[])
                   << error.message() << std::endl;
         return error.value();
     }
+
+    // Set default route through tunnel interface
+    tun->set_default_route(error);
+    if (error)
+    {
+        std::cout << "Error setting default route to tunnel interface: "
+                  << error.message() << std::endl;
+        return error.value();
+    }
+
+
+    std::vector<uint8_t> buffer(max_buffer_size);
+
 
     // Setup UDP tunnel
     links::udp::link udp_link(io);
@@ -244,6 +260,15 @@ int main(int argc, char* argv[])
     io.run();
 
     udp_link.close();
+
+    // remove default route through tunnel interface
+    tun->remove_default_route(error);
+    if (error)
+    {
+        std::cout << "Error removing default route from tunnel interface: "
+        << error.message() << std::endl;
+        return error.value();
+    }
 
     tun->down(error);
     if (error)

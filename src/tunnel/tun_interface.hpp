@@ -9,6 +9,7 @@
 
 // Linux TUN/TAP includes
 #include <net/if.h>
+#include <net/route.h>
 #include <linux/if_tun.h>
 #include <sys/ioctl.h>
 
@@ -65,6 +66,14 @@ namespace tunnel
         // Write buffers / packets to the kernel from this interface.
         // That is, "inbound traffic".
         void write(const std::vector<uint8_t>& buffer, std::error_code& error);
+
+        // Set default route to this interface
+        void set_default_route(std::error_code& error);
+
+        // Remove default route from this interface
+        void remove_default_route(std::error_code& error);
+
+
 
     private:
 
