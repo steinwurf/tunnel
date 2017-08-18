@@ -114,6 +114,7 @@ int main(int argc, char* argv[])
     uint16_t port;
     std::string tunnel_ip;
     std::string tunnel_name;
+    bool route;
 
     // Parse the prorgram options
     bpo::options_description options("Commandline Options");
@@ -133,7 +134,10 @@ int main(int argc, char* argv[])
         "Set the port to use for the udp tunnel")(
         "name,n",
         bpo::value<std::string>(&tunnel_name)->default_value("tunwurf"),
-        "Set the tunnel interface name")("help,h", "Print this help message");
+        "Set the tunnel interface name")("help,h", "Print this help message")(
+        "default_route,d",
+        bpo::bool_switch(&route)->default_value(false),
+        "Use this flag if the tunnel should be default route");
 
     bpo::variables_map opts;
 
@@ -201,13 +205,18 @@ int main(int argc, char* argv[])
 
     std::cout << "Setting up default route through tunnel interface."
               << std::endl;
-    // Set default route through tunnel interface
-    tun->set_default_route(error);
-    if (error)
+
+
+    // Set default route through tunnel interface if specified
+    if (route)
     {
-        std::cout << "Error setting default route to tunnel interface: "
-                  << error.message() << std::endl;
-        return error.value();
+        tun->set_default_route(error);
+        if (error)
+        {
+            std::cout << "Error setting default route to tunnel interface: "
+                      << error.message() << std::endl;
+            return error.value();
+        }
     }
 
 
@@ -266,12 +275,15 @@ int main(int argc, char* argv[])
     udp_link.close();
 
     // remove default route through tunnel interface
-    tun->remove_default_route(error);
-    if (error)
+    if (route)
     {
-        std::cout << "Error removing default route from tunnel interface: "
-        << error.message() << std::endl;
-        return error.value();
+        tun->remove_default_route(error);
+        if (error)
+        {
+            std::cout << "Error removing default route from tunnel interface: "
+                      << error.message() << std::endl;
+            return error.value();
+        }
     }
 
     tun->down(error);

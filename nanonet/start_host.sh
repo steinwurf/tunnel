@@ -11,12 +11,12 @@ function finish {
     echo "Removing virtual network stack"
 
     # Remove veth interface
-    if [ -n "${LINK_SET}" && -n "${LINK}"  ]; then
+    if [[ -n "${LINK_SET}" && -n "${LINK}" ]]; then
         ip link del dev $LINK
     fi
 
     # Remove network namespace
-    if [ -n "${HOSTNAME_ADDED}" && -n "${HOSTNAME}" ]; then
+    if [[ -n "${HOSTNAME_ADDED}" && -n "${HOSTNAME}" ]]; then
         ip netns del $HOSTNAME
     fi
 }
