@@ -6,3 +6,9 @@ bld.program(
     source=['example.cpp'],
     target='example',
     use=['tunnel'])
+
+bld.program(
+    features='cxx',
+    source=['udp_tunnel.cpp'],
+    target='udp_tunnel',
+    use=['tunnel', 'links','boost_program_options'])
