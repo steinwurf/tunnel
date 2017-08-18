@@ -136,22 +136,24 @@ int main(int argc, char* argv[])
         "Set the tunnel interface name")("help,h", "Print this help message");
 
     bpo::variables_map opts;
-    bpo::store(bpo::parse_command_line(argc, argv, options), opts);
-
-    if (opts.count("help"))
-    {
-        std::cout << options << std::endl;
-        return 0;
-    }
 
     // Verify all required options are present
     try
     {
+        bpo::store(bpo::parse_command_line(argc, argv, options), opts);
+
+        if (opts.count("help"))
+        {
+            std::cout << options << std::endl;
+            return 0;
+        }
+
         bpo::notify(opts);
     }
     catch (const std::exception& e)
     {
-        std::cout << e.what() << std::endl;
+        std::cout << "Error when parsing commandline options: " << e.what()
+                  << std::endl;
         std::cout << "See list of options with \"" << argv[0] << " --help\""
                   << std::endl;
         return 0;
