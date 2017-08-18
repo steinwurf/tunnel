@@ -265,6 +265,8 @@ void tun_interface::write(const std::vector<uint8_t>& buffer, std::error_code& e
 
 void tun_interface::set_default_route(std::error_code& error)
 {
+    assert(!error);
+
     struct rtentry route;
     std::memset(&route, 0, sizeof(route));
 
@@ -294,6 +296,8 @@ void tun_interface::set_default_route(std::error_code& error)
 
 void tun_interface::remove_default_route(std::error_code& error)
 {
+    assert(!error);
+
     struct rtentry route;
     std::memset(&route, 0, sizeof(route));
 
