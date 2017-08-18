@@ -39,8 +39,9 @@ struct ifreq read_interface_flags(int socket_fd,
                                   std::error_code& error)
 {
     struct ifreq ifr;
+    std::memset(&ifr, 0, sizeof(ifr));
 
-    std::strncpy(ifr.ifr_name, name.c_str(), name.size());
+    name.copy(ifr.ifr_name, name.size());
 
     if (ioctl(socket_fd, SIOCGIFFLAGS, &ifr) == -1)
     {
@@ -81,7 +82,7 @@ std::unique_ptr<tun_interface> tun_interface::make_tun_interface(
         // if a device name was specified, put it in the structure;
         // otherwise, the kernel will try to allocate the "next" device of the
         // specified type
-        std::strncpy(ifr.ifr_name, devname.c_str(), devname.size());
+        devname.copy(ifr.ifr_name, devname.size());
     }
 
     // try to create the device
@@ -246,6 +247,64 @@ void tun_interface::write(const std::vector<uint8_t>& buffer, std::error_code& e
     boost::system::error_code ec;
     boost::asio::write(m_tun_stream, boost::asio::buffer(buffer), ec);
     error = to_std_error_code(ec);
+}
+
+void tun_interface::set_default_route(std::error_code& error)
+{
+    struct rtentry route;
+    std::memset(&route, 0, sizeof(route));
+
+    char ifname[IFNAMSIZ] = { 0 };
+    m_name.copy(ifname, m_name.size());
+
+    route.rt_dev = ifname;
+    route.rt_flags = RTF_UP; // | RTF_GATEWAY;
+
+    struct sockaddr_in* gateway = (struct sockaddr_in*) &route.rt_gateway;
+    gateway->sin_family = AF_INET;
+    gateway->sin_addr.s_addr = INADDR_ANY;
+
+    struct sockaddr_in* dest = (struct sockaddr_in*) &route.rt_dst;
+    dest->sin_family = AF_INET;
+    dest->sin_addr.s_addr = INADDR_ANY;
+
+    struct sockaddr_in* mask = (struct sockaddr_in*) &route.rt_genmask;
+    mask->sin_family = AF_INET;
+    mask->sin_addr.s_addr = INADDR_ANY;
+
+    if (ioctl(m_kernel_socket, SIOCADDRT, &route) != 0)
+    {
+        error = make_error_code(errno);
+    }
+}
+
+void tun_interface::remove_default_route(std::error_code& error)
+{
+    struct rtentry route;
+    std::memset(&route, 0, sizeof(route));
+
+    char ifname[IFNAMSIZ] = { 0 };
+    m_name.copy(ifname, m_name.size());
+
+    route.rt_dev = ifname;
+    route.rt_flags = RTF_UP | RTF_GATEWAY;
+
+    struct sockaddr_in* gateway = (struct sockaddr_in*) &route.rt_gateway;
+    gateway->sin_family = AF_INET;
+    gateway->sin_addr.s_addr = INADDR_ANY;
+
+    struct sockaddr_in* dest = (struct sockaddr_in*) &route.rt_dst;
+    dest->sin_family = AF_INET;
+    dest->sin_addr.s_addr = INADDR_ANY;
+
+    struct sockaddr_in* mask = (struct sockaddr_in*) &route.rt_genmask;
+    mask->sin_family = AF_INET;
+    mask->sin_addr.s_addr = INADDR_ANY;
+
+    if (ioctl(m_kernel_socket, SIOCDELRT, &route) != 0)
+    {
+        error = make_error_code(errno);
+    }
 }
 
 }
