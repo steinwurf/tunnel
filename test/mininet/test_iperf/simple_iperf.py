@@ -48,13 +48,18 @@ if __name__ == '__main__':
 
     # Open iperf server and client and send 2 MB
     popens = {}
-    popens[h1] = h1.popen('udptunnel -local_ip {} -remote_ip {} -name tuna\
-                          -tunnel_ip 10.0.1.1 -port 42042'
+
+    # set up tunnel
+    popens[h1] = h1.popen('udptunnel -local_ip {} -remote_ip {}\
+                          -tunnel_ip 10.0.1.1 -port 42042 &'
                           .format(h1.IP(), h2.IP()))
 
-    popens[h2] = h2.popen('udptunnel -local_ip {} -remote_ip {} -name tuna\
-                          -tunnel_ip 10.0.1.2 -port 42042'
-                          .format(h2.IP(), h1.IP()))
+    popens[h2] = h2.popen('udptunnel -local_ip {} -remote_ip {}\
+                          -tunnel_ip 10.0.1.2 -port 42042 &'
+                          .format(h2.IP(), h1.IP))
+
+    # h1.cmd('intfs')
+    # popens[h2] = h2.popen('intfs')
 
     popens[h1] = h1.popen('iperf -I 10.0.1.1 -s -p 7777 -i 1')
     popens[h2] = h2.popen('iperf -I 10.0.1.2 -c 10.0.1.1 -p 7777 -n 2000000')
