@@ -82,10 +82,10 @@ ip netns exec $HOSTID ip link set dev lo up
 
 ip -netns $HOSTID addr add $ADDRESS/24 dev $IFACE
 ip -netns $HOSTID link set dev $IFACE up
+ip -netns $HOSTID route add default via 10.0.0.1
 
 ip netns exec $HOSTID echo "nameserver 8.8.8.8" >> /etc/resolv.conf
 ip netns exec $HOSTID echo "nameserver 8.8.4.4" >> /etc/resolv.conf
 
 echo "Opening host specific terminal. All commands will be run on the host network stack. Exit with 'exit'"
 ip netns exec $HOSTID bash --rcfile <(cat ~/.bashrc ; echo "PS1=$HOSTID"-'$PS1')
-# ip netns exec $HOSTID bash --rcfile <(cat ~/.bashrc ; echo 'PS1="\[\033[0;33m\]\u@HELLO:\W\$\[\033[00m\] "')
