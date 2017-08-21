@@ -10,6 +10,8 @@ from mininet.link import TCLink
 from mininet.util import pmonitor
 from mininet.log import setLogLevel
 
+import subprocess
+
 if __name__ == '__main__':
     setLogLevel('info')
 
@@ -50,13 +52,24 @@ if __name__ == '__main__':
     popens = {}
 
     # set up tunnel
-    popens[h1] = h1.popen('udptunnel -local_ip {} -remote_ip {}\
-                          -tunnel_ip 10.0.1.1 -port 42042 &'
-                          .format(h1.IP(), h2.IP()))
+    tun1 = h1.popen('./udp_tunnel -local_ip {} -remote_ip {}\
+             -tunnel_ip 10.0.1.1 -port 42042'
+             .format(h1.IP(), h2.IP()))
 
-    popens[h2] = h2.popen('udptunnel -local_ip {} -remote_ip {}\
-                          -tunnel_ip 10.0.1.2 -port 42042 &'
-                          .format(h2.IP(), h1.IP))
+    if tun1.returncode != 0:
+        print("Error: " + tun1.stderr.readline())
+        print("Existing")
+        raise SystemExit, -1
+
+    # except OSError as error:
+    # print("Error " +error)
+
+
+
+
+    # h2.Popen('udptunnel -local_ip {} -remote_ip {}\
+    # -tunnel_ip 10.0.1.2 -port 42042 &'
+    # .format(h2.IP(), h1.IP))
 
     # h1.cmd('intfs')
     # popens[h2] = h2.popen('intfs')
