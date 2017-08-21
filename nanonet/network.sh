@@ -6,6 +6,9 @@ BRIDGE_SET=""
 IPTABLES_SET=""
 RP_FILTER_SET=""
 RP_FILTER=""
+
+ETH=""
+
 # Define function to revert all settings
 function finish {
 
@@ -37,6 +40,27 @@ function finish {
 }
 trap finish EXIT
 
+while getopts ":g:" opt; do
+    case $opt in
+        g)
+            ETH=$OPTARG
+            ;;
+        \?)
+            echo "invalid option: $OPTARG"
+            exit 1
+            ;;
+        :)
+            echo "Option $OPTARG requires an argument."
+            exit 1
+            ;;
+    esac
+done
+
+if [ -z "$ETH" ]; then
+    echo "Gateway interface name must be set with argument -g"
+    exit 1
+fi
+
 # Save IP Forward setting
 FORWARD="$(cat /proc/sys/net/ipv4/ip_forward)"
 
@@ -58,11 +82,13 @@ ip addr add 10.0.0.1/24 dev "nanonet-bridge"
 ip link set "nanonet-bridge" up
 BRIDGE_SET="True"
 
-echo "Setting up routing tables for nanonet-bridge and $eth interfaces"
+echo "Setting up routing tables for nanonet-bridge and $ETH interfaces"
 # Set NATing on this host
 iptables -t nat -A POSTROUTING -o "nanonet-bridge" -j MASQUERADE
-iptables -t nat -A POSTROUTING -o eno1 -j MASQUERADE
+iptables -t nat -A POSTROUTING -o $ETH -j MASQUERADE
 IPTABLES_SET="True"
+
+echo "Network running. Close with Ctrl+C."
 
 ### Block program here ###
 cat

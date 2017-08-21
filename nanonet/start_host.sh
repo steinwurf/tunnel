@@ -1,9 +1,9 @@
 #!/bin/bash
 
-HOSTNAME=""
+HOSTID=""
 ADDRESS=""
 
-HOSTNAME_ADDED=""
+HOSTID_ADDED=""
 LINK_SET=""
 LINK=""
 
@@ -16,8 +16,8 @@ function finish {
     fi
 
     # Remove network namespace
-    if [[ -n "${HOSTNAME_ADDED}" && -n "${HOSTNAME}" ]]; then
-        ip netns del $HOSTNAME
+    if [[ -n "${HOSTID_ADDED}" && -n "${HOSTID}" ]]; then
+        ip netns del $HOSTID
     fi
 }
 trap finish EXIT
@@ -25,7 +25,7 @@ trap finish EXIT
 while getopts ":n:a:" opt; do
     case $opt in
         n)
-            HOSTNAME=$OPTARG
+            HOSTID=$OPTARG
             ;;
         a)
             ADDRESS=$OPTARG
@@ -42,7 +42,7 @@ while getopts ":n:a:" opt; do
 done
 
 # Fail if host id is not given
-if [ -z "${HOSTNAME}" ]; then
+if [ -z "${HOSTID}" ]; then
     echo "Virtual host id must be set with argument -n"
     exit 1
 fi
@@ -52,8 +52,8 @@ if [ -z "${ADDRESS}" ]; then
     exit 1
 fi
 
-LINK="nanonet-$HOSTNAME"
-IFACE="eth-$HOSTNAME"
+LINK="nanonet-$HOSTID"
+IFACE="eth-$HOSTID"
 BRIDGE="nanonet-bridge"
 
 # Create needed interfaces
@@ -71,19 +71,21 @@ ip addr add 10.0.0.2/24 dev $IFACE
 ip link set $IFACE up
 
 # Add network namespace
-ip netns add $HOSTNAME
-HOSTNAME_ADDED="True"
+ip netns add $HOSTID
+HOSTID_ADDED="True"
 
 # Push interface to namespace
-ip link set $IFACE netns $HOSTNAME
+ip link set $IFACE netns $HOSTID
 
  # Set localhost to network namespace
-ip netns exec $HOSTNAME ip link set dev lo up
+ip netns exec $HOSTID ip link set dev lo up
 
-ip -netns $HOSTNAME addr add $ADDRESS/24 dev $IFACE
-ip -netns $HOSTNAME link set dev $IFACE up
+ip -netns $HOSTID addr add $ADDRESS/24 dev $IFACE
+ip -netns $HOSTID link set dev $IFACE up
 
-ip netns exec $HOSTNAME echo "nameserver 8.8.8.8" >> /etc/resolv.conf
-ip netns exec $HOSTNAME echo "nameserver 8.8.4.4" >> /etc/resolv.conf
+ip netns exec $HOSTID echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+ip netns exec $HOSTID echo "nameserver 8.8.4.4" >> /etc/resolv.conf
 
-ip netns exec $HOSTNAME xterm
+echo "Opening host specific terminal. All commands will be run on the host network stack. Exit with 'exit'"
+ip netns exec $HOSTID bash --rcfile <(cat ~/.bashrc ; echo "PS1=$HOSTID"-'$PS1')
+# ip netns exec $HOSTID bash --rcfile <(cat ~/.bashrc ; echo 'PS1="\[\033[0;33m\]\u@HELLO:\W\$\[\033[00m\] "')
