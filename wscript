@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 APPNAME = 'tunnel'
-VERSION = '0.0.0'
+VERSION = '1.0.0'
 
 
 def build(bld):
