@@ -186,7 +186,7 @@ void tun_interface::set_ipv4(const std::string& address, std::error_code& error)
         error = to_std_error_code(ec);
         return;
     }
-    auto mask = boost::asio::ip::address_v4::netmask(addr);
+    auto mask = boost::asio::ip::address_v4::from_string("255.255.255.0");
     auto bcast = boost::asio::ip::address_v4::broadcast(addr, mask);
 
     struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
