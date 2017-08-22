@@ -10,8 +10,6 @@ from mininet.link import TCLink
 from mininet.util import pmonitor
 from mininet.log import setLogLevel
 
-import subprocess
-
 if __name__ == '__main__':
     setLogLevel('info')
 
@@ -53,26 +51,18 @@ if __name__ == '__main__':
 
     # set up tunnel
     tun1 = h1.popen('./udp_tunnel -local_ip {} -remote_ip {}\
-             -tunnel_ip 10.0.1.1 -port 42042'
-             .format(h1.IP(), h2.IP()))
+                    -tunnel_ip 10.0.1.1 -port 42042'
+                    .format(h1.IP(), h2.IP()))
 
     if tun1.returncode != 0:
-        print("Error: " + tun1.stderr.readline())
-        print("Existing")
-        raise SystemExit, -1
+        print("<h1> Error: " + tun1.stderr.readline())
 
-    # except OSError as error:
-    # print("Error " +error)
+    tun2 = h2.popen('./udp_tunnel -local_ip {} -remote_ip {}\
+                    -tunnel_ip 10.0.1.2 -port 42042'
+                    .format(h2.IP(), h1.IP()))
 
-
-
-
-    # h2.Popen('udptunnel -local_ip {} -remote_ip {}\
-    # -tunnel_ip 10.0.1.2 -port 42042 &'
-    # .format(h2.IP(), h1.IP))
-
-    # h1.cmd('intfs')
-    # popens[h2] = h2.popen('intfs')
+    if tun2.returncode != 0:
+        print("<h2> Error: " + tun2.stderr.readline())
 
     popens[h1] = h1.popen('iperf -I 10.0.1.1 -s -p 7777 -i 1')
     popens[h2] = h2.popen('iperf -I 10.0.1.2 -c 10.0.1.1 -p 7777 -n 2000000')

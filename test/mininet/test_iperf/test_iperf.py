@@ -71,6 +71,10 @@ def test_iperf(testdirectory):
     # Let us copy our mininet test script to the testdirectory.
 
     testdirectory.copy_file('build/linux*/examples/udp_tunnel')
+
+    # make the program executeable
+    testdirectory.run('chmod u+x udp_tunnel')
+
     testdirectory.symlink_file('test/mininet/test_iperf/simple_iperf.py')
 
     # The virtual machine is now running and we can execute commands
