@@ -40,7 +40,8 @@ int main()
     std::vector<uint8_t> buffer(max_buffer_size);
 
     // Setup a single async read that in turn will do a write of the read buffer
-    tun->async_read(buffer, [&](auto error, auto bytes) {
+    tun->async_read(buffer, [&](auto error, auto bytes)
+    {
         if (error && error != std::errc::operation_canceled)
         {
             std::cout << "Error on async read: " << error.message()
@@ -54,7 +55,8 @@ int main()
 
         buffer.resize(bytes);
 
-        tun->async_write(buffer, [&](auto error, auto bytes) {
+        tun->async_write(buffer, [&](auto error, auto bytes)
+        {
             if (error && error != std::errc::operation_canceled)
             {
                 std::cout << "Error on async send: " << error.message()

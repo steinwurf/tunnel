@@ -33,7 +33,7 @@ def configure(properties):
     if properties.get('build_distclean'):
         command += ['distclean']
 
-    command += ['configure', '--git-protocol=git@']
+    command += ['configure', '--git_protocol=git@']
 
     if 'waf_bundle_path' in properties:
         command += ['--resolve_path=' + properties['waf_bundle_path']]

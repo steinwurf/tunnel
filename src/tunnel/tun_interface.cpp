@@ -106,11 +106,11 @@ std::unique_ptr<tun_interface> tun_interface::make_tun_interface(
 
 tun_interface::tun_interface(boost::asio::io_service& io,
                              int tun_fd,
-                             const std::string& devname)
-    : m_name(devname),
-      m_kernel_socket(socket(AF_INET, SOCK_STREAM, 0)),
-      m_tun_fd(tun_fd),
-      m_tun_stream(io)
+                             const std::string& devname) :
+    m_name(devname),
+    m_kernel_socket(socket(AF_INET, SOCK_STREAM, 0)),
+    m_tun_fd(tun_fd),
+    m_tun_stream(io)
 {
     m_tun_stream.assign(m_tun_fd);
 }
@@ -186,17 +186,23 @@ void tun_interface::set_ipv4(const std::string& address, std::error_code& error)
         error = to_std_error_code(ec);
         return;
     }
-    auto mask = boost::asio::ip::address_v4::netmask(addr);
+    auto mask = boost::asio::ip::address_v4::from_string("255.255.255.0");
     auto bcast = boost::asio::ip::address_v4::broadcast(addr, mask);
 
     struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
+    if (error)
+    {
+        return;
+    }
 
     struct sockaddr_in* addr_in = (struct sockaddr_in*) &ifr.ifr_addr;
 
     addr_in->sin_family = AF_INET;
 
-    std::vector<std::pair<int, boost::asio::ip::address_v4>> addr_config = {
-        {SIOCSIFADDR, addr}, {SIOCSIFNETMASK, mask}, {SIOCSIFBRDADDR, bcast}};
+    std::vector<std::pair<int, boost::asio::ip::address_v4>> addr_config =
+        {
+            {SIOCSIFADDR, addr}, {SIOCSIFNETMASK, mask}, {SIOCSIFBRDADDR, bcast}
+        };
 
     for (const auto& pair : addr_config)
     {
@@ -254,7 +260,8 @@ void tun_interface::async_write(const std::vector<uint8_t>& buffer,
                                        std::placeholders::_2));
 }
 
-void tun_interface::write(const std::vector<uint8_t>& buffer, std::error_code& error)
+void tun_interface::write(const std::vector<uint8_t>& buffer,
+                          std::error_code& error)
 {
     assert(!error);
 

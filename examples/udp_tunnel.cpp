@@ -16,6 +16,7 @@
 #include <links/udp/link.hpp>
 
 const uint32_t max_buffer_size = 65600;
+bool verbose = false;
 
 void udp_receive_handler(tunnel::tun_interface& tun,
                          links::udp::link& link,
@@ -36,9 +37,11 @@ void udp_receive_handler(tunnel::tun_interface& tun,
 
     rx_buffer.resize(bytes);
 
-    std::cout << "Received buffer of size " << bytes << " bytes on udp"
-              << std::endl;
-
+    if (verbose) // verbose is global variable
+    {
+        std::cout << "Received buffer of size " << bytes << " bytes on udp"
+                  << std::endl;
+    }
     // Write buffer to tun interface
     std::error_code error;
     tun.write(rx_buffer, error);
@@ -81,8 +84,11 @@ void tun_read_handler(tunnel::tun_interface& tun,
 
     tx_buffer.resize(bytes);
 
-    std::cout << "Sending buffer of size " << bytes << " bytes on udp" << std::endl;
-
+    if (verbose) // verbose is global variable
+    {
+        std::cout << "Sending buffer of size " << bytes << " bytes on udp"
+                  << std::endl;
+    }
     // Send buffer to udp link
     std::error_code error;
     link.send(tx_buffer, error);
@@ -114,6 +120,7 @@ int main(int argc, char* argv[])
     uint16_t port;
     std::string tunnel_ip;
     std::string tunnel_name;
+    bool route;
 
     // Parse the prorgram options
     bpo::options_description options("Commandline Options");
@@ -122,36 +129,45 @@ int main(int argc, char* argv[])
         "local_ip,l",
         bpo::value<std::string>(&local_ip)->required(),
         "Specify the local IPv4 address to use for the tunnel [required]")(
-        "remote_ip,r",
-        bpo::value<std::string>(&remote_ip)->required(),
-        "Specify the remote IPv4 address to use for the tunnel [required]")(
-        "tunnel_ip,t",
-        bpo::value<std::string>(&tunnel_ip)->required(),
-        "Specify the IPv4 address to set on the tunnel interface [required]")(
-        "port,p",
-        bpo::value<uint16_t>(&port)->default_value(0xbeef),
-        "Set the port to use for the udp tunnel")(
-        "name,n",
-        bpo::value<std::string>(&tunnel_name)->default_value("tunwurf"),
-        "Set the tunnel interface name")("help,h", "Print this help message");
+            "remote_ip,r",
+            bpo::value<std::string>(&remote_ip)->required(),
+            "Specify the remote IPv4 address to use for the tunnel [required]")(
+                "tunnel_ip,t",
+                bpo::value<std::string>(&tunnel_ip)->required(),
+                "Specify the IPv4 address to set on the tunnel interface [required]")(
+                    "port,p",
+                    bpo::value<uint16_t>(&port)->default_value(0xbeef),
+                    "Set the port to use for the udp tunnel")(
+                        "name,n",
+                        bpo::value<std::string>(&tunnel_name)->default_value("tunwurf"),
+                        "Set the tunnel interface name")("help,h", "Print this help message")(
+                            "default_route,d",
+                            bpo::bool_switch(&route)->default_value(false),
+                            "Use this flag if the tunnel should be default route")(
+                                "verbose,v",
+                                // 'verbose' is global namespace variable
+                                bpo::bool_switch(&verbose)->default_value(false),
+                                "Use this flag for verbose output");
 
     bpo::variables_map opts;
-    bpo::store(bpo::parse_command_line(argc, argv, options), opts);
-
-    if (opts.count("help"))
-    {
-        std::cout << options << std::endl;
-        return 0;
-    }
 
     // Verify all required options are present
     try
     {
+        bpo::store(bpo::parse_command_line(argc, argv, options), opts);
+
+        if (opts.count("help"))
+        {
+            std::cout << options << std::endl;
+            return 0;
+        }
+
         bpo::notify(opts);
     }
     catch (const std::exception& e)
     {
-        std::cout << e.what() << std::endl;
+        std::cout << "Error when parsing commandline options: " << e.what()
+                  << std::endl;
         std::cout << "See list of options with \"" << argv[0] << " --help\""
                   << std::endl;
         return 0;
@@ -164,7 +180,7 @@ int main(int argc, char* argv[])
     std::cout << "Setting up virtual interface \"" << tunnel_name
               << "\" with ip " << tunnel_ip
               << ". All communication on this interface will go through the "
-                 "udp tunnel."
+              "udp tunnel."
               << std::endl;
 
     boost::asio::io_service io;
@@ -197,13 +213,20 @@ int main(int argc, char* argv[])
         return error.value();
     }
 
-    // Set default route through tunnel interface
-    tun->set_default_route(error);
-    if (error)
+    std::cout << "Setting up default route through tunnel interface."
+              << std::endl;
+
+
+    // Set default route through tunnel interface if specified
+    if (route)
     {
-        std::cout << "Error setting default route to tunnel interface: "
-                  << error.message() << std::endl;
-        return error.value();
+        tun->set_default_route(error);
+        if (error)
+        {
+            std::cout << "Error setting default route to tunnel interface: "
+                      << error.message() << std::endl;
+            return error.value();
+        }
     }
 
 
@@ -262,12 +285,15 @@ int main(int argc, char* argv[])
     udp_link.close();
 
     // remove default route through tunnel interface
-    tun->remove_default_route(error);
-    if (error)
+    if (route)
     {
-        std::cout << "Error removing default route from tunnel interface: "
-        << error.message() << std::endl;
-        return error.value();
+        tun->remove_default_route(error);
+        if (error)
+        {
+            std::cout << "Error removing default route from tunnel interface: "
+                      << error.message() << std::endl;
+            return error.value();
+        }
     }
 
     tun->down(error);
