@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 """
-Simple example of point-to-point link running iperf
+Simple example of point-to-point link running iperf over a udp tunnel
 """
 
 from mininet.topo import Topo
@@ -46,36 +46,39 @@ if __name__ == '__main__':
 
     h1, h2 = net.getNodeByName('h1', 'h2')
 
-    # Open iperf server and client and send 2 MB
-    popens = {}
-
     # set up tunnel
-    tun1 = h1.popen('./udp_tunnel -local_ip {} -remote_ip {}\
-                    -tunnel_ip 10.0.1.1 -port 42042'
+    tun1 = h1.popen('./udp_tunnel --local_ip {} --remote_ip {}\
+                    --tunnel_ip 10.0.1.1 --port 42042'
                     .format(h1.IP(), h2.IP()))
 
-    if tun1.returncode != 0:
+    if tun1.poll() is None:
+        print("<h1> " + tun1.stdout.readline())
+    else:
         print("<h1> Error: " + tun1.stderr.readline())
 
-    tun2 = h2.popen('./udp_tunnel -local_ip {} -remote_ip {}\
-                    -tunnel_ip 10.0.1.2 -port 42042'
+    print("<h2> Startin tunnel")
+    tun2 = h2.popen('./udp_tunnel --local_ip {} --remote_ip {}\
+                    --tunnel_ip 10.0.1.2 --port 42042'
                     .format(h2.IP(), h1.IP()))
 
-    if tun2.returncode != 0:
+    if tun2.poll() is None:
+        print("<h2> " + tun2.stdout.readline())
+    else:
         print("<h2> Error: " + tun2.stderr.readline())
 
-    popens[h1] = h1.popen('iperf -I 10.0.1.1 -s -p 7777 -i 1')
-    popens[h2] = h2.popen('iperf -I 10.0.1.2 -c 10.0.1.1 -p 7777 -n 2000000')
+    iperf = {}
+    iperf[h1] = h1.popen('iperf -I 10.0.1.1 -s -p 7777 -i 1')
+    iperf[h2] = h2.popen('iperf -I 10.0.1.2 -c 10.0.1.1 -p 7777 -n 2000000')
 
-    for host, line in pmonitor(popens):
+    for host, line in pmonitor(iperf):
         if host:
             # Output each line written as "<hX>: some output", where X
             # will be replaced by the host number i.e. 1 or 2.
             print("<{}>: {}".format(host.name, line.strip()))
 
         # stop the server if the client has terminated
-        if h2 not in popens:
-            popens[h1].kill()
+        if h2 not in iperf:
+            iperf[h1].kill()
             break
 
     net.stop()
