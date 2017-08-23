@@ -47,24 +47,27 @@ if __name__ == '__main__':
     h1, h2 = net.getNodeByName('h1', 'h2')
 
     # set up tunnel
-    tun1 = h1.popen('./udp_tunnel --local_ip {} --remote_ip {}\
-                    --tunnel_ip 10.0.1.1 --port 42042'
-                    .format(h1.IP(), h2.IP()))
+    tun = {}
+    tun[h1] = h1.popen('./udp_tunnel --local_ip {} --remote_ip {}\
+                       --tunnel_ip 10.0.1.1 --port 42042'
+                       .format(h1.IP(), h2.IP()))
 
-    if tun1.poll() is None:
-        print("<h1> " + tun1.stdout.readline())
+    print("poll")
+    print(tun[h1].poll())
+
+    if tun[h1].poll() is None:
+        print("<h1> " + tun[h1].stdout.readline())
     else:
-        print("<h1> Error: " + tun1.stderr.readline())
+        print("<h1> Error: " + tun[h1].stderr.readline())
 
-    print("<h2> Startin tunnel")
-    tun2 = h2.popen('./udp_tunnel --local_ip {} --remote_ip {}\
-                    --tunnel_ip 10.0.1.2 --port 42042'
-                    .format(h2.IP(), h1.IP()))
+    tun[h2] = h2.popen('./udp_tunnel --local_ip {} --remote_ip {}\
+                       --tunnel_ip 10.0.1.2 --port 42042'
+                       .format(h2.IP(), h1.IP()))
 
-    if tun2.poll() is None:
-        print("<h2> " + tun2.stdout.readline())
+    if tun[h2].poll() is None:
+        print("<h2> " + tun[h2].stdout.readline())
     else:
-        print("<h2> Error: " + tun2.stderr.readline())
+        print("<h2> Error: " + tun[h2].stderr.readline())
 
     iperf = {}
     iperf[h1] = h1.popen('iperf -I 10.0.1.1 -s -p 7777 -i 1')
