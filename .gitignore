@@ -13,6 +13,10 @@
 
 # Python
 *.pyc
+.cache
+pytest_tmp
+.vagrant
+test/mininet/test_temp
 
 # Compiled Doxygen documentation
 /doxygen/html
