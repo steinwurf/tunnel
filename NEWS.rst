@@ -6,6 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+1.0.1
+------
 * Patch: waf now only builds project for linux platforms
 
 1.0.0
