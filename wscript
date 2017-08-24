@@ -16,14 +16,16 @@ def build(bld):
         'STEINWURF_TUNNEL_VERSION="{}"'.format(
             VERSION))
 
-    bld.recurse('src/tunnel')
+    # Only build for linux platforms
+    if bld.is_mkspec_platform('linux'):
+        bld.recurse('src/tunnel')
 
-    if bld.is_toplevel():
+        if bld.is_toplevel():
 
-        # Only build tests when executed from the top-level wscript,
-        # i.e. not when included as a dependency
-        bld.recurse('test')
-        bld.recurse('examples')
+            # Only build tests when executed from the top-level wscript,
+            # i.e. not when included as a dependency
+            bld.recurse('test')
+            bld.recurse('examples')
 
 
 def resolve(ctx):
