@@ -6,7 +6,7 @@ import waflib
 from waflib.Build import BuildContext
 
 APPNAME = 'tunnel'
-VERSION = '1.0.1'
+VERSION = '1.1.0'
 
 
 def build(bld):

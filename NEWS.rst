@@ -6,6 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+1.1.0
+-----
 * Minor: Added set_mtu on tun_interface
 
 1.0.1
