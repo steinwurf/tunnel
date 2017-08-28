@@ -216,6 +216,14 @@ int main(int argc, char* argv[])
     std::cout << "Setting up default route through tunnel interface."
               << std::endl;
 
+    // Set MTU
+    tun->set_mtu(25000, error);
+    if (error)
+    {
+        std::cout << "Error setting tunnel interface MTU: " << error.message()
+                  << std::endl;
+        return error.value();
+    }
 
     // Set default route through tunnel interface if specified
     if (route)

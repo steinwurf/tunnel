@@ -229,6 +229,29 @@ void tun_interface::set_ipv4(const std::string& address, std::error_code& error)
     }
 }
 
+void tun_interface::set_mtu(uint32_t mtu, std::error_code& error)
+{
+    if (mtu < ETH_MIN_MTU || mtu > ETH_MAX_MTU)
+    {
+        error = std::make_error_code(std::errc::invalid_argument);
+        return;
+    }
+
+    struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
+    if (error)
+    {
+        return;
+    }
+
+    ifr.ifr_mtu = mtu;
+
+    if (ioctl(m_kernel_socket, SIOCSIFMTU, &ifr) != 0)
+    {
+        error = make_error_code(errno);
+        return;
+    }
+}
+
 std::string tun_interface::name() const
 {
     return m_name;
