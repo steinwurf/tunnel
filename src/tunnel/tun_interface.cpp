@@ -231,7 +231,7 @@ void tun_interface::set_ipv4(const std::string& address, std::error_code& error)
 
 void tun_interface::set_mtu(uint32_t mtu, std::error_code& error)
 {
-    if (mtu < ETH_MIN_MTU || mtu > ETH_MAX_MTU)
+    if (mtu < ETH_HLEN || mtu > 65535)
     {
         error = std::make_error_code(std::errc::invalid_argument);
         return;
