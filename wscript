@@ -28,19 +28,6 @@ def build(bld):
             bld.recurse('examples')
 
 
-def resolve(ctx):
-
-    # Testing dependencies
-    ctx.add_dependency(
-        name='virtualenv',
-        recurse=False,
-        optional=False,
-        resolver='git',
-        method='checkout',
-        checkout='15.1.0',
-        sources=['github.com/pypa/virtualenv.git'])
-
-
 def options(opt):
 
     # In default mode Vagrant stores information about provisioned machines

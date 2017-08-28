@@ -7,8 +7,17 @@ bld.program(
     target='example',
     use=['tunnel'])
 
+linkflags = []
+CXX = bld.env.get_flat("CXX")
+# Matches both g++ and clang++
+if 'g++' in CXX or 'clang' in CXX:
+    # The binary might be executed in a VM running an older system
+    # where libstdc++ could be incompatible, so we link it statically.
+    linkflags += ['-static-libstdc++']
+
 bld.program(
     features='cxx',
     source=['udp_tunnel.cpp'],
     target='udp_tunnel',
+    linkflags=linkflags,
     use=['tunnel', 'links','boost_program_options'])
