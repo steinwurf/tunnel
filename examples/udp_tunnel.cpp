@@ -125,29 +125,23 @@ int main(int argc, char* argv[])
     // Parse the prorgram options
     bpo::options_description options("Commandline Options");
 
-    options.add_options()(
-        "local_ip,l",
-        bpo::value<std::string>(&local_ip)->required(),
-        "Specify the local IPv4 address to use for the tunnel [required]")(
-            "remote_ip,r",
-            bpo::value<std::string>(&remote_ip)->required(),
-            "Specify the remote IPv4 address to use for the tunnel [required]")(
-                "tunnel_ip,t",
-                bpo::value<std::string>(&tunnel_ip)->required(),
-                "Specify the IPv4 address to set on the tunnel interface [required]")(
-                    "port,p",
-                    bpo::value<uint16_t>(&port)->default_value(0xbeef),
-                    "Set the port to use for the udp tunnel")(
-                        "name,n",
-                        bpo::value<std::string>(&tunnel_name)->default_value("tunwurf"),
-                        "Set the tunnel interface name")("help,h", "Print this help message")(
-                            "default_route,d",
-                            bpo::bool_switch(&route)->default_value(false),
-                            "Use this flag if the tunnel should be default route")(
-                                "verbose,v",
-                                // 'verbose' is global namespace variable
-                                bpo::bool_switch(&verbose)->default_value(false),
-                                "Use this flag for verbose output");
+    options.add_options()
+    ("local_ip,l", bpo::value<std::string>(&local_ip)->required(),
+     "Specify the local IPv4 address to use for the tunnel [required]")
+    ("remote_ip,r", bpo::value<std::string>(&remote_ip)->required(),
+     "Specify the remote IPv4 address to use for the tunnel [required]")
+    ("tunnel_ip,t", bpo::value<std::string>(&tunnel_ip)->required(),
+     "Specify the IPv4 address to set on the tunnel interface [required]")
+    ("port,p", bpo::value<uint16_t>(&port)->default_value(0xbeef),
+     "Set the port to use for the udp tunnel")
+    ("name,n", bpo::value<std::string>(&tunnel_name)->default_value("tunwurf"),
+     "Set the tunnel interface name")
+    ("help,h", "Print this help message")
+    ("default_route,d", bpo::bool_switch(&route)->default_value(false),
+     "Use this flag if the tunnel should be default route")
+    // 'verbose' is global namespace variable
+    ("verbose,v", bpo::bool_switch(&verbose)->default_value(false),
+     "Use this flag for verbose output");
 
     bpo::variables_map opts;
 

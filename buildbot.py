@@ -43,7 +43,8 @@ def configure(properties):
             properties['dependency_project'],
             properties['dependency_checkout'])]
 
-    command += ["--cxx_mkspec={}".format(properties['cxx_mkspec'])]
+    if 'cxx_mkspec' in properties:
+        command += ["--cxx_mkspec={}".format(properties['cxx_mkspec'])]
     command += get_tool_options(properties)
 
     run_command(command)
@@ -80,6 +81,12 @@ def install(properties):
     run_command(command)
 
 
+def mininet(properties):
+    command = [sys.executable, 'waf', '-v', 'mininet']
+
+    run_command(command)
+
+
 # def coverage_settings(options):
 #    options['required_line_coverage'] = 94.0
 
@@ -102,6 +109,8 @@ def main():
         run_tests(properties)
     elif cmd == 'install':
         install(properties)
+    elif cmd == 'mininet':
+        mininet(properties)
     else:
         print("Unknown command: {}".format(cmd))
 

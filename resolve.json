@@ -28,5 +28,14 @@
         "method": "semver",
         "major": 12,
         "sources": ["gitlab.com/steinwurf/links.git"]
+    },
+    {
+        "name": "virtualenv",
+        "internal": true,
+        "recurse": false,
+        "resolver": "git",
+        "method": "checkout",
+        "checkout": "15.1.0",
+        "sources": ["github.com/pypa/virtualenv.git"]
     }
 ]
