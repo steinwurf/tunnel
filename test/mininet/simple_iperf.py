@@ -3,6 +3,7 @@
 """
 Simple example of point-to-point link running iperf over a udp tunnel
 """
+import sys
 import time
 import threading
 
@@ -15,25 +16,18 @@ from mininet.log import setLogLevel
 if __name__ == '__main__':
     setLogLevel('info')
 
-    # The topology:
-    #
-    #             +-----------------------+
-    #             |     0.8M bit/s link   |
-    #             |     250 ms delay      |
-    #             |     0.1% packet loss  |
-    #             |                       |
-    #             +-----------+-----------+
-    #                         |
-    #                         |
-    # +-------------+         v        +-------------+
-    # |             |                  |             |
-    # | host 1 (h1) +------------------+ host 2 (h2) |
-    # |             |                  |             |
-    # +-------------+                  +-------------+
+    argv = sys.argv
+
+    if len(argv) != 2:
+        print("Usage: {} <path-to-tunnel-binary>".format(argv[0]))
+        sys.exit(0)
+
+    tunnel_binary = argv[1]
+
     topo = Topo()
     topo.addHost('h1')
     topo.addHost('h2')
-    topo.addLink('h1', 'h2', bw=0.8, delay='250ms', loss=0.1)
+    topo.addLink('h1', 'h2', bw=3.0, delay='250ms', loss=3.0)
 
     # TCLink is needed to set the bandwidth, delay and loss constraints
     # on the link
@@ -52,18 +46,22 @@ if __name__ == '__main__':
         print("Starting udp_tunnel...")
 
         tun = {}
-        tun[h1] = h1.popen('./udp_tunnel --local_ip {} --remote_ip {} '
-                           '--tunnel_ip 10.0.1.1 --port 42042 2>&1'
-                           .format(h1.IP(), h2.IP()), shell=True)
+        tun[h1] = h1.popen(
+            '{} --local_ip {} --remote_ip {} --tunnel_ip 10.0.1.1 --port 42042'
+            .format(tunnel_binary, h1.IP(), h2.IP()),
+            stderr=sys.stdout.fileno())
 
-        tun[h2] = h2.popen('./udp_tunnel --local_ip {} --remote_ip {} '
-                           '--tunnel_ip 10.0.1.2 --port 42042 2>&1'
-                           .format(h2.IP(), h1.IP()), shell=True)
+        tun[h2] = h2.popen(
+            '{} --local_ip {} --remote_ip {} --tunnel_ip 10.0.1.2 --port 42042'
+            .format(tunnel_binary, h2.IP(), h1.IP()),
+            stderr=sys.stdout.fileno())
 
         for host, line in pmonitor(tun):
             if host:
                 print("<{}>: {}".format(host.name, line.strip()))
             if finished:
+                tun[h1].kill()
+                tun[h2].kill()
                 break
         print("udp_tunnel thread finished.")
 
@@ -75,9 +73,10 @@ if __name__ == '__main__':
 
     print("Starting iperf...")
     iperf = {}
-    iperf[h1] = h1.popen('iperf -s -p 7777 -i 1 2>&1', shell=True)
-    iperf[h2] = h2.popen('iperf -c 10.0.1.1 -p 7777 -n 2000000 2>&1',
-                         shell=True)
+    iperf[h1] = h1.popen('iperf -s -p 7777 -u -i 1',
+                         stderr=sys.stdout.fileno())
+    iperf[h2] = h2.popen('iperf -c 10.0.1.1 -p 7777 -u -b 2M -l 1000',
+                         stderr=sys.stdout.fileno())
 
     for host, line in pmonitor(iperf):
         if host:
