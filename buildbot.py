@@ -82,7 +82,7 @@ def install(properties):
 
 
 def mininet(properties):
-    command = [sys.executable, 'waf', '-v', 'mininet']
+    command = [sys.executable, 'waf', '-v', '--run_mininet_tests']
 
     run_command(command)
 
