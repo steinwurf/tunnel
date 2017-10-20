@@ -91,7 +91,6 @@ class SingleSwitchNetwork(object):
             time.sleep(command['start_time'])
 
         # Start the background process
-        print("{}: {} start cmd: {}".format(time.time(), host.name, cmd))
         proc = host.popen(cmd)
 
         killed = False
@@ -101,16 +100,13 @@ class SingleSwitchNetwork(object):
             # If the process did not finish, terminate it
             if proc.poll() is None:
                 proc.kill()
-                print("{}: {} killed: {}".format(time.time(), host.name, cmd))
                 killed = True
 
-        print("{}: {} waiting: {}".format(time.time(), host.name, cmd))
         # Save results
         results['command'] = cmd
         results['killed'] = killed
         results['output'] = proc.communicate()
         results['returncode'] = proc.poll()
-        print("{}: {} finished: {}".format(time.time(), host.name, cmd))
 
     def _execute_commands(self, net):
 
@@ -151,35 +147,38 @@ def main():
     # Create the network
     net = SingleSwitchNetwork()
 
-    nodes = 1
+    nodes = 2
 
-    # Commands of hosts will execute in the order the are added.
-    # Add one type of host (the iperf client is the sender here)
-    for i in range(1, nodes + 1):
-        net.add_host('h{}'.format(i),
-                     ["echo 'hello' | nc 10.0.0.1 12101"],
-                     #["iperf -u -c 10.0.0.1 -p 13337 -x SV -b 3M"],
-                     addr="10.0.0.{}".format(i+10), timeout=3)
+    # The commands will be executed according to the specified start_time
+    # and killed after the given timeout
 
-    # Add another type of host (the iperf server functions as a receiver here)
-    net.add_host('h0',
-                 ["nc -l 0.0.0.0 12101"],
-                  #["iperf -u -s -p 13337"],
-                  addr="10.0.0.1", timeout=3)
+    net.add_host('h0', addr="10.0.0.1")
+    net.add_command(
+        'h0', 'iperf -c 10.0.0.2 -u -t 3 -i 1 -b 3M',
+        start_time=0.5, timeout=5.0)
+
+    net.add_host('h1', addr="10.0.0.2")
+    net.add_command(
+        'h1', 'iperf -s -u -i 1',
+        start_time=0.0, timeout=6.0)
 
     # Run network scenario
     net.run()
 
     results = net.results()
 
-    for n in range(0, nodes + 1):
+    for n in range(0, nodes):
         node = 'h{}'.format(n)
-        print("\n{} results:".format(node))
-        res = results[node]
-        print("killed: {}".format(res["killed"]))
-        print("Return code: {}".format(res["returncode"]))
-        print("stdout:\n{}".format(res["output"][0]))
-        print("stderr:\n{}".format(res["output"][1]))
+        print("\nResults for {}:\n".format(node))
+        for res in results[node]:
+            print("Command: {}".format(res["command"]))
+            status = "killed" if res["killed"] else "completed"
+            print("Exit code: {} ({})".format(res["returncode"], status))
+            if res["output"][0]:
+                print("stdout:\n{}".format(res["output"][0]))
+            if res["output"][1]:
+                print("stderr:\n{}".format(res["output"][1]))
+
 
 if __name__ == '__main__':
     main()
