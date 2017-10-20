@@ -14,7 +14,6 @@ try:
     # from mininet.util import dumpNodeConnections
     from mininet.log import setLogLevel
 
-
 except ImportError as err:
     sys.exit("Error: A module was not found ({})".format(err))
 

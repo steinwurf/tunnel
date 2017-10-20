@@ -6,6 +6,7 @@ import sys
 
 try:
     from single_switch_network import SingleSwitchNetwork
+    from mininet.log import setLogLevel
 
 except ImportError as err:
     sys.exit("Error: A module was not found ({})".format(err))
@@ -16,17 +17,25 @@ def main(tunnel_binary):
     # Create the network
     net = SingleSwitchNetwork()
 
-    # broadcast address because mininet cannot multicast
+    # Use the broadcast address, because mininet cannot multicast
     broadcast_addr = "10.255.255.255"
+    # The number of receivers in the network
     receivers = 2
 
     # Sender commands
-    net.add_host('h0', addr="10.0.0.1")
+
+    # The sender is connected to the central switch with an error-free link,
+    # so we don't introduce any correlated packet erasures
+    linkopts = dict(bw=5.0, delay='100ms', loss=0)
+    net.add_host('h0', addr="10.0.0.1", linkopts=linkopts)
+    # The broadcast address must be used for both tunnel endpoints so it can
+    # send and receive broadcast packets
     net.add_command(
         'h0', "{} --local_ip {} --remote_ip {} --tunnel_ip 10.0.1.1"
         .format(tunnel_binary, broadcast_addr, broadcast_addr),
         timeout=6)
-    # Add multicast iperf sender
+    # The iperf sender will send multicast packets over the *tunnel interface*
+    # (note that iperf cannot send broadcast packets)
     net.add_command(
         'h0', 'iperf -c 224.0.67.67 -u -t 3 -i 1 -b 3M -B 10.0.1.1',
         start_time=1.0, timeout=5.0)
@@ -36,14 +45,17 @@ def main(tunnel_binary):
         node = 'h{}'.format(i)
         node_ip = "10.0.0.{}".format(i+10)
         tunnel_ip = "10.0.1.{}".format(i+10)
+        # The receivers are connected to the central switch with a lossy link,
+        # so their losses should be independent
         linkopts = dict(bw=5.0, delay='200ms', loss=3)
         net.add_host(node, addr=node_ip, linkopts=linkopts)
         net.add_command(
             node, "{} --local_ip {} --remote_ip {} --tunnel_ip {}"
             .format(tunnel_binary, broadcast_addr, broadcast_addr, tunnel_ip),
             timeout=6)
-        # Add route that forces iperf to listen for multicast traffic on the
-        # tunnel interface
+        # Add a route that forces iperf to listen for multicast traffic on the
+        # tunnel interface (iperf listens on the interface associated with
+        # the default route, and there is no option to override that)
         net.add_command(
             node, 'sudo route add 224.0.67.67 dev tunwurf',
             start_time=0.3, timeout=0.2)
@@ -81,6 +93,8 @@ def main(tunnel_binary):
 
 
 if __name__ == '__main__':
+    setLogLevel('info')
+
     argv = sys.argv
 
     if len(argv) != 2:

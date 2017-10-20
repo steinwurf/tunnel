@@ -68,14 +68,13 @@ def run_mininet_tests(bld):
         # Kill any leftover test processes from previous incomplete tests
         subprocess.call(["sudo", "pkill", "-9", "-f", "udp_tunnel"])
         subprocess.call(["sudo", "pkill", "-9", "-f", "iperf"])
-        subprocess.call(["sudo", "pkill", "-9", "-f", "multicast_test"])
 
         root = os.getcwd()
         # Run the mininet tests in the 'test/mininet' folder
         if os.path.exists('test/mininet'):
             os.chdir('./test/mininet')
 
-            #run_command(["sudo", "python", "simple_iperf.py", tunnel_binary])
+            run_command(["sudo", "python", "simple_iperf.py", tunnel_binary])
             run_command(["sudo", "python", "multicast_test.py", tunnel_binary])
 
         os.chdir(root)
