@@ -30,6 +30,7 @@ waf3-*
 build
 resolve_symlinks
 resolved_dependencies
+*.sh
 
 # Gnu Global tag files
 GPATH

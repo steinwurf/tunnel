@@ -63,10 +63,11 @@ def run_mininet_tests(bld):
         print("Binary: " + tunnel_binary)
 
         # Make sure that Mininet is in a clean state (after a previous crash)
-        #with open(os.devnull, 'wb') as pipe:  # silence mininet reset
-        #    run_command(["sudo", "mn", "-c"], stdout=pipe, stderr=pipe)
-
         run_command(["sudo", "mn", "-c"])
+
+        # Kill any leftover test processes from previous incomplete tests
+        subprocess.call(["sudo", "pkill", "-9", "-f", "udp_tunnel"])
+        subprocess.call(["sudo", "pkill", "-9", "-f", "iperf"])
 
         root = os.getcwd()
         # Run the mininet tests in the 'test/mininet' folder
@@ -74,6 +75,7 @@ def run_mininet_tests(bld):
             os.chdir('./test/mininet')
 
             run_command(["sudo", "python", "simple_iperf.py", tunnel_binary])
+            run_command(["sudo", "python", "multicast_test.py", tunnel_binary])
 
         os.chdir(root)
 
