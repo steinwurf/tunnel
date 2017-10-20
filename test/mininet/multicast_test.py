@@ -27,12 +27,13 @@ def main(tunnel_binary):
     # The sender is connected to the central switch with an error-free link,
     # so we don't introduce any correlated packet erasures
     linkopts = dict(bw=5.0, delay='100ms', loss=0)
-    net.add_host('h0', addr="10.0.0.1", linkopts=linkopts)
-    # The broadcast address must be used for both tunnel endpoints so it can
-    # send and receive broadcast packets
+    sender_ip = "10.0.0.1"
+    net.add_host('h0', addr=sender_ip, linkopts=linkopts)
+    # The sender will transmit broadcast packets and it will receive normal
+    # unicast packets on its local_ip
     net.add_command(
         'h0', "{} --local_ip {} --remote_ip {} --tunnel_ip 10.0.1.1"
-        .format(tunnel_binary, broadcast_addr, broadcast_addr),
+        .format(tunnel_binary, sender_ip, broadcast_addr),
         timeout=6)
     # The iperf sender will send multicast packets over the *tunnel interface*
     # (note that iperf cannot send broadcast packets)
@@ -51,7 +52,7 @@ def main(tunnel_binary):
         net.add_host(node, addr=node_ip, linkopts=linkopts)
         net.add_command(
             node, "{} --local_ip {} --remote_ip {} --tunnel_ip {}"
-            .format(tunnel_binary, broadcast_addr, broadcast_addr, tunnel_ip),
+            .format(tunnel_binary, broadcast_addr, sender_ip, tunnel_ip),
             timeout=6)
         # Add a route that forces iperf to listen for multicast traffic on the
         # tunnel interface (iperf listens on the interface associated with
