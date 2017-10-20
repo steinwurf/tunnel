@@ -55,7 +55,7 @@ def main(tunnel_binary):
     net.run()
 
     results = net.results()
-    found_errors = 0
+    failed_processes = 0
 
     nodes = receivers + 1
     for n in range(0, nodes):
@@ -63,21 +63,21 @@ def main(tunnel_binary):
         print("\nResults for {}:\n".format(node))
         for res in results[node]:
             print("Command: {}".format(res["command"]))
-            if 'iperf' in res['command'] and res['returncode']:
-                    found_errors += 1
+            # All processes should finish with return code 0 or -9
+            if res['returncode'] not in [0, -9]:
+                failed_processes += 1
 
-            status = "terminated" if res["terminated"] else "completed"
+            status = "killed" if res["killed"] else "completed"
             print("Exit code: {} ({})".format(res["returncode"], status))
             if res["output"][0]:
                 print("stdout:\n{}".format(res["output"][0]))
             if res["output"][1]:
                 print("stderr:\n{}".format(res["output"][1]))
 
-    print("\nSuccessful test completion: {}/{} nodes\n"
-          .format(nodes - found_errors, nodes))
+    print("Failed processes: {}\n".format(failed_processes))
 
-    if found_errors > 0:
-        sys.exit(found_errors)
+    if failed_processes > 0:
+        sys.exit(failed_processes)
 
 
 if __name__ == '__main__':

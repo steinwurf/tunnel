@@ -95,20 +95,20 @@ class SingleSwitchNetwork(object):
         print("{}: {} start cmd: {}".format(time.time(), host.name, cmd))
         proc = host.popen(cmd)
 
-        terminated = False
+        killed = False
         # If there is a timeout, wait for the specified period
         if command['timeout']:
             time.sleep(command['timeout'])
             # If the process did not finish, terminate it
             if proc.poll() is None:
-                proc.terminate()
-                print("{}: {} terminated: {}".format(time.time(), host.name, cmd))
-                terminated = True
+                proc.kill()
+                print("{}: {} killed: {}".format(time.time(), host.name, cmd))
+                killed = True
 
         print("{}: {} waiting: {}".format(time.time(), host.name, cmd))
         # Save results
         results['command'] = cmd
-        results['terminated'] = terminated
+        results['killed'] = killed
         results['output'] = proc.communicate()
         results['returncode'] = proc.poll()
         print("{}: {} finished: {}".format(time.time(), host.name, cmd))
@@ -135,7 +135,7 @@ class SingleSwitchNetwork(object):
     def results(self):
         """
         Returns a dict with <hostname, results> key-value pairs, where results
-        are a 4-tuple with (returncode, terminated, stdout, stderr) values
+        are a 4-tuple with (returncode, killed, stdout, stderr) values
         """
         res = {}
         for d in self.hosts:
@@ -177,7 +177,7 @@ def main():
         node = 'h{}'.format(n)
         print("\n{} results:".format(node))
         res = results[node]
-        print("Terminated: {}".format(res["terminated"]))
+        print("killed: {}".format(res["killed"]))
         print("Return code: {}".format(res["returncode"]))
         print("stdout:\n{}".format(res["output"][0]))
         print("stderr:\n{}".format(res["output"][1]))
