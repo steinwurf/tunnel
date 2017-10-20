@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
      "Specify the remote IPv4 address to use for the tunnel [required]")
     ("tunnel_ip,t", bpo::value<std::string>(&tunnel_ip)->required(),
      "Specify the IPv4 address to set on the tunnel interface [required]")
-    ("port,p", bpo::value<uint16_t>(&port)->default_value(0xbeef),
+    ("port,p", bpo::value<uint16_t>(&port)->default_value(9999),
      "Set the port to use for the udp tunnel")
     ("name,n", bpo::value<std::string>(&tunnel_name)->default_value("tunwurf"),
      "Set the tunnel interface name")

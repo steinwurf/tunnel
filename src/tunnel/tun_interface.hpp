@@ -74,8 +74,6 @@ public:
     // Remove default route from this interface
     void remove_default_route(std::error_code& error);
 
-
-
 private:
 
     // The dev name
