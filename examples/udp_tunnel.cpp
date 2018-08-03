@@ -13,24 +13,22 @@
 #include <boost/asio.hpp>
 #include <boost/program_options.hpp>
 
-#include <links/udp/link.hpp>
-
 const uint32_t max_buffer_size = 65600;
 bool verbose = false;
 
 void udp_receive_handler(tunnel::tun_interface& tun,
-                         links::udp::link& link,
+                         boost::asio::ip::udp::socket& socket,
                          std::vector<uint8_t>& rx_buffer,
-                         const std::error_code& ec,
-                         uint32_t bytes)
+                         const boost::system::error_code& ec,
+                         std::size_t bytes)
 {
-    if (ec && ec != std::errc::operation_canceled)
+    if (ec && ec != boost::system::errc::operation_canceled)
     {
         std::cout << "Error on udp receive: " << ec.message() << std::endl;
         exit(ec.value());
     }
 
-    if (ec == std::errc::operation_canceled)
+    if (ec == boost::system::errc::operation_canceled)
     {
         return;
     }
@@ -56,18 +54,20 @@ void udp_receive_handler(tunnel::tun_interface& tun,
     rx_buffer.resize(max_buffer_size);
 
     // Qeuue another receive call
-    link.async_receive(rx_buffer,
-                       std::bind(&udp_receive_handler,
+    socket.async_receive(
+        boost::asio::buffer(rx_buffer),
+            std::bind(&udp_receive_handler,
                                  std::ref(tun),
-                                 std::ref(link),
+                                 std::ref(socket),
                                  std::ref(rx_buffer),
                                  std::placeholders::_1,
                                  std::placeholders::_2));
 }
 
 void tun_read_handler(tunnel::tun_interface& tun,
-                      links::udp::link& link,
+                      boost::asio::ip::udp::socket& socket,
                       std::vector<uint8_t>& tx_buffer,
+                      boost::asio::ip::udp::endpoint remote,
                       const std::error_code& ec,
                       uint32_t bytes)
 {
@@ -89,12 +89,12 @@ void tun_read_handler(tunnel::tun_interface& tun,
         std::cout << "Sending buffer of size " << bytes << " bytes on udp"
                   << std::endl;
     }
-    // Send buffer to udp link
-    std::error_code error;
-    link.send(tx_buffer, error);
+    // Send buffer to udp socket
+    boost::system::error_code error;
+    socket.send_to(boost::asio::buffer(tx_buffer), remote, 0, error);
     if (error)
     {
-        std::cout << "Error on udp link send: " << error.message() << std::endl;
+        std::cout << "Error on udp socket send: " << error.message() << std::endl;
         exit(error.value());
     }
 
@@ -105,8 +105,9 @@ void tun_read_handler(tunnel::tun_interface& tun,
     tun.async_read(tx_buffer,
                    std::bind(&tun_read_handler,
                              std::ref(tun),
-                             std::ref(link),
+                             std::ref(socket),
                              std::ref(tx_buffer),
+                             remote,
                              std::placeholders::_1,
                              std::placeholders::_2));
 }
@@ -207,9 +208,6 @@ int main(int argc, char* argv[])
         return error.value();
     }
 
-    std::cout << "Setting up default route through tunnel interface."
-              << std::endl;
-
     // Set MTU
     tun->set_mtu(25000, error);
     if (error)
@@ -222,6 +220,9 @@ int main(int argc, char* argv[])
     // Set default route through tunnel interface if specified
     if (route)
     {
+        std::cout << "Setting up default route through tunnel interface."
+            << std::endl;
+
         tun->set_default_route(error);
         if (error)
         {
@@ -231,29 +232,36 @@ int main(int argc, char* argv[])
         }
     }
 
-
     std::vector<uint8_t> buffer(max_buffer_size);
 
+    auto local_endpoint = boost::asio::ip::udp::endpoint(
+        boost::asio::ip::address_v4::from_string(local_ip),
+        port);
 
-    // Setup UDP tunnel
-    links::udp::link udp_link(io);
-
-    udp_link.bind(
-        boost::asio::ip::address_v4::from_string(local_ip), port, error);
-    if (error)
+    boost::system::error_code ec;
+    boost::asio::ip::udp::socket udp_socket(io);
+    udp_socket.open(local_endpoint.protocol(), ec);
+    if (ec)
     {
-        std::cout << "Error binding to address: " << error.message()
-                  << std::endl;
-        return error.value();
+        std::cout << "Error opening socket: " << ec.message() << std::endl;
+        return ec.value();
     }
 
-    udp_link.add_remote(
-        boost::asio::ip::address_v4::from_string(remote_ip), port, error);
-    if (error)
+    // bind to specified address
+    udp_socket.bind({local_endpoint.address(), port}, ec);
+    if (ec)
     {
-        std::cout << "Error adding remote address: " << error.message()
-                  << std::endl;
-        return error.value();
+        std::cout << "Error binding socket: " << ec.message() << std::endl;
+        return ec.value();
+    }
+
+    // allow socket to transmit broadcast packets
+    boost::asio::socket_base::broadcast opt(true);
+    udp_socket.set_option(opt, ec);
+    if (ec)
+    {
+        std::cout << "Error enabling broadcast: " << ec.message() << std::endl;
+        return ec.value();
     }
 
     uint32_t max_buffer_size = 66000;
@@ -262,30 +270,37 @@ int main(int argc, char* argv[])
 
     // Setup receive->write functionality
     // UDP packets received should be forwarded to tun write
-    //
-    udp_link.async_receive(udp_rx_buffer,
-                           std::bind(&udp_receive_handler,
-                                     std::ref(*tun),
-                                     std::ref(udp_link),
-                                     std::ref(udp_rx_buffer),
-                                     std::placeholders::_1,
-                                     std::placeholders::_2));
+    udp_socket.async_receive(
+        boost::asio::buffer(udp_rx_buffer),
+        std::bind(&udp_receive_handler,
+            std::ref(*tun),
+            std::ref(udp_socket),
+            std::ref(udp_rx_buffer),
+            std::placeholders::_1,
+            std::placeholders::_2));
 
+    auto remote_endpoint = boost::asio::ip::udp::endpoint(
+        boost::asio::ip::address_v4::from_string(remote_ip),
+        port);
     // Setup read->send functionality
     // Packets read from tun should be forwarded to UDP send
-
     tun->async_read(udp_tx_buffer,
-                    std::bind(&tun_read_handler,
-                              std::ref(*tun),
-                              std::ref(udp_link),
-                              std::ref(udp_tx_buffer),
-                              std::placeholders::_1,
-                              std::placeholders::_2));
+        std::bind(&tun_read_handler,
+            std::ref(*tun),
+            std::ref(udp_socket),
+            std::ref(udp_tx_buffer),
+            remote_endpoint,
+            std::placeholders::_1,
+            std::placeholders::_2));
 
     io.run();
 
-    udp_link.close();
-
+    udp_socket.close(ec);
+    if (ec)
+    {
+        std::cout << "Error closing udp socket: " << ec.message() << std::endl;
+        return ec.value();
+    }
     // remove default route through tunnel interface
     if (route)
     {

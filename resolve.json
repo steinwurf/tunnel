@@ -20,13 +20,5 @@
         "method": "semver",
         "major": 4,
         "sources": ["github.com/steinwurf/gtest.git"]
-    },
-    {
-        "name": "links",
-        "internal": true,
-        "resolver": "git",
-        "method": "semver",
-        "major": 12,
-        "sources": ["gitlab.com/steinwurf/links.git"]
     }
 ]
