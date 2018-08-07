@@ -229,8 +229,23 @@ void tun_interface::set_ipv4(const std::string& address, std::error_code& error)
     }
 }
 
+uint32_t tun_interface::mtu(std::error_code& error) const
+{
+    assert(!error);
+
+    struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
+    if (error)
+    {
+        return 0;
+    }
+
+    return ifr.ifr_mtu;
+}
+
 void tun_interface::set_mtu(uint32_t mtu, std::error_code& error)
 {
+    assert(!error);
+
     if (mtu < ETH_HLEN || mtu > 65535)
     {
         error = std::make_error_code(std::errc::invalid_argument);

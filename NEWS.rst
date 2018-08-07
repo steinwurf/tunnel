@@ -7,6 +7,8 @@ every change, see the Git log.
 Latest
 ------
 * tbd
+* Major: Removed dependency on Links.
+* Minor: Added uint32_t mtu() const.
 
 1.1.0
 -----

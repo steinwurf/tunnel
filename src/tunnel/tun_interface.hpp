@@ -45,6 +45,7 @@ public:
         std::error_code& error);
 
     void set_ipv4(const std::string& address, std::error_code& error);
+    uint32_t mtu(std::error_code& error) const;
     void set_mtu(uint32_t mtu, std::error_code& error);
 
     bool is_up(std::error_code& error) const;
