@@ -6,7 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Major: Removed a couple of abbreviations.
+* Major: Changed API to take pointer and size instead of std::vector.
+* Patch: Fixed make_tun_interface so that it now takes a const string reference
+  to the dev name.
 * Major: Removed dependency on Links.
 * Minor: Added uint32_t mtu() const.
 

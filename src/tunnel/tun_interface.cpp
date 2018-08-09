@@ -34,18 +34,18 @@ void io_handler_proxy(const tun_interface::io_handler& callback,
 }
 
 // Helper function for reading flags from interface
-struct ifreq read_interface_flags(int socket_fd,
-                                  const std::string& name,
-                                  std::error_code& error)
+struct ifreq read_interface_info(int socket_file_descriptor,
+                                 const std::string& device_name,
+                                 std::error_code& error)
 {
     assert(!error);
 
     struct ifreq ifr;
     std::memset(&ifr, 0, sizeof(ifr));
 
-    name.copy(ifr.ifr_name, name.size());
+    device_name.copy(ifr.ifr_name, device_name.size());
 
-    if (ioctl(socket_fd, SIOCGIFFLAGS, &ifr) == -1)
+    if (ioctl(socket_file_descriptor, SIOCGIFFLAGS, &ifr) == -1)
     {
         error = make_error_code(errno);
         return ifr;
@@ -55,21 +55,21 @@ struct ifreq read_interface_flags(int socket_fd,
 }
 
 // @param io the io service to be used for async operation
-// @param devname: the name of an interface. May be an empty string. In this
-// case, the kernel chooses the interface name and sets devname to this.
+// @param wanted_devname: the wamted name of an interface. If empty
+// the kernel chooses the interface name.
 // @return the tun file descriptor
 std::unique_ptr<tun_interface> tun_interface::make_tun_interface(
     boost::asio::io_service& io,
-    std::string& devname,
+    const std::string& wanted_device_name,
     std::error_code& error)
 {
     assert(!error);
 
     struct ifreq ifr;
-    const char* tundev = "/dev/net/tun";
-    int fd;
+    const char* tun_device = "/dev/net/tun";
+    int file_descriptor;
 
-    if ((fd = open(tundev, O_RDWR)) < 0)
+    if ((file_descriptor = open(tun_device, O_RDWR)) < 0)
     {
         error = make_error_code(errno);
         return nullptr;
@@ -79,56 +79,51 @@ std::unique_ptr<tun_interface> tun_interface::make_tun_interface(
 
     ifr.ifr_flags = IFF_TUN;
 
-    if (!devname.empty())
+    if (!wanted_device_name.empty())
     {
         // if a device name was specified, put it in the structure;
         // otherwise, the kernel will try to allocate the "next" device of the
         // specified type
-        devname.copy(ifr.ifr_name, devname.size());
+        wanted_device_name.copy(ifr.ifr_name, wanted_device_name.size());
     }
 
     // try to create the device
-    if (ioctl(fd, TUNSETIFF, (void*) &ifr) < 0)
+    if (ioctl(file_descriptor, TUNSETIFF, (void*) &ifr) < 0)
     {
-        close(fd);
+        close(file_descriptor);
         error = make_error_code(errno);
         return nullptr;
     }
 
-    // if the operation was successful, write back the name of the
-    // interface to the variable "dev", so the caller can know
-    // it. Note that the caller MUST reserve space in *dev (see calling
-    // code below)
-    devname = std::string(ifr.ifr_name);
-
-    return std::make_unique<tun_interface>(io, fd, devname);
+    auto device_name = std::string(ifr.ifr_name);
+    return std::make_unique<tun_interface>(io, file_descriptor, device_name);
 }
 
 tun_interface::tun_interface(boost::asio::io_service& io,
-                             int tun_fd,
-                             const std::string& devname) :
-    m_name(devname),
-    m_kernel_socket(socket(AF_INET, SOCK_STREAM, 0)),
-    m_tun_fd(tun_fd),
-    m_tun_stream(io)
+                             int file_descriptor,
+                             const std::string& device_name) :
+    m_device_name(device_name),
+    m_socket(socket(AF_INET, SOCK_STREAM, 0)),
+    m_file_descriptor(file_descriptor),
+    m_stream_descriptor(io)
 {
-    m_tun_stream.assign(m_tun_fd);
+    m_stream_descriptor.assign(m_file_descriptor);
 }
 
 tun_interface::~tun_interface()
 {
-    m_tun_stream.cancel();
-    m_tun_stream.close();
-    m_tun_stream.release();
-    close(m_kernel_socket);
-    close(m_tun_fd);
+    m_stream_descriptor.cancel();
+    m_stream_descriptor.close();
+    m_stream_descriptor.release();
+    close(m_socket);
+    close(m_file_descriptor);
 }
 
 bool tun_interface::is_up(std::error_code& error) const
 {
     assert(!error);
 
-    struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
+    struct ifreq ifr = read_interface_info(m_socket, m_device_name, error);
 
     return (ifr.ifr_flags & IFF_UP) != 0;
 }
@@ -137,7 +132,7 @@ void tun_interface::up(std::error_code& error)
 {
     assert(!error);
 
-    struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
+    struct ifreq ifr = read_interface_info(m_socket, m_device_name, error);
 
     if (error)
     {
@@ -146,7 +141,7 @@ void tun_interface::up(std::error_code& error)
 
     ifr.ifr_flags |= IFF_UP;
 
-    if (ioctl(m_kernel_socket, SIOCSIFFLAGS, &ifr) == -1)
+    if (ioctl(m_socket, SIOCSIFFLAGS, &ifr) == -1)
     {
         error = make_error_code(errno);
         return;
@@ -164,11 +159,11 @@ void tun_interface::down(std::error_code& error)
 {
     assert(!error);
 
-    struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
+    struct ifreq ifr = read_interface_info(m_socket, m_device_name, error);
 
     ifr.ifr_flags &= ~IFF_UP;
 
-    if (ioctl(m_kernel_socket, SIOCSIFFLAGS, &ifr) == -1)
+    if (ioctl(m_socket, SIOCSIFFLAGS, &ifr) == -1)
     {
         error = make_error_code(errno);
         return;
@@ -189,7 +184,7 @@ void tun_interface::set_ipv4(const std::string& address, std::error_code& error)
     auto mask = boost::asio::ip::address_v4::from_string("255.255.255.0");
     auto bcast = boost::asio::ip::address_v4::broadcast(addr, mask);
 
-    struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
+    struct ifreq ifr = read_interface_info(m_socket, m_device_name, error);
     if (error)
     {
         return;
@@ -219,7 +214,7 @@ void tun_interface::set_ipv4(const std::string& address, std::error_code& error)
             return;
         }
 
-        if (ioctl(m_kernel_socket, pair.first, &ifr) != 0)
+        if (ioctl(m_socket, pair.first, &ifr) != 0)
         {
             error = make_error_code(errno);
             return;
@@ -233,7 +228,7 @@ uint32_t tun_interface::mtu(std::error_code& error) const
 {
     assert(!error);
 
-    struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
+    struct ifreq ifr = read_interface_info(m_socket, m_device_name, error);
     if (error)
     {
         return 0;
@@ -252,7 +247,7 @@ void tun_interface::set_mtu(uint32_t mtu, std::error_code& error)
         return;
     }
 
-    struct ifreq ifr = read_interface_flags(m_kernel_socket, m_name, error);
+    struct ifreq ifr = read_interface_info(m_socket, m_device_name, error);
     if (error)
     {
         return;
@@ -260,16 +255,16 @@ void tun_interface::set_mtu(uint32_t mtu, std::error_code& error)
 
     ifr.ifr_mtu = mtu;
 
-    if (ioctl(m_kernel_socket, SIOCSIFMTU, &ifr) != 0)
+    if (ioctl(m_socket, SIOCSIFMTU, &ifr) != 0)
     {
         error = make_error_code(errno);
         return;
     }
 }
 
-std::string tun_interface::name() const
+std::string tun_interface::device_name() const
 {
-    return m_name;
+    return m_device_name;
 }
 
 // @param buffer the buffer into which the data will be read.
@@ -277,34 +272,35 @@ std::string tun_interface::name() const
 // remain valid until the callback is called
 // @param callback The callback to be called when the read operation
 // completes. Copies will be made of the handler as required.
-void tun_interface::async_read(std::vector<uint8_t>& buffer,
-                               io_handler callback)
+void tun_interface::async_read(
+    uint8_t* data, uint32_t size, io_handler callback)
 {
-    m_tun_stream.async_read_some(boost::asio::buffer(buffer),
-                                 std::bind(io_handler_proxy,
-                                           callback,
-                                           std::placeholders::_1,
-                                           std::placeholders::_2));
+    m_stream_descriptor.async_read_some(boost::asio::buffer(data, size),
+                                        std::bind(io_handler_proxy,
+                                                  callback,
+                                                  std::placeholders::_1,
+                                                  std::placeholders::_2));
 }
 
-void tun_interface::async_write(const std::vector<uint8_t>& buffer,
-                                io_handler callback)
+void tun_interface::async_write(
+    const uint8_t* data, uint32_t size, io_handler callback)
 {
-    boost::asio::async_write(m_tun_stream,
-                             boost::asio::buffer(buffer),
+    boost::asio::async_write(m_stream_descriptor,
+                             boost::asio::buffer(data, size),
                              std::bind(io_handler_proxy,
                                        callback,
                                        std::placeholders::_1,
                                        std::placeholders::_2));
 }
 
-void tun_interface::write(const std::vector<uint8_t>& buffer,
-                          std::error_code& error)
+void tun_interface::write(
+    const uint8_t* data, uint32_t size, std::error_code& error)
 {
     assert(!error);
 
     boost::system::error_code ec;
-    boost::asio::write(m_tun_stream, boost::asio::buffer(buffer), ec);
+    boost::asio::write(
+        m_stream_descriptor, boost::asio::buffer(data, size), ec);
     error = to_std_error_code(ec);
 }
 
@@ -316,7 +312,7 @@ void tun_interface::set_default_route(std::error_code& error)
     std::memset(&route, 0, sizeof(route));
 
     char ifname[IFNAMSIZ] = { 0 };
-    m_name.copy(ifname, m_name.size());
+    m_device_name.copy(ifname, m_device_name.size());
 
     route.rt_dev = ifname;
     route.rt_flags = RTF_UP; // | RTF_GATEWAY;
@@ -333,7 +329,7 @@ void tun_interface::set_default_route(std::error_code& error)
     mask->sin_family = AF_INET;
     mask->sin_addr.s_addr = INADDR_ANY;
 
-    if (ioctl(m_kernel_socket, SIOCADDRT, &route) != 0)
+    if (ioctl(m_socket, SIOCADDRT, &route) != 0)
     {
         error = make_error_code(errno);
     }
@@ -347,7 +343,7 @@ void tun_interface::remove_default_route(std::error_code& error)
     std::memset(&route, 0, sizeof(route));
 
     char ifname[IFNAMSIZ] = { 0 };
-    m_name.copy(ifname, m_name.size());
+    m_device_name.copy(ifname, m_device_name.size());
 
     route.rt_dev = ifname;
     route.rt_flags = RTF_UP | RTF_GATEWAY;
@@ -364,10 +360,9 @@ void tun_interface::remove_default_route(std::error_code& error)
     mask->sin_family = AF_INET;
     mask->sin_addr.s_addr = INADDR_ANY;
 
-    if (ioctl(m_kernel_socket, SIOCDELRT, &route) != 0)
+    if (ioctl(m_socket, SIOCDELRT, &route) != 0)
     {
         error = make_error_code(errno);
     }
 }
-
 }

@@ -40,7 +40,23 @@ int main()
     std::vector<uint8_t> buffer(max_buffer_size);
 
     // Setup a single async read that in turn will do a write of the read buffer
-    tun->async_read(buffer, [&](auto error, auto bytes)
+
+    auto write_handler = [&io](auto error, auto bytes)
+    {
+        if (error && error != std::errc::operation_canceled)
+        {
+            std::cout << "Error on async send: " << error.message()
+                      << std::endl;
+        }
+        else if (error != std::errc::operation_canceled)
+        {
+            std::cout << "Wrote a packet of " << bytes << " bytes"
+                      << " to the interface " << std::endl;
+        }
+
+        io.stop();
+    };
+    auto read_handler = [&buffer, &write_handler, &tun](auto error, auto bytes)
     {
         if (error && error != std::errc::operation_canceled)
         {
@@ -55,22 +71,9 @@ int main()
 
         buffer.resize(bytes);
 
-        tun->async_write(buffer, [&](auto error, auto bytes)
-        {
-            if (error && error != std::errc::operation_canceled)
-            {
-                std::cout << "Error on async send: " << error.message()
-                          << std::endl;
-            }
-            else if (error != std::errc::operation_canceled)
-            {
-                std::cout << "Wrote a packet of " << bytes << " bytes"
-                          << " to the interface " << std::endl;
-            }
-
-            io.stop();
-        });
-    });
+        tun->async_write(buffer.data(), buffer.size(), write_handler);
+    };
+    tun->async_read(buffer.data(), buffer.size(), read_handler);
 
     // "Set IP address"
     tun->set_ipv4("10.0.0.2", error);
