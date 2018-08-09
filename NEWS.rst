@@ -6,6 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+2.0.0
+-----
 * Major: Removed a couple of abbreviations.
 * Major: Changed API to take pointer and size instead of std::vector.
 * Patch: Fixed make_tun_interface so that it now takes a const string reference
