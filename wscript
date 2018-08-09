@@ -10,16 +10,17 @@ VERSION = '1.1.0'
 
 
 def options(opt):
-
-    opt.add_option(
-        '--run_mininet_tests', default=None, dest='run_mininet_tests',
-        action='store_true', help='Run the mininet tests')
+    if opt.is_toplevel():
+        opt.add_option(
+            '--run_mininet_tests', default=None, dest='run_mininet_tests',
+            action='store_true', help='Run the mininet tests')
 
 
 def configure(conf):
 
-    # Check if we have mininet installed
-    conf.find_program('mn', mandatory=False)
+    if conf.is_toplevel():
+        # Check if we have mininet installed
+        conf.find_program('mn', mandatory=False)
 
 
 def build(bld):
@@ -30,17 +31,19 @@ def build(bld):
             VERSION))
 
     # Only build for linux platforms
-    if bld.is_mkspec_platform('linux'):
-        bld.recurse('src/tunnel')
+    if not bld.is_mkspec_platform('linux'):
+        return
 
-        if bld.is_toplevel():
+    bld.recurse('src/tunnel')
 
-            # Only build tests when executed from the top-level wscript,
-            # i.e. not when included as a dependency
-            bld.recurse('test')
-            bld.recurse('examples')
+    if bld.is_toplevel():
 
-            bld.add_post_fun(run_mininet_tests)
+        # Only build tests when executed from the top-level wscript,
+        # i.e. not when included as a dependency
+        bld.recurse('test')
+        bld.recurse('examples')
+
+        bld.add_post_fun(run_mininet_tests)
 
 
 def run_command(args, **kwargs):

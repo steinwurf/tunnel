@@ -42,7 +42,7 @@ void udp_receive_handler(tunnel::tun_interface& tun,
     }
     // Write buffer to tun interface
     std::error_code error;
-    tun.write(rx_buffer, error);
+    tun.write(rx_buffer.data(), rx_buffer.size(), error);
     if (error)
     {
         std::cout << "Error on tun interface write: " << error.message()
@@ -56,12 +56,12 @@ void udp_receive_handler(tunnel::tun_interface& tun,
     // Qeuue another receive call
     socket.async_receive(
         boost::asio::buffer(rx_buffer),
-            std::bind(&udp_receive_handler,
-                                 std::ref(tun),
-                                 std::ref(socket),
-                                 std::ref(rx_buffer),
-                                 std::placeholders::_1,
-                                 std::placeholders::_2));
+        std::bind(&udp_receive_handler,
+                  std::ref(tun),
+                  std::ref(socket),
+                  std::ref(rx_buffer),
+                  std::placeholders::_1,
+                  std::placeholders::_2));
 }
 
 void tun_read_handler(tunnel::tun_interface& tun,
@@ -94,7 +94,8 @@ void tun_read_handler(tunnel::tun_interface& tun,
     socket.send_to(boost::asio::buffer(tx_buffer), remote, 0, error);
     if (error)
     {
-        std::cout << "Error on udp socket send: " << error.message() << std::endl;
+        std::cout << "Error on udp socket send: " << error.message()
+                  << std::endl;
         exit(error.value());
     }
 
@@ -102,7 +103,7 @@ void tun_read_handler(tunnel::tun_interface& tun,
     tx_buffer.resize(max_buffer_size);
 
     // Qeuue another read call
-    tun.async_read(tx_buffer,
+    tun.async_read(tx_buffer.data(), tx_buffer.size(),
                    std::bind(&tun_read_handler,
                              std::ref(tun),
                              std::ref(socket),
@@ -172,8 +173,7 @@ int main(int argc, char* argv[])
     std::cout << "Setting up udp tunnel between endpoints " << local_ip << ":"
               << port << " (local) and " << remote_ip << ":" << port
               << " (remote)." << std::endl;
-    std::cout << "Setting up virtual interface \"" << tunnel_name
-              << "\" with ip " << tunnel_ip
+    std::cout << "Setting up virtual interface with ip " << tunnel_ip
               << ". All communication on this interface will go through the "
               "udp tunnel."
               << std::endl;
@@ -189,6 +189,9 @@ int main(int argc, char* argv[])
                   << std::endl;
         return error.value();
     }
+
+    std::cout << "Virtual interface \"" << tun->device_name() << "\" created."
+              << std::endl;
 
     // Set interface up
     tun->up(error);
@@ -221,7 +224,7 @@ int main(int argc, char* argv[])
     if (route)
     {
         std::cout << "Setting up default route through tunnel interface."
-            << std::endl;
+                  << std::endl;
 
         tun->set_default_route(error);
         if (error)
@@ -265,33 +268,33 @@ int main(int argc, char* argv[])
     }
 
     uint32_t max_buffer_size = 66000;
-    std::vector<uint8_t> udp_rx_buffer(max_buffer_size);
-    std::vector<uint8_t> udp_tx_buffer(max_buffer_size);
+    std::vector<uint8_t> rx_buffer(max_buffer_size);
+    std::vector<uint8_t> tx_buffer(max_buffer_size);
 
     // Setup receive->write functionality
     // UDP packets received should be forwarded to tun write
     udp_socket.async_receive(
-        boost::asio::buffer(udp_rx_buffer),
+        boost::asio::buffer(rx_buffer),
         std::bind(&udp_receive_handler,
-            std::ref(*tun),
-            std::ref(udp_socket),
-            std::ref(udp_rx_buffer),
-            std::placeholders::_1,
-            std::placeholders::_2));
+                  std::ref(*tun),
+                  std::ref(udp_socket),
+                  std::ref(rx_buffer),
+                  std::placeholders::_1,
+                  std::placeholders::_2));
 
     auto remote_endpoint = boost::asio::ip::udp::endpoint(
         boost::asio::ip::address_v4::from_string(remote_ip),
         port);
     // Setup read->send functionality
     // Packets read from tun should be forwarded to UDP send
-    tun->async_read(udp_tx_buffer,
-        std::bind(&tun_read_handler,
-            std::ref(*tun),
-            std::ref(udp_socket),
-            std::ref(udp_tx_buffer),
-            remote_endpoint,
-            std::placeholders::_1,
-            std::placeholders::_2));
+    tun->async_read(tx_buffer.data(), tx_buffer.size(),
+                    std::bind(&tun_read_handler,
+                              std::ref(*tun),
+                              std::ref(udp_socket),
+                              std::ref(tx_buffer),
+                              remote_endpoint,
+                              std::placeholders::_1,
+                              std::placeholders::_2));
 
     io.run();
 
