@@ -6,6 +6,9 @@ every change, see the Git log.
 
 Latest
 ------
+
+3.0.0
+-----
 * Major: Wanted device name must now be less than ``IFNAMSIZ-1``.
 * Minor: Added ``ipv4`` and ``is_default_route_enabled``.
 * Major: Renamed ``set_default_route`` -> ``enable_default_route`` and
