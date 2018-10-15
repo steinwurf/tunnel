@@ -33,25 +33,35 @@ void io_handler_proxy(const tun_interface::io_handler& callback,
     callback(to_std_error_code(error), bytes_transferred);
 }
 
-// Helper function for reading flags from interface
-struct ifreq read_interface_info(int socket_file_descriptor,
-                                 const std::string& device_name,
-                                 std::error_code& error)
+// Helper function for reading from interface
+struct ifreq read_interface(int socket_fd,
+                            const std::string& device_name,
+                            int key,
+                            std::error_code& error)
 {
     assert(!error);
+    assert(device_name.size() <= (IFNAMSIZ-1));
 
     struct ifreq ifr;
     std::memset(&ifr, 0, sizeof(ifr));
-
     device_name.copy(ifr.ifr_name, device_name.size());
 
-    if (ioctl(socket_file_descriptor, SIOCGIFFLAGS, &ifr) == -1)
+    if (ioctl(socket_fd, key, &ifr) == -1)
     {
         error = make_error_code(errno);
         return ifr;
     }
 
     return ifr;
+}
+
+// Helper function for reading flags from interface
+struct ifreq read_interface_info(int socket_fd,
+                                 const std::string& device_name,
+                                 std::error_code& error)
+{
+    assert(!error);
+    return read_interface(socket_fd, device_name, SIOCGIFFLAGS, error);
 }
 
 // @param io the io service to be used for async operation
@@ -79,6 +89,12 @@ std::unique_ptr<tun_interface> tun_interface::make_tun_interface(
 
     ifr.ifr_flags = IFF_TUN;
 
+    if (wanted_device_name.size() > IFNAMSIZ-1)
+    {
+        error = std::make_error_code(std::errc::invalid_argument);
+        return nullptr;
+    }
+
     if (!wanted_device_name.empty())
     {
         // if a device name was specified, put it in the structure;
@@ -105,8 +121,10 @@ tun_interface::tun_interface(boost::asio::io_service& io,
     m_device_name(device_name),
     m_socket(socket(AF_INET, SOCK_STREAM, 0)),
     m_file_descriptor(file_descriptor),
-    m_stream_descriptor(io)
+    m_stream_descriptor(io),
+    m_default_route_enabled(false)
 {
+    assert(m_device_name.size() <= (IFNAMSIZ-1));
     m_stream_descriptor.assign(m_file_descriptor);
 }
 
@@ -170,11 +188,25 @@ void tun_interface::down(std::error_code& error)
     }
 }
 
+std::string tun_interface::ipv4(std::error_code& error)
+{
+    assert(!error);
+    struct ifreq ifr = read_interface(m_socket, m_device_name, SIOCGIFADDR, error);
+    if (error)
+    {
+        return "";
+    }
+
+    struct sockaddr_in* addr_in = (struct sockaddr_in*) &ifr.ifr_addr;
+
+    return inet_ntoa(addr_in->sin_addr);
+}
+
 void tun_interface::set_ipv4(const std::string& address, std::error_code& error)
 {
     assert(!error);
-
     boost::system::error_code ec;
+
     auto addr = boost::asio::ip::address_v4::from_string(address, ec);
     if (ec)
     {
@@ -183,6 +215,13 @@ void tun_interface::set_ipv4(const std::string& address, std::error_code& error)
     }
     auto mask = boost::asio::ip::address_v4::from_string("255.255.255.0");
     auto bcast = boost::asio::ip::address_v4::broadcast(addr, mask);
+
+    std::map<int, std::string> addr_config =
+        {
+            {SIOCSIFADDR, addr.to_string()},
+            {SIOCSIFNETMASK, mask.to_string()},
+            {SIOCSIFBRDADDR, bcast.to_string()}
+        };
 
     struct ifreq ifr = read_interface_info(m_socket, m_device_name, error);
     if (error)
@@ -194,15 +233,12 @@ void tun_interface::set_ipv4(const std::string& address, std::error_code& error)
 
     addr_in->sin_family = AF_INET;
 
-    std::vector<std::pair<int, boost::asio::ip::address_v4>> addr_config =
-        {
-            {SIOCSIFADDR, addr}, {SIOCSIFNETMASK, mask}, {SIOCSIFBRDADDR, bcast}
-        };
-
-    for (const auto& pair : addr_config)
+    for (const auto& kv : addr_config)
     {
-        int res = inet_pton(
-            AF_INET, pair.second.to_string().c_str(), &addr_in->sin_addr);
+        const auto& key = kv.first;
+        auto value = kv.second;
+
+        int res = inet_pton(AF_INET, value.c_str(), &addr_in->sin_addr);
         if (res == 0)
         {
             error = std::make_error_code(std::errc::invalid_argument);
@@ -214,13 +250,11 @@ void tun_interface::set_ipv4(const std::string& address, std::error_code& error)
             return;
         }
 
-        if (ioctl(m_socket, pair.first, &ifr) != 0)
+        if (ioctl(m_socket, key, &ifr) != 0)
         {
             error = make_error_code(errno);
             return;
         }
-
-        std::cout << "Setting config " << pair.second << std::endl;
     }
 }
 
@@ -304,10 +338,14 @@ void tun_interface::write(
     error = to_std_error_code(ec);
 }
 
-void tun_interface::set_default_route(std::error_code& error)
+bool tun_interface::is_default_route_enabled()
+{
+    return m_default_route_enabled;
+}
+
+void tun_interface::enable_default_route(std::error_code& error)
 {
     assert(!error);
-
     struct rtentry route;
     std::memset(&route, 0, sizeof(route));
 
@@ -333,9 +371,10 @@ void tun_interface::set_default_route(std::error_code& error)
     {
         error = make_error_code(errno);
     }
+    m_default_route_enabled = true;
 }
 
-void tun_interface::remove_default_route(std::error_code& error)
+void tun_interface::disable_default_route(std::error_code& error)
 {
     assert(!error);
 
@@ -364,5 +403,6 @@ void tun_interface::remove_default_route(std::error_code& error)
     {
         error = make_error_code(errno);
     }
+    m_default_route_enabled = false;
 }
 }
