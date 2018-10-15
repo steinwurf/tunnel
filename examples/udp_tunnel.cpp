@@ -210,6 +210,7 @@ int main(int argc, char* argv[])
                   << error.message() << std::endl;
         return error.value();
     }
+    std::cout << "ip address set to " << tun->ipv4(error) << std::endl;
 
     // Set MTU
     tun->set_mtu(25000, error);
@@ -226,7 +227,7 @@ int main(int argc, char* argv[])
         std::cout << "Setting up default route through tunnel interface."
                   << std::endl;
 
-        tun->set_default_route(error);
+        tun->enable_default_route(error);
         if (error)
         {
             std::cout << "Error setting default route to tunnel interface: "
@@ -307,7 +308,7 @@ int main(int argc, char* argv[])
     // remove default route through tunnel interface
     if (route)
     {
-        tun->remove_default_route(error);
+        tun->disable_default_route(error);
         if (error)
         {
             std::cout << "Error removing default route from tunnel interface: "

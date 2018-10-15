@@ -46,7 +46,10 @@ public:
 
     ~tun_interface();
 
+
+    std::string ipv4(std::error_code& error);
     void set_ipv4(const std::string& address, std::error_code& error);
+
     uint32_t mtu(std::error_code& error) const;
     void set_mtu(uint32_t mtu, std::error_code& error);
 
@@ -70,24 +73,30 @@ public:
     // That is, "inbound traffic".
     void write(const uint8_t* data, uint32_t size, std::error_code& error);
 
-    // Set default route to this interface
-    void set_default_route(std::error_code& error);
+    // Enable default route for this interface
+    void enable_default_route(std::error_code& error);
 
-    // Remove default route from this interface
-    void remove_default_route(std::error_code& error);
+    // Disable default route for this interface
+    void disable_default_route(std::error_code& error);
+
+    // Returns true if default route is enabled for this interface
+    bool is_default_route_enabled();
 
 private:
 
     // The dev name
-    std::string m_device_name;
+    const std::string m_device_name;
 
     // Internal kernel socket used for ioctl calls
-    int m_socket;
+    const int m_socket;
 
     // The tun device file descriptor
-    int m_file_descriptor = -1;
+    const int m_file_descriptor = -1;
 
     // The tun file descriptor stream descriptor
     boost::asio::posix::stream_descriptor m_stream_descriptor;
+
+    // Determines whether this interface is to be used as the default route.
+    bool m_default_route_enabled;
 };
 }
