@@ -44,8 +44,8 @@ def main(tunnel_binary):
     # Receiver commands
     for i in range(1, receivers + 1):
         node = 'h{}'.format(i)
-        node_ip = "10.0.0.{}".format(i+10)
-        tunnel_ip = "10.0.1.{}".format(i+10)
+        node_ip = "10.0.0.{}".format(i + 10)
+        tunnel_ip = "10.0.1.{}".format(i + 10)
         # The receivers are connected to the central switch with a lossy link,
         # so their losses should be independent
         linkopts = dict(bw=5.0, delay='200ms', loss=3)
@@ -58,7 +58,7 @@ def main(tunnel_binary):
         # tunnel interface (iperf listens on the interface associated with
         # the default route, and there is no option to override that)
         net.add_command(
-            node, 'sudo route add 224.0.67.67 dev tunwurf',
+            node, 'sudo route add 224.0.67.67 dev tun0',
             start_time=0.3, timeout=0.2)
         # Add iperf server listening on a multicast address
         net.add_command(

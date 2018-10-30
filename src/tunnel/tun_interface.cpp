@@ -1,408 +1,437 @@
-// Copyright (c) 2017 Steinwurf ApS
-// All Rights Reserved
-//
-// THIS IS UNPUBLISHED PROPRIETARY SOURCE CODE OF STEINWURF
-// The copyright notice above does not evidence any
-// actual or intended publication of such source code.
-
 #include "tun_interface.hpp"
+#include "throw_if_error.hpp"
 
-#include <cstring>
-#include <iostream>
+#include <cassert>
+
+#include <platform/config.hpp>
+
+// Waf has some problems with this macro which means that
+// in the linux/*.hpp files change. If you run
+// ./waf build --zone deps you will see that the dependencies
+// for this .cpp files does not include the headers if these
+// #ifdef are active...
+//
+//#ifdef PLATFORM_LINUX
+
+#include "linux/tun_interface.hpp"
+
+using platform_tun_interface = tunnel::linux::tun_interface;
+
+//#else
+
+//#error "Not a supported platform"
+
+//#endif
 
 namespace tunnel
 {
 
-// Helper function for creating error codes
-std::error_code make_error_code(int value)
+struct tun_interface::impl : platform_tun_interface
 {
-    return std::error_code(value, std::generic_category());
+};
+
+tun_interface::tun_interface()
+{
+    m_impl = std::make_unique<tun_interface::impl>();
 }
 
-// Helper function for converting boost errors to std errors
-std::error_code to_std_error_code(const boost::system::error_code& error)
+tun_interface::tun_interface(tun_interface&& iface)
 {
-    return std::error_code(error.value(), std::generic_category());
+    m_impl = std::move(iface.m_impl);
 }
 
-// Proxy function for converting boost error codes to std error codes
-void io_handler_proxy(const tun_interface::io_handler& callback,
-                      const boost::system::error_code& error,
-                      uint32_t bytes_transferred)
+tun_interface& tun_interface::operator=(tun_interface&& iface)
 {
-    callback(to_std_error_code(error), bytes_transferred);
-}
-
-// Helper function for reading from interface
-struct ifreq read_interface(int socket_fd,
-                            const std::string& device_name,
-                            int key,
-                            std::error_code& error)
-{
-    assert(!error);
-    assert(device_name.size() <= (IFNAMSIZ-1));
-
-    struct ifreq ifr;
-    std::memset(&ifr, 0, sizeof(ifr));
-    device_name.copy(ifr.ifr_name, device_name.size());
-
-    if (ioctl(socket_fd, key, &ifr) == -1)
-    {
-        error = make_error_code(errno);
-        return ifr;
-    }
-
-    return ifr;
-}
-
-// Helper function for reading flags from interface
-struct ifreq read_interface_info(int socket_fd,
-                                 const std::string& device_name,
-                                 std::error_code& error)
-{
-    assert(!error);
-    return read_interface(socket_fd, device_name, SIOCGIFFLAGS, error);
-}
-
-// @param io the io service to be used for async operation
-// @param wanted_devname: the wamted name of an interface. If empty
-// the kernel chooses the interface name.
-// @return the tun file descriptor
-std::unique_ptr<tun_interface> tun_interface::make_tun_interface(
-    boost::asio::io_service& io,
-    const std::string& wanted_device_name,
-    std::error_code& error)
-{
-    assert(!error);
-
-    struct ifreq ifr;
-    const char* tun_device = "/dev/net/tun";
-    int file_descriptor;
-
-    if ((file_descriptor = open(tun_device, O_RDWR)) < 0)
-    {
-        error = make_error_code(errno);
-        return nullptr;
-    }
-
-    std::memset(&ifr, 0, sizeof(ifr));
-
-    ifr.ifr_flags = IFF_TUN;
-
-    if (wanted_device_name.size() > IFNAMSIZ-1)
-    {
-        error = std::make_error_code(std::errc::invalid_argument);
-        return nullptr;
-    }
-
-    if (!wanted_device_name.empty())
-    {
-        // if a device name was specified, put it in the structure;
-        // otherwise, the kernel will try to allocate the "next" device of the
-        // specified type
-        wanted_device_name.copy(ifr.ifr_name, wanted_device_name.size());
-    }
-
-    // try to create the device
-    if (ioctl(file_descriptor, TUNSETIFF, (void*) &ifr) < 0)
-    {
-        close(file_descriptor);
-        error = make_error_code(errno);
-        return nullptr;
-    }
-
-    auto device_name = std::string(ifr.ifr_name);
-    return std::make_unique<tun_interface>(io, file_descriptor, device_name);
-}
-
-tun_interface::tun_interface(boost::asio::io_service& io,
-                             int file_descriptor,
-                             const std::string& device_name) :
-    m_device_name(device_name),
-    m_socket(socket(AF_INET, SOCK_STREAM, 0)),
-    m_file_descriptor(file_descriptor),
-    m_stream_descriptor(io),
-    m_default_route_enabled(false)
-{
-    assert(m_device_name.size() <= (IFNAMSIZ-1));
-    m_stream_descriptor.assign(m_file_descriptor);
+    m_impl = std::move(iface.m_impl);
+    return *this;
 }
 
 tun_interface::~tun_interface()
 {
-    m_stream_descriptor.cancel();
-    m_stream_descriptor.close();
-    m_stream_descriptor.release();
-    close(m_socket);
-    close(m_file_descriptor);
+}
+
+void tun_interface::create()
+{
+    assert(m_impl);
+
+    std::error_code error;
+    create(error);
+    throw_if_error(error);
+}
+void tun_interface::create(std::error_code& error)
+{
+    assert(m_impl);
+    m_impl->create("", error);
+}
+
+void tun_interface::create(const std::string& device_name)
+{
+    assert(m_impl);
+
+    std::error_code error;
+    m_impl->create(device_name, error);
+    throw_if_error(error);
+}
+void tun_interface::create(const std::string& device_name,
+                           std::error_code& error)
+{
+    assert(m_impl);
+    m_impl->create(device_name, error);
+}
+
+void tun_interface::rename(const std::string& interface_name) const
+{
+    assert(m_impl);
+
+    std::error_code error;
+    rename(interface_name, error);
+    throw_if_error(error);
+}
+
+void tun_interface::rename(const std::string& interface_name,
+                           std::error_code& error) const
+{
+    assert(m_impl);
+    m_impl->rename(interface_name, error);
+}
+
+std::string tun_interface::owner() const
+{
+    assert(m_impl);
+
+    std::error_code error;
+    std::string own = owner(error);
+    throw_if_error(error);
+    return own;
+}
+std::string tun_interface::owner(std::error_code& error) const
+{
+    assert(m_impl);
+    return m_impl->owner(error);
+}
+
+std::string tun_interface::group() const
+{
+    assert(m_impl);
+
+    std::error_code error;
+    std::string grp = group(error);
+    throw_if_error(error);
+    return grp;
+}
+std::string tun_interface::group(std::error_code& error) const
+{
+    assert(m_impl);
+    return m_impl->group(error);
+}
+
+void tun_interface::set_owner(const std::string& owner) const
+{
+    assert(m_impl);
+
+    std::error_code error;
+    set_owner(owner, error);
+    throw_if_error(error);
+}
+void tun_interface::set_owner(const std::string& owner,
+                              std::error_code& error) const
+{
+    assert(m_impl);
+    m_impl->set_owner(owner, error);
+}
+
+void tun_interface::set_group(const std::string& group) const
+{
+    assert(m_impl);
+
+    std::error_code error;
+    set_group(group, error);
+    throw_if_error(error);
+}
+void tun_interface::set_group(const std::string& group,
+                              std::error_code& error) const
+{
+    assert(m_impl);
+    m_impl->set_group(group, error);
+}
+
+std::string tun_interface::interface_name() const
+{
+    assert(m_impl);
+
+    std::error_code error;
+    std::string name = interface_name(error);
+    throw_if_error(error);
+    return name;
+}
+
+std::string tun_interface::interface_name(std::error_code& error) const
+{
+    assert(m_impl);
+    return m_impl->interface_name(error);
+}
+
+bool tun_interface::is_persistent(std::error_code& error) const
+{
+    assert(m_impl);
+    return m_impl->is_persistent(error);
+}
+
+bool tun_interface::is_persistent() const
+{
+    assert(m_impl);
+
+    std::error_code error;
+    bool persistent = m_impl->is_persistent(error);
+    throw_if_error(error);
+    return persistent;
 }
 
 bool tun_interface::is_up(std::error_code& error) const
 {
-    assert(!error);
-
-    struct ifreq ifr = read_interface_info(m_socket, m_device_name, error);
-
-    return (ifr.ifr_flags & IFF_UP) != 0;
+    assert(m_impl);
+    return m_impl->is_up(error);
 }
 
-void tun_interface::up(std::error_code& error)
+bool tun_interface::is_up() const
 {
-    assert(!error);
+    assert(m_impl);
 
-    struct ifreq ifr = read_interface_info(m_socket, m_device_name, error);
-
-    if (error)
-    {
-        return;
-    }
-
-    ifr.ifr_flags |= IFF_UP;
-
-    if (ioctl(m_socket, SIOCSIFFLAGS, &ifr) == -1)
-    {
-        error = make_error_code(errno);
-        return;
-    }
+    std::error_code error;
+    bool up = m_impl->is_up(error);
+    throw_if_error(error);
+    return up;
 }
 
 bool tun_interface::is_down(std::error_code& error) const
 {
-    assert(!error);
-
-    return !is_up(error);
+    assert(m_impl);
+    return m_impl->is_down(error);
 }
 
-void tun_interface::down(std::error_code& error)
+bool tun_interface::is_down() const
 {
-    assert(!error);
+    assert(m_impl);
 
-    struct ifreq ifr = read_interface_info(m_socket, m_device_name, error);
-
-    ifr.ifr_flags &= ~IFF_UP;
-
-    if (ioctl(m_socket, SIOCSIFFLAGS, &ifr) == -1)
-    {
-        error = make_error_code(errno);
-        return;
-    }
+    std::error_code error;
+    bool down = m_impl->is_down(error);
+    throw_if_error(error);
+    return down;
 }
 
-std::string tun_interface::ipv4(std::error_code& error)
+void tun_interface::up() const
 {
-    assert(!error);
-    struct ifreq ifr = read_interface(m_socket, m_device_name, SIOCGIFADDR, error);
-    if (error)
-    {
-        return "";
-    }
+    assert(m_impl);
 
-    struct sockaddr_in* addr_in = (struct sockaddr_in*) &ifr.ifr_addr;
-
-    return inet_ntoa(addr_in->sin_addr);
+    std::error_code error;
+    up(error);
+    throw_if_error(error);
 }
-
-void tun_interface::set_ipv4(const std::string& address, std::error_code& error)
+void tun_interface::up(std::error_code& error) const
 {
-    assert(!error);
-    boost::system::error_code ec;
-
-    auto addr = boost::asio::ip::address_v4::from_string(address, ec);
-    if (ec)
-    {
-        error = to_std_error_code(ec);
-        return;
-    }
-    auto mask = boost::asio::ip::address_v4::from_string("255.255.255.0");
-    auto bcast = boost::asio::ip::address_v4::broadcast(addr, mask);
-
-    std::map<int, std::string> addr_config =
-        {
-            {SIOCSIFADDR, addr.to_string()},
-            {SIOCSIFNETMASK, mask.to_string()},
-            {SIOCSIFBRDADDR, bcast.to_string()}
-        };
-
-    struct ifreq ifr = read_interface_info(m_socket, m_device_name, error);
-    if (error)
-    {
-        return;
-    }
-
-    struct sockaddr_in* addr_in = (struct sockaddr_in*) &ifr.ifr_addr;
-
-    addr_in->sin_family = AF_INET;
-
-    for (const auto& kv : addr_config)
-    {
-        const auto& key = kv.first;
-        auto value = kv.second;
-
-        int res = inet_pton(AF_INET, value.c_str(), &addr_in->sin_addr);
-        if (res == 0)
-        {
-            error = std::make_error_code(std::errc::invalid_argument);
-            return;
-        }
-        else if (res < 0)
-        {
-            error = make_error_code(errno);
-            return;
-        }
-
-        if (ioctl(m_socket, key, &ifr) != 0)
-        {
-            error = make_error_code(errno);
-            return;
-        }
-    }
+    assert(m_impl);
+    return m_impl->up(error);
 }
 
+void tun_interface::down() const
+{
+    assert(m_impl);
+
+    std::error_code error;
+    down(error);
+    throw_if_error(error);
+}
+void tun_interface::down(std::error_code& error) const
+{
+    assert(m_impl);
+    return m_impl->down(error);
+}
+
+void tun_interface::set_persistent(std::error_code& error)
+{
+    assert(m_impl);
+    m_impl->set_persistent(error);
+}
+void tun_interface::set_non_persistent(std::error_code& error)
+{
+    assert(m_impl);
+    m_impl->set_non_persistent(error);
+}
+
+void tun_interface::set_persistent()
+{
+    assert(m_impl);
+
+    std::error_code error;
+    m_impl->set_persistent(error);
+    throw_if_error(error);
+}
+void tun_interface::set_non_persistent()
+{
+    assert(m_impl);
+
+    std::error_code error;
+    m_impl->set_non_persistent(error);
+    throw_if_error(error);
+}
+
+uint32_t tun_interface::mtu() const
+{
+    assert(m_impl);
+
+    std::error_code error;
+    uint32_t mtu = m_impl->mtu(error);
+    throw_if_error(error);
+    return mtu;
+}
 uint32_t tun_interface::mtu(std::error_code& error) const
 {
-    assert(!error);
-
-    struct ifreq ifr = read_interface_info(m_socket, m_device_name, error);
-    if (error)
-    {
-        return 0;
-    }
-
-    return ifr.ifr_mtu;
+    assert(m_impl);
+    return m_impl->mtu(error);
 }
 
-void tun_interface::set_mtu(uint32_t mtu, std::error_code& error)
+void tun_interface::set_mtu(uint32_t mtu) const
 {
-    assert(!error);
+    assert(m_impl);
 
-    if (mtu < ETH_HLEN || mtu > 65535)
-    {
-        error = std::make_error_code(std::errc::invalid_argument);
-        return;
-    }
-
-    struct ifreq ifr = read_interface_info(m_socket, m_device_name, error);
-    if (error)
-    {
-        return;
-    }
-
-    ifr.ifr_mtu = mtu;
-
-    if (ioctl(m_socket, SIOCSIFMTU, &ifr) != 0)
-    {
-        error = make_error_code(errno);
-        return;
-    }
+    std::error_code error;
+    set_mtu(mtu, error);
+    throw_if_error(error);
 }
-
-std::string tun_interface::device_name() const
+void tun_interface::set_mtu(uint32_t mtu, std::error_code& error) const
 {
-    return m_device_name;
+    assert(m_impl);
+    m_impl->set_mtu(mtu, error);
 }
 
-// @param buffer the buffer into which the data will be read.
-// Ownership of the buffer is retained by the caller, which must guarantee it
-// remain valid until the callback is called
-// @param callback The callback to be called when the read operation
-// completes. Copies will be made of the handler as required.
-void tun_interface::async_read(
-    uint8_t* data, uint32_t size, io_handler callback)
+void tun_interface::enable_default_route() const
 {
-    m_stream_descriptor.async_read_some(boost::asio::buffer(data, size),
-                                        std::bind(io_handler_proxy,
-                                                  callback,
-                                                  std::placeholders::_1,
-                                                  std::placeholders::_2));
-}
+    assert(m_impl);
 
-void tun_interface::async_write(
-    const uint8_t* data, uint32_t size, io_handler callback)
+    std::error_code error;
+    enable_default_route(error);
+    throw_if_error(error);
+}
+void tun_interface::enable_default_route(std::error_code& error) const
 {
-    boost::asio::async_write(m_stream_descriptor,
-                             boost::asio::buffer(data, size),
-                             std::bind(io_handler_proxy,
-                                       callback,
-                                       std::placeholders::_1,
-                                       std::placeholders::_2));
+    assert(m_impl);
+    m_impl->enable_default_route(error);
 }
 
-void tun_interface::write(
-    const uint8_t* data, uint32_t size, std::error_code& error)
+void tun_interface::disable_default_route() const
 {
-    assert(!error);
+    assert(m_impl);
 
-    boost::system::error_code ec;
-    boost::asio::write(
-        m_stream_descriptor, boost::asio::buffer(data, size), ec);
-    error = to_std_error_code(ec);
+    std::error_code error;
+    disable_default_route(error);
+    throw_if_error(error);
 }
-
-bool tun_interface::is_default_route_enabled()
+void tun_interface::disable_default_route(std::error_code& error) const
 {
-    return m_default_route_enabled;
+    assert(m_impl);
+    m_impl->disable_default_route(error);
 }
 
-void tun_interface::enable_default_route(std::error_code& error)
+bool tun_interface::is_default_route() const
 {
-    assert(!error);
-    struct rtentry route;
-    std::memset(&route, 0, sizeof(route));
+    assert(m_impl);
 
-    char ifname[IFNAMSIZ] = { 0 };
-    m_device_name.copy(ifname, m_device_name.size());
-
-    route.rt_dev = ifname;
-    route.rt_flags = RTF_UP; // | RTF_GATEWAY;
-
-    struct sockaddr_in* gateway = (struct sockaddr_in*) &route.rt_gateway;
-    gateway->sin_family = AF_INET;
-    gateway->sin_addr.s_addr = INADDR_ANY;
-
-    struct sockaddr_in* dest = (struct sockaddr_in*) &route.rt_dst;
-    dest->sin_family = AF_INET;
-    dest->sin_addr.s_addr = INADDR_ANY;
-
-    struct sockaddr_in* mask = (struct sockaddr_in*) &route.rt_genmask;
-    mask->sin_family = AF_INET;
-    mask->sin_addr.s_addr = INADDR_ANY;
-
-    if (ioctl(m_socket, SIOCADDRT, &route) != 0)
-    {
-        error = make_error_code(errno);
-    }
-    m_default_route_enabled = true;
+    std::error_code error;
+    bool is_default = is_default_route(error);
+    throw_if_error(error);
+    return is_default;
 }
-
-void tun_interface::disable_default_route(std::error_code& error)
+bool tun_interface::is_default_route(std::error_code& error) const
 {
-    assert(!error);
-
-    struct rtentry route;
-    std::memset(&route, 0, sizeof(route));
-
-    char ifname[IFNAMSIZ] = { 0 };
-    m_device_name.copy(ifname, m_device_name.size());
-
-    route.rt_dev = ifname;
-    route.rt_flags = RTF_UP | RTF_GATEWAY;
-
-    struct sockaddr_in* gateway = (struct sockaddr_in*) &route.rt_gateway;
-    gateway->sin_family = AF_INET;
-    gateway->sin_addr.s_addr = INADDR_ANY;
-
-    struct sockaddr_in* dest = (struct sockaddr_in*) &route.rt_dst;
-    dest->sin_family = AF_INET;
-    dest->sin_addr.s_addr = INADDR_ANY;
-
-    struct sockaddr_in* mask = (struct sockaddr_in*) &route.rt_genmask;
-    mask->sin_family = AF_INET;
-    mask->sin_addr.s_addr = INADDR_ANY;
-
-    if (ioctl(m_socket, SIOCDELRT, &route) != 0)
-    {
-        error = make_error_code(errno);
-    }
-    m_default_route_enabled = false;
+    assert(m_impl);
+    return m_impl->is_default_route(error);
 }
+
+std::string tun_interface::ipv4() const
+{
+    assert(m_impl);
+
+    std::error_code error;
+    std::string ip = ipv4(error);
+    throw_if_error(error);
+    return ip;
+}
+
+std::string tun_interface::ipv4(std::error_code& error) const
+{
+    assert(m_impl);
+    return m_impl->ipv4(error);
+}
+
+std::string tun_interface::ipv4_netmask() const
+{
+    assert(m_impl);
+
+    std::error_code error;
+    std::string ip = ipv4_netmask(error);
+    throw_if_error(error);
+    return ip;
+}
+
+std::string tun_interface::ipv4_netmask(std::error_code& error) const
+{
+    assert(m_impl);
+    return m_impl->ipv4_netmask(error);
+}
+
+void tun_interface::set_ipv4(const std::string& ip) const
+{
+    assert(m_impl);
+
+    std::error_code error;
+    set_ipv4(ip, error);
+    throw_if_error(error);
+}
+void tun_interface::set_ipv4(const std::string& ip,
+                             std::error_code& error) const
+{
+    assert(m_impl);
+    m_impl->set_ipv4(ip, error);
+}
+
+void tun_interface::set_ipv4_netmask(const std::string& mask) const
+{
+    assert(m_impl);
+
+    std::error_code error;
+    set_ipv4_netmask(mask, error);
+    throw_if_error(error);
+}
+
+void tun_interface::set_ipv4_netmask(const std::string& mask,
+                                     std::error_code& error) const
+{
+    assert(m_impl);
+    m_impl->set_ipv4_netmask(mask, error);
+}
+
+void tun_interface::disable_log_stdout()
+{
+    assert(m_impl);
+    m_impl->disable_log_stdout();
+}
+
+void tun_interface::enable_log_stdout()
+{
+    assert(m_impl);
+    m_impl->enable_log_stdout();
+}
+
+bool tun_interface::is_log_enabled() const
+{
+    assert(m_impl);
+    return m_impl->is_log_enabled();
+}
+
+int tun_interface::native_handle() const
+{
+    assert(m_impl);
+    return m_impl->native_handle();
+}
+
 }

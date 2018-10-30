@@ -6,6 +6,9 @@ every change, see the Git log.
 
 Latest
 ------
+* Major: Refactor project with an all new API.
+* Major: Removed external boost dependency.
+* Major: Added platform dependency.
 
 3.0.0
 -----

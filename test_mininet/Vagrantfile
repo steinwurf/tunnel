@@ -1,0 +1,70 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+$mininet = <<SCRIPT
+  echo "mininet"
+  sudo apt-get update
+  git clone git://github.com/mininet/mininet
+  pushd mininet
+  git checkout 2.2.2
+  echo "Patching util/install.sh to use iproute2 instead of iproute"
+  sed -i 's/iproute /iproute2 /g' util/install.sh
+  touch here
+  ./util/install.sh -fnv > install.log 2>&1
+  touch here_too
+  popd
+SCRIPT
+
+$iperf = <<SCRIPT
+  echo "iperf"
+  sudo apt-get install -y iperf3
+SCRIPT
+
+$pip = <<SCRIPT
+  echo "pip"
+  sudo apt-get update
+  sudo apt-get install -y python-pip
+SCRIPT
+
+$mininet_test = <<SCRIPT
+  echo "mininet-test"
+  sudo pip install git+https://github.com/steinwurf/mininet-test.git@1c3620e
+SCRIPT
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "generic/ubuntu1804"
+
+  config.vm.provider "virtualbox" do |v|
+      v.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
+      v.customize ["modifyvm", :id, "--memory", "2048"]
+  end
+
+  ## Provisioning
+  config.vm.provision "mininet",
+    type: "shell",
+    preserve_order: true,
+    privileged: false,
+    inline: $mininet
+
+  config.vm.provision "iperf",
+    type: "shell",
+    preserve_order: true,
+    privileged: false,
+    inline: $iperf
+
+  config.vm.provision "pip",
+    type: "shell",
+    preserve_order: true,
+    privileged: false,
+    inline: $pip
+
+  config.vm.provision "mininet_test",
+    type: "shell",
+    preserve_order: true,
+    privileged: false,
+    inline: $mininet_test
+
+  ## SSH config
+  config.ssh.forward_x11 = false
+
+end
