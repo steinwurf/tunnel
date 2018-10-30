@@ -6,6 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+4.0.0
+-----
 * Major: Refactor project with an all new API.
 * Major: Removed external boost dependency.
 * Major: Added platform dependency.
