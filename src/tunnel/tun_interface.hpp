@@ -7,96 +7,140 @@
 
 #pragma once
 
-// Linux TUN/TAP includes
-#include <net/if.h>
-#include <net/route.h>
-#include <linux/if_tun.h>
-#include <sys/ioctl.h>
-
-// POSIX
-#include <fcntl.h>      // O_RDWR
-#include <unistd.h>     // open(), close()
-
-#include <string>
 #include <memory>
-#include <functional>
+#include <string>
 #include <system_error>
-
-#include <boost/asio.hpp>
 
 namespace tunnel
 {
 class tun_interface
 {
 public:
+    /// Constructor
+    tun_interface();
+    tun_interface(tun_interface&&);
+    tun_interface& operator=(tun_interface&&);
 
-    static std::unique_ptr<tun_interface> make_tun_interface(
-        boost::asio::io_service& io,
-        const std::string& wanted_device_name,
-        std::error_code& error);
-
-public:
-
-    using io_handler = std::function<void(const std::error_code&,uint32_t)>;
-
-    // constructor
-    tun_interface(boost::asio::io_service& io,
-                  int file_descriptor,
-                  const std::string& device_name);
-
+    /// Destructor
     ~tun_interface();
 
+    /// Create the interface
+    void create();
+    void create(std::error_code& error);
 
-    std::string ipv4(std::error_code& error);
-    void set_ipv4(const std::string& address, std::error_code& error);
+    /// Create the interface with the specified name
+    void create(const std::string& interface_name);
+    void create(const std::string& interface_name, std::error_code& error);
 
-    uint32_t mtu(std::error_code& error) const;
-    void set_mtu(uint32_t mtu, std::error_code& error);
+    /// Rename the interface
+    void rename(const std::string& interface_name) const;
+    void rename(const std::string& interface_name, std::error_code& error) const;
 
+    /// Set the owner of the interface
+    void set_owner(const std::string& owner) const;
+    void set_owner(const std::string& owner, std::error_code& error) const;
+
+    /// Set the group the interface belongs to
+    void set_group(const std::string& group) const;
+    void set_group(const std::string& group, std::error_code& error) const;
+
+    /// @return The owner of the interface or an empty string if no
+    ///         is specified.
+    std::string owner() const;
+    std::string owner(std::error_code& error) const;
+
+    /// @return The group of the interface belongs to or an empty
+    ///         string if no group is specified.
+    std::string group() const;
+    std::string group(std::error_code& error) const;
+
+    /// @return The interface name
+    std::string interface_name() const;
+    std::string interface_name(std::error_code& error) const;
+
+    /// @return The native file descriptor of the TUN interface. This
+    ///         can be used for reading and writing data to and from
+    ///         the interface.
+    int native_handle() const;
+
+    /// @return True if the interface is up
+    bool is_up() const;
     bool is_up(std::error_code& error) const;
-    void up(std::error_code& error);
 
+    /// Set the interface up
+    void up() const;
+    void up(std::error_code& error) const;
+
+    /// @return True if the interface is down
+    bool is_down() const;
     bool is_down(std::error_code& error) const;
-    void down(std::error_code& error);
 
-    std::string device_name() const;
+    /// Set the interface down
+    void down() const;
+    void down(std::error_code& error) const;
 
-    // Read buffers / packets sent to this interface from the kernel.
-    // That is, "outbound traffic".
-    void async_read(uint8_t* data, uint32_t size, io_handler callback);
+    /// @return true if the interface is persistent
+    bool is_persistent() const;
+    bool is_persistent(std::error_code& error) const;
 
-    // Write buffers / packets to the kernel from this interface.
-    // That is, "inbound traffic".
-    void async_write(const uint8_t* data, uint32_t size, io_handler callback);
+    /// Change the persistent status - if persistent the interface
+    /// will not disappear when the application closes.
+    void set_persistent();
+    void set_persistent(std::error_code& error);
 
-    // Write buffers / packets to the kernel from this interface.
-    // That is, "inbound traffic".
-    void write(const uint8_t* data, uint32_t size, std::error_code& error);
+    /// Set the interface non persistant i.e. the interface will only
+    /// be around for as long as the application keeps it alive.
+    void set_non_persistent();
+    void set_non_persistent(std::error_code& error);
 
-    // Enable default route for this interface
-    void enable_default_route(std::error_code& error);
+    /// @return The MTU (Maximum Transfer Unit) of the interface
+    uint32_t mtu() const;
+    uint32_t mtu(std::error_code& error) const;
 
-    // Disable default route for this interface
-    void disable_default_route(std::error_code& error);
+    /// Set the MTU (Maximum Transfer Unit) of the interface
+    void set_mtu(uint32_t mtu) const;
+    void set_mtu(uint32_t mtu, std::error_code& error) const;
 
-    // Returns true if default route is enabled for this interface
-    bool is_default_route_enabled();
+    /// Check if the interface is the default route
+    bool is_default_route() const;
+    bool is_default_route(std::error_code& error) const;
+
+    /// Enable default route for this interface
+    void enable_default_route() const;
+    void enable_default_route(std::error_code& error) const;
+
+    /// Disable default route for this interface
+    void disable_default_route() const;
+    void disable_default_route(std::error_code& error) const;
+
+    /// @return The IPv4 address for the interface
+    std::string ipv4() const;
+    std::string ipv4(std::error_code& error) const;
+
+    /// @return The IPv4 netmask of the interface
+    std::string ipv4_netmask() const;
+    std::string ipv4_netmask(std::error_code& error) const;
+
+    /// Set the IPv4 address of the interface.
+    void set_ipv4(const std::string& ip) const;
+    void set_ipv4(const std::string& ip, std::error_code& error) const;
+
+    /// Set the IPv4 netmask
+    void set_ipv4_netmask(const std::string& mask) const;
+    void set_ipv4_netmask(const std::string& mask,
+                          std::error_code& error) const;
+
+    /// Enable printing log information to stdout
+    void enable_log_stdout();
+
+    /// Disable printing log information to stdout
+    void disable_log_stdout();
+
+    /// Check if printing log information to stdout
+    bool is_log_enabled() const;
 
 private:
-
-    // The dev name
-    const std::string m_device_name;
-
-    // Internal kernel socket used for ioctl calls
-    const int m_socket;
-
-    // The tun device file descriptor
-    const int m_file_descriptor = -1;
-
-    // The tun file descriptor stream descriptor
-    boost::asio::posix::stream_descriptor m_stream_descriptor;
-
-    // Determines whether this interface is to be used as the default route.
-    bool m_default_route_enabled;
+    struct impl;
+    std::unique_ptr<impl> m_impl;
 };
 }

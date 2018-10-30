@@ -17,6 +17,8 @@
 pytest_tmp
 .vagrant
 test/mininet/test_temp
+.pytest_cache
+.vscode
 
 # Compiled Doxygen documentation
 /doxygen/html
@@ -63,3 +65,4 @@ local.properties
 *.log
 *.vcxproj*
 VSProjects
+virtualenv-*

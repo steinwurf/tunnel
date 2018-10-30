@@ -21,7 +21,7 @@ Here is how you use it...
 Route a vlc stream over a tunnel
 --------------------------------
 
-Using the udp_tunnel example located in /exmaples we can do a small test.
+Using the sample_tunnel example located in /examples we can do a small test.
 Two machines that can access each other over a network, and each with the tunnel
 project compiled and vlc installed is needed.
 
@@ -34,11 +34,11 @@ On the server side start a tunnel and a vlc server:
 ::
 
     (as root)
-    ./build/linux/examples/udp_tunnel --local_ip 10.10.0.1 --remote_ip 10.10.0.2 --tunnel_ip 10.0.0.13
+    ./build_current/examples/sample_tunnel --local_ip 10.10.0.1 --remote_ip 10.10.0.2 --tunnel_ip 10.0.0.13
 
-This will create a tun interface "tunwurf" with ip 10.0.0.100, traffic arriving
-from the remote will be routed to the tunwurf inteface, and all traffic sent on
-the tunwurf interface will be routed to the remote ip .
+This will create a tun interface "tun0" with ip 10.0.0.100, traffic arriving
+from the remote will be routed to the tun0 inteface, and all traffic sent on
+the tun0 interface will be routed to the remote ip .
 
 
 if you run ifconfig you should be able to verify that a new interface have been created
@@ -47,7 +47,7 @@ if you run ifconfig you should be able to verify that a new interface have been 
 
     ifconfig
 
-    tunwurf: flags=4305<UP,POINTOPOINT,RUNNING,NOARP,MULTICAST>  mtu 25000
+    tun0: flags=4305<UP,POINTOPOINT,RUNNING,NOARP,MULTICAST>  mtu 25000
         inet 10.0.0.13  netmask 255.255.255.0  destination 10.0.0.13
         inet6 fe80::84e8:aaae:9fdc:6e92  prefixlen 64  scopeid 0x20<link>
         unspec 00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00  txqueuelen 500  (UNSPEC)
@@ -70,7 +70,7 @@ On the Client side open a tunnel and vlc viewer
 ::
 
     (as root)
-    ./build/linux/examples/udp_tunnel  --local_ip 10.10.0.2 --remote_ip 10.10.0.1 --tunnel_ip 10.0.0.42
+    ./build_current/examples/sample_tunnel  --local_ip 10.10.0.2 --remote_ip 10.10.0.1 --tunnel_ip 10.0.0.42
 
     cvlc udp://@10.0.0.42:9915
 
