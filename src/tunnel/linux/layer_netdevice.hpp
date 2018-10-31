@@ -23,8 +23,6 @@ namespace linux
 {
 /// netdevice API:
 /// http://man7.org/linux/man-pages/man7/netdevice.7.html
-///
-/// @todo Make decision about bcast addr.
 template <class Super>
 class layer_netdevice : public Super
 {
