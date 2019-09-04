@@ -1,3 +1,8 @@
+// Copyright (c) 2017 Steinwurf ApS
+// All Rights Reserved
+//
+// Distributed under the "BSD License". See the accompanying LICENSE.rst file.
+
 #include "tun_interface.hpp"
 #include "throw_if_error.hpp"
 

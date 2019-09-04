@@ -1,3 +1,8 @@
+// Copyright (c) 2016 Steinwurf ApS
+// All Rights Reserved
+//
+// Distributed under the "BSD License". See the accompanying LICENSE.rst file.
+
 #ifdef ERROR_TAG
 ERROR_TAG(interface_name_too_long,
           "The interface name is too long, max size is IFNAMSIZ")
