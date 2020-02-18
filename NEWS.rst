@@ -8,6 +8,10 @@ Latest
 ------
 * tbd
 
+4.1.0
+-----
+* Minor: Upgrade to boost 4
+
 4.0.0
 -----
 * Major: Refactor project with an all new API.
