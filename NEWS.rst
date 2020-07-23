@@ -6,7 +6,7 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Patch: Disable OpenWRT platform.
 
 4.1.0
 -----
