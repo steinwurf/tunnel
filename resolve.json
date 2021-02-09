@@ -12,7 +12,7 @@
         "name": "platform",
         "resolver": "git",
         "method": "semver",
-        "major": 3,
+        "major": 4,
         "sources": [
             "github.com/steinwurf/platform.git"
         ]
