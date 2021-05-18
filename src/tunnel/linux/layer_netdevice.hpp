@@ -25,7 +25,6 @@ template <class Super>
 class layer_netdevice : public Super
 {
 public:
-
     void create(const std::string& interface_name, std::error_code& error)
     {
         assert(!error);
@@ -201,7 +200,9 @@ public:
     {
         assert(!error);
 
-        struct rtentry route {};
+        struct rtentry route
+        {
+        };
 
         std::string interface_name = Super::interface_name(error);
 
@@ -235,7 +236,9 @@ public:
     {
         assert(!error);
 
-        struct rtentry route {};
+        struct rtentry route
+        {
+        };
 
         std::string interface_name = Super::interface_name(error);
 
@@ -364,8 +367,10 @@ private:
     struct sockaddr make_sockaddr(const std::string& ip,
                                   std::error_code& error) const
     {
-        struct sockaddr addr {};
-        struct sockaddr_in* addr_in = (struct sockaddr_in*)& addr;
+        struct sockaddr addr
+        {
+        };
+        struct sockaddr_in* addr_in = (struct sockaddr_in*)&addr;
 
         if (::inet_aton(ip.c_str(), &addr_in->sin_addr) < 0)
         {
@@ -380,7 +385,9 @@ private:
 
     struct ifreq make_ifreq(std::error_code& error) const
     {
-        struct ifreq ifr {};
+        struct ifreq ifr
+        {
+        };
 
         const std::string& interface_name = Super::interface_name(error);
 

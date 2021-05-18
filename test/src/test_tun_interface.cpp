@@ -3,8 +3,8 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
-#include <tunnel/tun_interface.hpp>
 #include <gtest/gtest.h>
+#include <tunnel/tun_interface.hpp>
 
 TEST(test_tun_interface, construct_no_su_fail)
 {

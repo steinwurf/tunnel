@@ -32,7 +32,8 @@ public:
 
     /// Rename the interface
     void rename(const std::string& interface_name) const;
-    void rename(const std::string& interface_name, std::error_code& error) const;
+    void rename(const std::string& interface_name,
+                std::error_code& error) const;
 
     /// Set the owner of the interface
     void set_owner(const std::string& owner) const;

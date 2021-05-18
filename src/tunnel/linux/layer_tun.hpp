@@ -47,7 +47,9 @@ struct layer_tun : public Super
         }
 
         // Create the TUN interface
-        struct ifreq ifr {};
+        struct ifreq ifr
+        {
+        };
 
         ifr.ifr_flags = IFF_TUN;
 
@@ -109,7 +111,8 @@ struct layer_tun : public Super
             return;
         }
 
-        Super::ioctl(m_tun_fd, TUNSETOWNER, (void*)(intptr_t)pwd->pw_uid, error);
+        Super::ioctl(m_tun_fd, TUNSETOWNER, (void*)(intptr_t)pwd->pw_uid,
+                     error);
     }
 
     std::string group(std::error_code& error) const
@@ -156,7 +159,8 @@ struct layer_tun : public Super
             return;
         }
 
-        Super::ioctl(m_tun_fd, TUNSETGROUP, (void*)(intptr_t)grp->gr_gid, error);
+        Super::ioctl(m_tun_fd, TUNSETGROUP, (void*)(intptr_t)grp->gr_gid,
+                     error);
     }
 
     bool is_persistent(std::error_code& error) const
@@ -164,7 +168,9 @@ struct layer_tun : public Super
         assert(m_tun_fd);
         assert(!error);
 
-        struct ifreq ifr {};
+        struct ifreq ifr
+        {
+        };
         Super::ioctl(m_tun_fd, TUNGETIFF, (void*)&ifr, error);
 
         return ifr.ifr_flags & IFF_PERSIST;
@@ -191,7 +197,9 @@ struct layer_tun : public Super
         assert(m_tun_fd);
         assert(!error);
 
-        struct ifreq ifr {};
+        struct ifreq ifr
+        {
+        };
         Super::ioctl(m_tun_fd, TUNGETIFF, (void*)&ifr, error);
 
         return ifr.ifr_name;

@@ -69,7 +69,6 @@ template <class Super>
 class layer_netlink_v4 : public Super
 {
 public:
-
     void create(const std::string& interface_name, std::error_code& error)
     {
         assert(!error);
@@ -93,7 +92,9 @@ public:
             return;
         }
 
-        struct sockaddr_nl sa {};
+        struct sockaddr_nl sa
+        {
+        };
 
         sa.nl_family = AF_NETLINK;
         sa.nl_pid = m_netlink_port;
@@ -103,7 +104,9 @@ public:
 
     bool is_default_route(std::error_code& error)
     {
-        struct rtmsg payload {};
+        struct rtmsg payload
+        {
+        };
 
         // http://man7.org/linux/man-pages/man7/rtnetlink.7.html
         payload.rtm_family = AF_INET;
@@ -135,7 +138,6 @@ public:
     }
 
 private:
-
     void send_netlink(int type, int flags, const void* data, uint32_t size,
                       std::error_code& error)
     {
@@ -272,8 +274,7 @@ private:
                              " error=", error);
 
             // Filter out messages not for us
-        }
-        while ((pid_t)header->nlmsg_pid != m_netlink_port);
+        } while ((pid_t)header->nlmsg_pid != m_netlink_port);
 
         return message;
     }

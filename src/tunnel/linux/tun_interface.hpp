@@ -15,7 +15,6 @@
 #include <linux/if.h>
 #include <linux/if_tun.h>
 
-
 #include "error.hpp"
 #include "layer_linux.hpp"
 #include "layer_log.hpp"
