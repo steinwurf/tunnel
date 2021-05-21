@@ -12,9 +12,13 @@
 #include <sys/socket.h>
 
 #include <fcntl.h>
-#include <linux/if.h>
 #include <linux/if_tun.h>
 
+// clang-format off
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <linux/if.h>
+// clang-format on
 
 #include "error.hpp"
 #include "layer_linux.hpp"

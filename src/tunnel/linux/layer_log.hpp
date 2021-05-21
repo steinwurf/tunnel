@@ -42,7 +42,7 @@ public:
         }
 
         std::string result;
-        int unpack[] {0, (result += detail::to_string(args), 0)...};
+        int unpack[]{0, (result += detail::to_string(args), 0)...};
         (void)unpack;
         std::cout << result << std::endl;
     }

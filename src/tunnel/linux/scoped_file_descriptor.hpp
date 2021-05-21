@@ -20,8 +20,7 @@ class scoped_file_descriptor
 public:
     /// Default constructor for a non-owning scoped_file_descriptor
     /// i.e. it will not do anything when going out of scope.
-    scoped_file_descriptor() :
-        m_file_descriptor(-1)
+    scoped_file_descriptor() : m_file_descriptor(-1)
     {
     }
 

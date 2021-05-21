@@ -6,13 +6,28 @@
 #pragma once
 
 #include <cstdint>
+#include <sstream>
 #include <system_error>
+#include <vector>
 
+#include <fcntl.h>
 #include <grp.h>
+
+#include <sys/socket.h>
+#include <sys/types.h>
+
+// clang-format off
+#include <sys/socket.h>
+#include <sys/types.h>
 #include <linux/if.h>
+// clang-format on
+
 #include <linux/if_tun.h>
 #include <pwd.h>
 #include <sys/ioctl.h>
+
+#include "error.hpp"
+#include "scoped_file_descriptor.hpp"
 
 namespace tunnel
 {
@@ -47,7 +62,9 @@ struct layer_tun : public Super
         }
 
         // Create the TUN interface
-        struct ifreq ifr {};
+        struct ifreq ifr
+        {
+        };
 
         ifr.ifr_flags = IFF_TUN;
 
@@ -109,7 +126,8 @@ struct layer_tun : public Super
             return;
         }
 
-        Super::ioctl(m_tun_fd, TUNSETOWNER, (void*)(intptr_t)pwd->pw_uid, error);
+        Super::ioctl(m_tun_fd, TUNSETOWNER, (void*)(intptr_t)pwd->pw_uid,
+                     error);
     }
 
     std::string group(std::error_code& error) const
@@ -156,7 +174,8 @@ struct layer_tun : public Super
             return;
         }
 
-        Super::ioctl(m_tun_fd, TUNSETGROUP, (void*)(intptr_t)grp->gr_gid, error);
+        Super::ioctl(m_tun_fd, TUNSETGROUP, (void*)(intptr_t)grp->gr_gid,
+                     error);
     }
 
     bool is_persistent(std::error_code& error) const
@@ -164,7 +183,9 @@ struct layer_tun : public Super
         assert(m_tun_fd);
         assert(!error);
 
-        struct ifreq ifr {};
+        struct ifreq ifr
+        {
+        };
         Super::ioctl(m_tun_fd, TUNGETIFF, (void*)&ifr, error);
 
         return ifr.ifr_flags & IFF_PERSIST;
@@ -191,7 +212,9 @@ struct layer_tun : public Super
         assert(m_tun_fd);
         assert(!error);
 
-        struct ifreq ifr {};
+        struct ifreq ifr
+        {
+        };
         Super::ioctl(m_tun_fd, TUNGETIFF, (void*)&ifr, error);
 
         return ifr.ifr_name;
