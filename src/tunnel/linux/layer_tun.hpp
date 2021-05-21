@@ -12,7 +12,16 @@
 
 #include <fcntl.h>
 #include <grp.h>
+
+#include <sys/socket.h>
+#include <sys/types.h>
+
+// clang-format off
+#include <sys/socket.h>
+#include <sys/types.h>
 #include <linux/if.h>
+// clang-format on
+
 #include <linux/if_tun.h>
 #include <pwd.h>
 #include <sys/ioctl.h>
