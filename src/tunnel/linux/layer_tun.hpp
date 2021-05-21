@@ -6,13 +6,19 @@
 #pragma once
 
 #include <cstdint>
+#include <sstream>
 #include <system_error>
+#include <vector>
 
+#include <fcntl.h>
 #include <grp.h>
 #include <linux/if.h>
 #include <linux/if_tun.h>
 #include <pwd.h>
 #include <sys/ioctl.h>
+
+#include "error.hpp"
+#include "scoped_file_descriptor.hpp"
 
 namespace tunnel
 {

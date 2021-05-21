@@ -27,9 +27,11 @@
 #include <system_error>
 #include <unistd.h>
 #include <vector>
+#include <cstring>
 
 #include "detail/if_nametoindex.hpp"
 #include "error.hpp"
+#include "scoped_file_descriptor.hpp"
 
 namespace tunnel
 {

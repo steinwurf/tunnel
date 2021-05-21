@@ -8,12 +8,14 @@
 #include <arpa/inet.h>
 #include <cstdint>
 #include <iostream>
+#include <linux/if_ether.h>
 #include <linux/route.h>
 #include <netinet/ip.h>
 #include <sys/ioctl.h>
 #include <system_error>
 
 #include "error.hpp"
+#include "scoped_file_descriptor.hpp"
 
 namespace tunnel
 {
