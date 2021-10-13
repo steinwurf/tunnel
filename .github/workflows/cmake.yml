@@ -3,11 +3,7 @@ on: [push, pull_request]
 jobs:
   # CMake build
   cmake_build:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [linux]
-    runs-on: [ self-hosted, '${{ matrix.os }}', 'cmake' ]
+    runs-on: [ self-hosted, 'linux', 'cmake' ]
     name: ${{ matrix.os }}
     steps:
       - name: Checkout
