@@ -68,6 +68,15 @@ struct layer_tun : public Super
 
         ifr.ifr_flags = IFF_TUN;
 
+        // Do not prepend a protocol information header.
+        //
+        // *Without* the IFF_NO_PI flag, the driver will send the following;
+        // two bytes of flags, two bytes of protocol type, and then the actual
+        // network packet.
+        // Since the first two values are largely redundant, most applications
+        // will probably want to set this flag, hence we do so here.
+        ifr.ifr_flags |= IFF_NO_PI;
+
         if (!interface_name.empty())
         {
             // If a device name was specified, put it in the structure;
