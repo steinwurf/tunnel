@@ -6,6 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+6.0.0
+-----
 * Major: Do not prepend a protocol information header, i.e.,
   add the IFF_NO_PI flag.
 
