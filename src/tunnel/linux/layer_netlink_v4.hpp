@@ -19,7 +19,6 @@
 #include <linux/rtnetlink.h>
 // clang-format on
 
-#include <netinet/ether.h>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
