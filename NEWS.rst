@@ -6,7 +6,8 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Patch: Removed check for OpenWRT as the library seems to compile with OpenWRT 21.02.0
+* Patch: Removed an unnecessary header include causing redefinition of struct ethhdr
 
 6.0.0
 -----

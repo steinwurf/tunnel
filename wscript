@@ -47,10 +47,6 @@ def build(bld):
     if not bld.is_mkspec_platform('linux'):
         return
 
-    # This library doesn't work with openwrt
-    if 'openwrt' in bld.env['CXX_NAME']:
-        return;
-
     bld.stlib(
         features='cxx',
         source=bld.path.ant_glob('src/**/*.cpp'),
