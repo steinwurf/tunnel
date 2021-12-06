@@ -1,20 +1,18 @@
 name: No Assertions
-on: [push, pull_request]
+on:
+  workflow_dispatch:
+    inputs:
+      extra_resolve_options:
+        description: "Extra Resolve Options"
+        required: false
+  schedule:
+    - cron: "0 1 * * *" # 3 AM CET
+  push:
+  pull_request:
 jobs:
-  # NDEBUG compilation
   ndebug:
     name: No Assertions
-    runs-on: [ self-hosted, linux ]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Configure
-        env:
-          GIT_SSH_COMMAND: "${{ runner.os != 'Linux' && 'ssh' || 'ssh -i /home/buildbot/.ssh/id_ed25519 -o IdentitiesOnly=yes' }}"
-        run: python3 waf configure --cxx_nodebug --git_protocol=git@
-      - name: Build
-        run: |
-          echo "::add-matcher::.github/gcc-problem-matcher.json"
-          python3 waf
-      - name: Test
-        run: python3 waf --run_tests
+    uses: steinwurf/nodebug-action/.github/workflows/action.yml@2.0.0
+    with:
+      extra_resolve_options: ${{ github.event.inputs.extra_resolve_options }}
+
