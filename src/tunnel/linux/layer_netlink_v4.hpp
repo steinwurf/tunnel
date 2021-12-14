@@ -19,6 +19,7 @@
 #include <linux/rtnetlink.h>
 // clang-format on
 
+#include <cstring>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +30,6 @@
 #include <system_error>
 #include <unistd.h>
 #include <vector>
-#include <cstring>
 
 #include "detail/if_nametoindex.hpp"
 #include "error.hpp"
