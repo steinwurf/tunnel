@@ -2,6 +2,26 @@
 tunnel
 ======
 
+|Waf| |CMake| |No Assertions| |Valgrind| |Clang Format| |Cppcheck|
+
+.. |Waf| image:: https://github.com/steinwurf/tunnel/actions/workflows/linux_mkspecs.yml/badge.svg
+   :target: https://github.com/steinwurf/tunnel/actions/workflows/linux_mkspecs.yml
+
+.. |CMake| image:: https://github.com/steinwurf/tunnel/actions/workflows/linux_cmake.yml/badge.svg
+    :target: https://github.com/steinwurf/tunnel/actions/workflows/linux_cmake.yml
+
+.. |No Assertions| image:: https://github.com/steinwurf/tunnel/actions/workflows/nodebug.yml/badge.svg
+      :target: https://github.com/steinwurf/tunnel/actions/workflows/nodebug.yml
+
+.. |Valgrind| image:: https://github.com/steinwurf/tunnel/actions/workflows/valgrind.yml/badge.svg
+      :target: https://github.com/steinwurf/tunnel/actions/workflows/valgrind.yml
+
+.. |Clang Format| image:: https://github.com/steinwurf/tunnel/actions/workflows/clang-format.yml/badge.svg
+      :target: https://github.com/steinwurf/tunnel/actions/workflows/clang-format.yml
+
+.. |Cppcheck| image:: https://github.com/steinwurf/tunnel/actions/workflows/cppcheck.yml/badge.svg
+      :target: https://github.com/steinwurf/tunnel/actions/workflows/cppcheck.yml
+
 The tunnel lib allow you to create an manipulate a tun interfaces on Linux.
 A tun interface is essentially a virtual network interface on the IP (layer 3).
 
