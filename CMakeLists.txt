@@ -2,16 +2,19 @@ cmake_minimum_required(VERSION 3.12)
 project(tunnel)
 
 find_package(Python COMPONENTS Interpreter)
+
 # Use waf to resolve dependencies
 if(NOT DEFINED STEINWURF_RESOLVE)
     message(STATUS "Resolving dependencies...")
     execute_process(
-            COMMAND ${Python_EXECUTABLE} waf resolve ${STEINWURF_RESOLVE_OPTIONS}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-            RESULT_VARIABLE STATUS)
+        COMMAND ${Python_EXECUTABLE} waf resolve ${STEINWURF_RESOLVE_OPTIONS}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        RESULT_VARIABLE STATUS)
+
     if(STATUS AND NOT STATUS EQUAL 0)
         message(FATAL_ERROR "Failed: ${STATUS}")
     endif()
+
     set(STEINWURF_RESOLVE "${CMAKE_CURRENT_SOURCE_DIR}/resolve_symlinks")
     set(STEINWURF_TOP_NAME tunnel)
 endif()
@@ -19,6 +22,11 @@ endif()
 # platform dependency
 if(NOT TARGET steinwurf::platform)
     add_subdirectory("${STEINWURF_RESOLVE}/platform" platform EXCLUDE_FROM_ALL)
+endif()
+
+if(NOT MSVC)
+    # Prevent the compiler from adding a "linux" define
+    add_compile_options(-std=c++14)
 endif()
 
 # Define library
@@ -37,7 +45,7 @@ else()
 
     # Add this library to a global list of steinwurf object libraries
     set_property(GLOBAL APPEND PROPERTY steinwurf::object_libraries
-            steinwurf::tunnel)
+        steinwurf::tunnel)
 endif()
 
 # Link header only dependencies
@@ -47,17 +55,15 @@ target_link_libraries(tunnel PRIVATE platform)
 target_include_directories(tunnel INTERFACE src)
 
 # Set properties
-set_target_properties(tunnel PROPERTIES
-        CXX_STANDARD 14
-        CXX_EXTENSIONS OFF)
+target_compile_features(tunnel PUBLIC cxx_std_14)
 
 # Add alias for tunnel
 add_library(steinwurf::tunnel ALIAS tunnel)
 
 # Install headers excluding "detail" as these are internal to the library.
 install(
-        DIRECTORY ./src/tunnel
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/include
-        FILES_MATCHING
-        PATTERN *.hpp
-        PATTERN ./src/tunnel/detail EXCLUDE)
+    DIRECTORY ./src/tunnel
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/include
+    FILES_MATCHING
+    PATTERN *.hpp
+    PATTERN ./src/tunnel/detail EXCLUDE)
