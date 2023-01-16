@@ -19,7 +19,7 @@
 
 namespace tunnel
 {
-namespace linux
+namespace platform_linux
 {
 /// netdevice API:
 /// http://man7.org/linux/man-pages/man7/netdevice.7.html

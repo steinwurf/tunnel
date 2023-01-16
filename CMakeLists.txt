@@ -24,11 +24,6 @@ if(NOT TARGET steinwurf::platform)
     add_subdirectory("${STEINWURF_RESOLVE}/platform" platform EXCLUDE_FROM_ALL)
 endif()
 
-if(NOT MSVC)
-    # Prevent the compiler from adding a "linux" define
-    add_compile_options(-std=c++14)
-endif()
-
 # Define library
 file(GLOB_RECURSE tunnel_sources ./src/*.cpp)
 

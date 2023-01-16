@@ -17,7 +17,7 @@
 
 namespace tunnel
 {
-namespace linux
+namespace platform_linux
 {
 /// Opens the TUN driver and a socket for configuring the
 /// TUN device.

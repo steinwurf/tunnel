@@ -8,7 +8,7 @@
 
 namespace tunnel
 {
-namespace linux
+namespace platform_linux
 {
 
 enum class linux_error

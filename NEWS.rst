@@ -6,7 +6,8 @@ every change, see the Git log.
 
 Latest
 ------
-tbd
+* Patch: Renamed namespace `linux` to `platform_linux` to avoid conflicts with
+  `linux` define set by gcc and clang.
 
 6.0.1
 ------

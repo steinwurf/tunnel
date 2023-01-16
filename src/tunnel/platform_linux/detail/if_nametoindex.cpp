@@ -10,7 +10,7 @@
 
 namespace tunnel
 {
-namespace linux
+namespace platform_linux
 {
 namespace detail
 {

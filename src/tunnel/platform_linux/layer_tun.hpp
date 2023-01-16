@@ -31,7 +31,7 @@
 
 namespace tunnel
 {
-namespace linux
+namespace platform_linux
 {
 
 template <class Super>

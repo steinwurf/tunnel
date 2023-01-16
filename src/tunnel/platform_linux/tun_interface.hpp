@@ -31,7 +31,7 @@
 
 namespace tunnel
 {
-namespace linux
+namespace platform_linux
 {
 /// In Linux you can find the documentation for TUN/TAP devices
 /// here: https://www.kernel.org/doc/Documentation/networking/tuntap.txt

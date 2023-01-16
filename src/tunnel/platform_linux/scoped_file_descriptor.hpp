@@ -10,7 +10,7 @@
 
 namespace tunnel
 {
-namespace linux
+namespace platform_linux
 {
 /// RAII (Resource Allocation Is Initialization) wrapper for a file
 /// descriptor. Ensures that the file descriptor gets closed.

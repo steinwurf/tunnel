@@ -16,17 +16,17 @@
 // for this .cpp files does not include the headers if these
 // #ifdef are active...
 //
-//#ifdef PLATFORM_LINUX
+// #ifdef PLATFORM_LINUX
 
-#include "linux/tun_interface.hpp"
+#include "platform_linux/tun_interface.hpp"
 
-using platform_tun_interface = tunnel::linux::tun_interface;
+using platform_tun_interface = tunnel::platform_linux::tun_interface;
 
-//#else
+// #else
 
-//#error "Not a supported platform"
+// #error "Not a supported platform"
 
-//#endif
+// #endif
 
 namespace tunnel
 {
