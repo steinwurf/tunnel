@@ -466,6 +466,27 @@ tun_interface::tun_interface()
 {
     throw std::runtime_error("Tun interface is not supported on this platform");
 }
+
+tun_interface::tun_interface(const std::string& name)
+{
+    throw std::runtime_error("Tun interface is not supported on this platform");
 }
 
+tun_interface::~tun_interface()
+{
+}
+
+struct tun_interface::impl
+{
+    impl(const std::string& name)
+    {
+        throw std::runtime_error(
+            "Tun interface is not supported on this platform");
+    }
+
+    ~impl()
+    {
+    }
+}
+}
 #endif
