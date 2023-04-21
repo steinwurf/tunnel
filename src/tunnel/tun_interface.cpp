@@ -471,10 +471,10 @@ tun_interface::~tun_interface()
 {
 }
 
-tun_interface::impl::impl()
+struct tun_interface::impl
 {
     throw std::runtime_error("Tun interface is not supported on this platform");
-}
+};
 
 }
 
