@@ -43,6 +43,11 @@ else()
         steinwurf::tunnel)
 endif()
 
+
+if(UNIX AND NOT APPLE)
+    target_compile_definitions(tunnel PRIVATE -DTUNNEL_ENABLE_TUN)
+endif()
+
 # Link header only dependencies
 target_link_libraries(tunnel PRIVATE platform)
 

@@ -3,8 +3,8 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
-#include "tun_interface.hpp"
 #include "throw_if_error.hpp"
+#include "tun_interface.hpp"
 
 #include <cassert>
 
@@ -18,9 +18,26 @@
 //
 // #ifdef PLATFORM_LINUX
 
+#ifdef TUNNEL_ENABLE_TUN
 #include "platform_linux/tun_interface.hpp"
 
 using platform_tun_interface = tunnel::platform_linux::tun_interface;
+
+// #endif
+
+// #ifdef APPLE
+// #include "platform_mac/tun_interface.hpp"
+
+// using platform_tun_interface = tunnel::platform_mac::tun_interface;
+
+// #endif
+
+// #ifdef WIN32
+// #include "platform_windows/tun_interface.hpp"
+
+// using platform_tun_interface = tunnel::platform_windows::tun_interface;
+
+// #endif
 
 // #else
 
@@ -440,3 +457,15 @@ int tun_interface::native_handle() const
 }
 
 }
+
+#else
+
+namespace tunnel
+{
+tun_interface::tun_interface()
+{
+    throw std::runtime_error("Tun interface is not supported on this platform");
+}
+}
+
+#endif
