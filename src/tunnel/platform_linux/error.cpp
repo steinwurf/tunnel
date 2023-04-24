@@ -3,7 +3,7 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
-#include <platform.config.hpp>
+#include <platform/config.hpp>
 
 #ifdef PLATFORM_LINUX
 
