@@ -3,9 +3,9 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
-#include <platform/config.hpp>
+// #include <platform/config.hpp>
 
-#if defined(PLATFORM_LINUX)
+// #if defined(PLATFORM_LINUX)
 
 #include "error.hpp"
 
