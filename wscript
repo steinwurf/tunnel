@@ -48,16 +48,10 @@ def build(bld):
         "DEFINES_STEINWURF_VERSION", 'STEINWURF_TUNNEL_VERSION="{}"'.format(VERSION)
     )
 
-    # Only build for linux platforms
-    defines = []
-    if bld.is_mkspec_platform("linux"):
-        defines.append("TUNNEL_ENABLE_TUN")
-
     bld.stlib(
         features="cxx",
         source=bld.path.ant_glob("src/**/*.cpp"),
         target="tunnel",
-        defines=defines,
         use=["platform_includes"],
         export_includes=["src"],
     )

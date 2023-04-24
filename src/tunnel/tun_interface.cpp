@@ -462,7 +462,7 @@ int tun_interface::native_handle() const
     return m_impl->native_handle();
 }
 
-static auto tun_interface::is_platform_supported() -> bool
+auto tun_interface::is_platform_supported() -> bool
 {
     return platform_tun_interface::is_platform_supported();
 }
