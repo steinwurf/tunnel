@@ -44,6 +44,10 @@ struct tun_interface : public
     layer_linux<
     layer_log>>>>
 {
+    static auto is_platform_supported() -> bool
+    {
+        return true;
+    }
 };
 // clang-format on
 }

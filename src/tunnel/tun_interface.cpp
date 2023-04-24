@@ -18,11 +18,17 @@
 //
 // #ifdef PLATFORM_LINUX
 
-#ifdef TUNNEL_ENABLE_TUN
+#ifdef PLATFORM_LINUX
 #include "platform_linux/tun_interface.hpp"
 
 using platform_tun_interface = tunnel::platform_linux::tun_interface;
 
+#else
+#include "platform_unsupported/tun_interface.hpp"
+
+using platform_tun_interface = tunnel::platform_unsupported::tun_interface;
+
+#endif
 // #endif
 
 // #ifdef APPLE
@@ -456,25 +462,9 @@ int tun_interface::native_handle() const
     return m_impl->native_handle();
 }
 
+static auto tun_interface::is_platform_supported() -> bool
+{
+    return platform_tun_interface::is_platform_supported();
 }
 
-#else
-
-namespace tunnel
-{
-tun_interface::tun_interface()
-{
-    throw std::runtime_error("Tun interface is not supported on this platform");
 }
-
-tun_interface::~tun_interface()
-{
-}
-
-struct tun_interface::impl
-{
-};
-
-}
-
-#endif

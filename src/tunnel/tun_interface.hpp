@@ -138,6 +138,8 @@ public:
     /// Check if printing log information to stdout
     bool is_log_enabled() const;
 
+    static auto is_platform_supported() -> bool;
+
 private:
     struct impl;
     std::unique_ptr<impl> m_impl;
