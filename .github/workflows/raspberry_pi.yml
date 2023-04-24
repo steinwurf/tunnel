@@ -19,4 +19,4 @@ jobs:
       image: ghcr.io/steinwurf/gcc-8.3.0-raspberrypi-armv7:1.0.0
       test_runner: raspberry_pi
       test_binary_name: tunnel_tests
-      test_binary_directory: build/cxx_raspberry_gxx83_armv7
+      test_binary_directory: build/cxx_raspberry_gxx83_armv7/test

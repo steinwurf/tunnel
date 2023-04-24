@@ -3,8 +3,10 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
+// clang-format off
 #include "throw_if_error.hpp"
 #include "tun_interface.hpp"
+// clang-format on
 
 #include <cassert>
 
