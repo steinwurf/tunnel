@@ -56,7 +56,7 @@ def build(bld):
         export_includes=["src"],
     )
 
-    if bld.is_toplevel():
+    if bld.is_toplevel() and bld.is_mkspec_platform("linux"):
 
         # Only build tests when executed from the top-level wscript,
         # i.e. not when included as a dependency
