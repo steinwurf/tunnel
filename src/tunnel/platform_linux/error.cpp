@@ -3,6 +3,10 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
+#include <platform.config.hpp>
+
+#ifdef PLATFORM_LINUX
+
 #include "error.hpp"
 
 #include <cassert>
@@ -51,3 +55,5 @@ std::error_code make_error_code(linux_error error)
 
 }
 }
+
+#endif

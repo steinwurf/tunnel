@@ -3,6 +3,10 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
+#include <platform.config.hpp>
+
+#ifdef PLATFORM_LINUX
+
 #include <cassert>
 #include <cstdint>
 #include <net/if.h>
@@ -28,3 +32,4 @@ std::string if_indextoname(uint32_t index)
 }
 }
 }
+#endif
