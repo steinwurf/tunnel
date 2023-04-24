@@ -5,7 +5,7 @@
 
 #include <platform/config.hpp>
 
-#ifdef PLATFORM_LINUX
+#if defined(PLATFORM_LINUX)
 
 #include "error.hpp"
 

@@ -18,7 +18,7 @@
 //
 // #ifdef PLATFORM_LINUX
 
-#ifdef PLATFORM_LINUX
+#if defined(PLATFORM_LINUX)
 #include "platform_linux/tun_interface.hpp"
 
 using platform_tun_interface = tunnel::platform_linux::tun_interface;
