@@ -24,8 +24,8 @@ namespace platform_linux
 template <class Super>
 struct layer_linux : public Super
 {
-    scoped_file_descriptor open(const std::string& path, int flags,
-                                std::error_code& error) const
+    auto open(const std::string& path, int flags, std::error_code& error) const
+        -> scoped_file_descriptor
     {
         assert(!error);
         assert(!path.empty());
@@ -41,8 +41,8 @@ struct layer_linux : public Super
         return scoped_file_descriptor{fd};
     }
 
-    scoped_file_descriptor socket(int domain, int type, int protocol,
-                                  std::error_code& error) const
+    auto socket(int domain, int type, int protocol,
+                std::error_code& error) const -> scoped_file_descriptor
     {
         assert(!error);
 
@@ -71,8 +71,8 @@ struct layer_linux : public Super
         }
     }
 
-    uint32_t send(const scoped_file_descriptor& fd, void* data, uint32_t size,
-                  int flags, std::error_code& error) const
+    auto send(const scoped_file_descriptor& fd, void* data, uint32_t size,
+              int flags, std::error_code& error) const -> uint32_t
     {
         assert(!error);
         assert(fd);
@@ -90,8 +90,8 @@ struct layer_linux : public Super
         return res;
     }
 
-    uint32_t recv(const scoped_file_descriptor& fd, void* data, uint32_t size,
-                  int flags, std::error_code& error) const
+    auto recv(const scoped_file_descriptor& fd, void* data, uint32_t size,
+              int flags, std::error_code& error) const -> uint32_t
     {
         assert(!error);
         assert(fd);
@@ -109,8 +109,8 @@ struct layer_linux : public Super
         return res;
     }
 
-    int bind(const scoped_file_descriptor& fd, const struct sockaddr* addr,
-             socklen_t addrlen, std::error_code& error)
+    auto bind(const scoped_file_descriptor& fd, const struct sockaddr* addr,
+              socklen_t addrlen, std::error_code& error) -> uint32_t
     {
         assert(!error);
         assert(fd);
@@ -128,8 +128,8 @@ struct layer_linux : public Super
         return res;
     }
 
-    uint32_t size(const scoped_file_descriptor& fd,
-                  std::error_code& error) const
+    auto size(const scoped_file_descriptor& fd, std::error_code& error) const
+        -> uint32_t
     {
         assert(fd);
         assert(!error);
@@ -162,8 +162,8 @@ struct layer_linux : public Super
         return offset;
     }
 
-    uint32_t read(const scoped_file_descriptor& fd, void* buf, uint32_t size,
-                  std::error_code& error) const
+    auto read(const scoped_file_descriptor& fd, void* buf, uint32_t size,
+              std::error_code& error) const -> uint32_t
     {
         assert(fd);
         assert(buf);

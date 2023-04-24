@@ -57,7 +57,7 @@ public:
         m_log = false;
     }
 
-    bool is_log_enabled() const
+    auto is_log_enabled() const -> bool
     {
         return m_log;
     }

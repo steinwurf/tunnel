@@ -14,7 +14,7 @@ namespace platform_linux
 {
 namespace detail
 {
-std::string if_indextoname(uint32_t index);
+auto if_indextoname(uint32_t index) -> std::string;
 }
 }
 }

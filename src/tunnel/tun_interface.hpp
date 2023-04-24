@@ -45,42 +45,42 @@ public:
 
     /// @return The owner of the interface or an empty string if no
     ///         is specified.
-    std::string owner() const;
-    std::string owner(std::error_code& error) const;
+    auto owner() const -> std::string;
+    auto owner(std::error_code& error) const -> std::string;
 
     /// @return The group of the interface belongs to or an empty
     ///         string if no group is specified.
-    std::string group() const;
-    std::string group(std::error_code& error) const;
+    auto group() const -> std::string;
+    auto group(std::error_code& error) const -> std::string;
 
     /// @return The interface name
-    std::string interface_name() const;
-    std::string interface_name(std::error_code& error) const;
+    auto interface_name() const -> std::string;
+    auto interface_name(std::error_code& error) const -> std::string;
 
     /// @return The native file descriptor of the TUN interface. This
     ///         can be used for reading and writing data to and from
     ///         the interface.
-    int native_handle() const;
+    auto native_handle() const -> int;
 
     /// @return True if the interface is up
-    bool is_up() const;
-    bool is_up(std::error_code& error) const;
+    auto is_up() const -> bool;
+    auto is_up(std::error_code& error) const -> bool;
 
     /// Set the interface up
     void up() const;
     void up(std::error_code& error) const;
 
     /// @return True if the interface is down
-    bool is_down() const;
-    bool is_down(std::error_code& error) const;
+    auto is_down() const -> bool;
+    auto is_down(std::error_code& error) const -> bool;
 
     /// Set the interface down
     void down() const;
     void down(std::error_code& error) const;
 
     /// @return true if the interface is persistent
-    bool is_persistent() const;
-    bool is_persistent(std::error_code& error) const;
+    auto is_persistent() const -> bool;
+    auto is_persistent(std::error_code& error) const -> bool;
 
     /// Change the persistent status - if persistent the interface
     /// will not disappear when the application closes.
@@ -93,16 +93,16 @@ public:
     void set_non_persistent(std::error_code& error);
 
     /// @return The MTU (Maximum Transfer Unit) of the interface
-    uint32_t mtu() const;
-    uint32_t mtu(std::error_code& error) const;
+    auto mtu() const -> uint32_t;
+    auto mtu(std::error_code& error) const -> uint32_t;
 
     /// Set the MTU (Maximum Transfer Unit) of the interface
     void set_mtu(uint32_t mtu) const;
     void set_mtu(uint32_t mtu, std::error_code& error) const;
 
     /// Check if the interface is the default route
-    bool is_default_route() const;
-    bool is_default_route(std::error_code& error) const;
+    auto is_default_route() const -> bool;
+    auto is_default_route(std::error_code& error) const -> bool;
 
     /// Enable default route for this interface
     void enable_default_route() const;
@@ -113,12 +113,12 @@ public:
     void disable_default_route(std::error_code& error) const;
 
     /// @return The IPv4 address for the interface
-    std::string ipv4() const;
-    std::string ipv4(std::error_code& error) const;
+    auto ipv4() const -> std::string;
+    auto ipv4(std::error_code& error) const -> std::string;
 
     /// @return The IPv4 netmask of the interface
-    std::string ipv4_netmask() const;
-    std::string ipv4_netmask(std::error_code& error) const;
+    auto ipv4_netmask() const -> std::string;
+    auto ipv4_netmask(std::error_code& error) const -> std::string;
 
     /// Set the IPv4 address of the interface.
     void set_ipv4(const std::string& ip) const;
@@ -136,7 +136,7 @@ public:
     void disable_log_stdout();
 
     /// Check if printing log information to stdout
-    bool is_log_enabled() const;
+    auto is_log_enabled() const -> bool;
 
     static auto is_platform_supported() -> bool;
 

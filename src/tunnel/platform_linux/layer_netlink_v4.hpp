@@ -106,7 +106,7 @@ public:
         Super::bind(m_dev_fd, (struct sockaddr*)&sa, sizeof(sa), error);
     }
 
-    bool is_default_route(std::error_code& error)
+    auto is_default_route(std::error_code& error) -> bool
     {
         struct rtmsg payload
         {
@@ -170,7 +170,7 @@ private:
                          " nlmsg_seq=", header->nlmsg_seq, " error=", error);
     }
 
-    std::string recv_netlink(std::error_code& error)
+    auto recv_netlink(std::error_code& error) -> std::string
     {
         assert(!error);
 
@@ -235,7 +235,7 @@ private:
         return {};
     }
 
-    std::vector<uint8_t> recv_netlink_message(std::error_code& error)
+    auto recv_netlink_message(std::error_code& error) -> std::vector<uint8_t>
     {
         std::vector<uint8_t> message;
 
@@ -283,8 +283,8 @@ private:
         return message;
     }
 
-    std::vector<std::vector<uint8_t>>
-    recv_netlink_messages(std::error_code& error)
+    auto recv_netlink_messages(std::error_code& error)
+        -> std::vector<std::vector<uint8_t>>
     {
         std::vector<std::vector<uint8_t>> messages;
 

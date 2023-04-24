@@ -91,7 +91,7 @@ public:
         }
     }
 
-    bool is_up(std::error_code& error) const
+    auto is_up(std::error_code& error) const -> bool
     {
         assert(!error);
 
@@ -134,7 +134,7 @@ public:
         Super::ioctl(m_dev_fd, SIOCSIFFLAGS, &ifr, error);
     }
 
-    bool is_down(std::error_code& error) const
+    auto is_down(std::error_code& error) const -> bool
     {
         assert(!error);
         return !is_up(error);
@@ -184,7 +184,7 @@ public:
         Super::ioctl(m_dev_fd, SIOCSIFMTU, &ifr, error);
     }
 
-    uint32_t mtu(std::error_code& error) const
+    auto mtu(std::error_code& error) const -> uint32_t
     {
         struct ifreq ifr = make_ifreq(error);
 
@@ -270,7 +270,7 @@ public:
         Super::ioctl(m_dev_fd, SIOCDELRT, &route, error);
     }
 
-    std::string ipv4(std::error_code& error) const
+    auto ipv4(std::error_code& error) const -> std::string
     {
         assert(!error);
 
@@ -293,7 +293,7 @@ public:
         return ::inet_ntoa(addr_in->sin_addr);
     }
 
-    std::string ipv4_netmask(std::error_code& error) const
+    auto ipv4_netmask(std::error_code& error) const -> std::string
     {
         assert(!error);
 
@@ -366,8 +366,8 @@ public:
     }
 
 private:
-    struct sockaddr make_sockaddr(const std::string& ip,
-                                  std::error_code& error) const
+    auto make_sockaddr(const std::string& ip, std::error_code& error) const
+        -> struct sockaddr
     {
         struct sockaddr addr
         {
@@ -385,7 +385,8 @@ private:
         return addr;
     }
 
-    struct ifreq make_ifreq(std::error_code& error) const
+    auto
+    make_ifreq(std::error_code& error) const -> struct ifreq
     {
         struct ifreq ifr
         {
@@ -403,8 +404,7 @@ private:
         return ifr;
     }
 
-private:
-    scoped_file_descriptor m_dev_fd;
+    private : scoped_file_descriptor m_dev_fd;
 };
 }
 }

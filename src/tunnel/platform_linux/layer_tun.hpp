@@ -90,7 +90,7 @@ struct layer_tun : public Super
         Super::write_log("create interface ", ifr.ifr_name, " error=", error);
     }
 
-    std::string owner(std::error_code& error) const
+    auto owner(std::error_code& error) const -> std::string
     {
         assert(!error);
 
@@ -139,7 +139,7 @@ struct layer_tun : public Super
                      error);
     }
 
-    std::string group(std::error_code& error) const
+    auto group(std::error_code& error) const -> std::string
     {
         std::string o = read_property("group", error);
 
@@ -187,7 +187,7 @@ struct layer_tun : public Super
                      error);
     }
 
-    bool is_persistent(std::error_code& error) const
+    auto is_persistent(std::error_code& error) const -> bool
     {
         assert(m_tun_fd);
         assert(!error);
@@ -216,7 +216,7 @@ struct layer_tun : public Super
         Super::ioctl(m_tun_fd, TUNSETPERSIST, (void*)0, error);
     }
 
-    std::string interface_name(std::error_code& error) const
+    auto interface_name(std::error_code& error) const -> std::string
     {
         assert(m_tun_fd);
         assert(!error);
@@ -229,7 +229,7 @@ struct layer_tun : public Super
         return ifr.ifr_name;
     }
 
-    int native_handle() const
+    auto native_handle() const -> int
     {
         assert(m_tun_fd);
 
@@ -237,8 +237,8 @@ struct layer_tun : public Super
     }
 
 private:
-    std::string read_property(const std::string& property,
-                              std::error_code& error) const
+    auto read_property(const std::string& property,
+                       std::error_code& error) const -> std::string
     {
         std::string name = interface_name(error);
 

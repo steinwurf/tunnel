@@ -49,7 +49,7 @@ public:
     ///
     /// @param other Temporary scoped_file_descriptor where we will
     ///              take ownership of the contained file descriptor
-    scoped_file_descriptor& operator=(scoped_file_descriptor&& other)
+    auto operator=(scoped_file_descriptor&& other) -> scoped_file_descriptor&
     {
         m_file_descriptor = other.m_file_descriptor;
         other.m_file_descriptor = -1;
@@ -69,7 +69,7 @@ public:
     }
 
     /// @return The contained "naked" file descriptor.
-    int native_handle() const
+    auto native_handle() const -> int
     {
         assert(m_file_descriptor != -1);
         return m_file_descriptor;
@@ -88,7 +88,8 @@ private:
     /// descriptor.
     scoped_file_descriptor(const scoped_file_descriptor&) = delete;
 
-    scoped_file_descriptor& operator=(const scoped_file_descriptor&) = delete;
+    auto operator=(const scoped_file_descriptor&)
+        -> scoped_file_descriptor& = delete;
 
 private:
     /// The owned file descriptor
