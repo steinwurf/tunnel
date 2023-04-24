@@ -130,17 +130,17 @@ struct tun_interface
         error = std::make_error_code(std::errc::not_supported);
     }
 
-    void disable_log_stdout(std::error_code& error) const
+    void disable_log_stdout() const
     {
         error = std::make_error_code(std::errc::not_supported);
     }
 
-    void enable_log_stdout(std::error_code& error) const
+    void enable_log_stdout() const
     {
         error = std::make_error_code(std::errc::not_supported);
     }
 
-    bool is_log_enabled(std::error_code& error) const
+    bool is_log_enabled() const
     {
         error = std::make_error_code(std::errc::not_supported);
         return false;
