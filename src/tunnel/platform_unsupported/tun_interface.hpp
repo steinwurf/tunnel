@@ -30,6 +30,12 @@ struct tun_interface
         return "";
     }
 
+    std::string group(std::error_code& error) const
+    {
+        error = std::make_error_code(std::errc::not_supported);
+        return "";
+    }
+
     std::string interface_name(std::error_code& error) const
     {
         error = std::make_error_code(std::errc::not_supported);
@@ -68,6 +74,87 @@ struct tun_interface
     {
         error = std::make_error_code(std::errc::not_supported);
     }
-}
+
+    int mtu(std::error_code& error) const
+    {
+        error = std::make_error_code(std::errc::not_supported);
+        return 0;
+    }
+
+    void set_non_persistent(std::error_code& error) const
+    {
+        error = std::make_error_code(std::errc::not_supported);
+    }
+
+    void set_mtu(int mtu, std::error_code& error) const
+    {
+        error = std::make_error_code(std::errc::not_supported);
+    }
+
+    void set_ipv4(const std::string& address, std::error_code& error) const
+    {
+        error = std::make_error_code(std::errc::not_supported);
+    }
+
+    void enable_default_route(std::error_code& error) const
+    {
+        error = std::make_error_code(std::errc::not_supported);
+    }
+
+    void disable_default_route(std::error_code& error) const
+    {
+        error = std::make_error_code(std::errc::not_supported);
+    }
+
+    bool is_default_route(std::error_code& error) const
+    {
+        error = std::make_error_code(std::errc::not_supported);
+        return false;
+    }
+
+    std::string ipv4(std::error_code& error) const
+    {
+        error = std::make_error_code(std::errc::not_supported);
+        return "";
+    }
+
+    std::string ipv4_netmask(std::error_code& error) const
+    {
+        error = std::make_error_code(std::errc::not_supported);
+        return "";
+    }
+
+    void set_ipv4_netmask(const std::string& netmask,
+                          std::error_code& error) const
+    {
+        error = std::make_error_code(std::errc::not_supported);
+    }
+
+    void disable_log_stdout(std::error_code& error) const
+    {
+        error = std::make_error_code(std::errc::not_supported);
+    }
+
+    void enable_log_stdout(std::error_code& error) const
+    {
+        error = std::make_error_code(std::errc::not_supported);
+    }
+
+    bool is_log_enabled(std::error_code& error) const
+    {
+        error = std::make_error_code(std::errc::not_supported);
+        return false;
+    }
+
+    int native_handle() const
+    {
+        return -1;
+    }
+
+    static bool is_platform_supported()
+    {
+        return false;
+    }
+};
 }
 }
