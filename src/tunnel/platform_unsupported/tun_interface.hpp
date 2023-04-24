@@ -132,22 +132,23 @@ struct tun_interface
 
     void disable_log_stdout() const
     {
-        error = std::make_error_code(std::errc::not_supported);
+        throw std::runtime_error("not supported");
     }
 
     void enable_log_stdout() const
     {
-        error = std::make_error_code(std::errc::not_supported);
+        throw std::runtime_error("not supported");
     }
 
     bool is_log_enabled() const
     {
-        error = std::make_error_code(std::errc::not_supported);
+        throw std::runtime_error("not supported");
         return false;
     }
 
     int native_handle() const
     {
+        throw std::runtime_error("not supported");
         return -1;
     }
 
