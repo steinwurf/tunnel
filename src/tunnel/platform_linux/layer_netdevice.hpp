@@ -17,6 +17,9 @@
 #include "error.hpp"
 #include "scoped_file_descriptor.hpp"
 
+#include "../log_kind.hpp"
+#include "../log_level.hpp"
+
 namespace tunnel
 {
 namespace platform_linux
@@ -49,6 +52,8 @@ public:
         if (interface_name.size() > IFNAMSIZ - 1)
         {
             error = make_error_code(linux_error::interface_name_too_long);
+            Super::do_log(log_level::error, log_kind::interface_renamed,
+                          interface_name.c_str(), error.message());
             return;
         }
 
@@ -85,6 +90,9 @@ public:
             return;
         }
 
+        Super::do_log(log_level::state, log_kind::interface_renamed,
+                      interface_name.c_str());
+
         if (iface_up)
         {
             up(error);
@@ -109,7 +117,11 @@ public:
             return false;
         }
 
-        return (ifr.ifr_flags & IFF_UP) != 0;
+        bool is_if_up = (ifr.ifr_flags & IFF_UP) != 0;
+
+        Super::do_log(log_level::state, log_kind::is_up, is_if_up);
+
+        return is_if_up;
     }
 
     void up(std::error_code& error) const
@@ -132,11 +144,14 @@ public:
 
         ifr.ifr_flags |= IFF_UP;
         Super::ioctl(m_dev_fd, SIOCSIFFLAGS, &ifr, error);
+
+        Super::do_log(log_level::state, log_kind::interface_up);
     }
 
     auto is_down(std::error_code& error) const -> bool
     {
         assert(!error);
+        Super::do_log(log_level::state, log_kind::is_down);
         return !is_up(error);
     }
 
@@ -160,6 +175,8 @@ public:
 
         ifr.ifr_flags &= ~IFF_UP;
         Super::ioctl(m_dev_fd, SIOCSIFFLAGS, &ifr, error);
+
+        Super::do_log(log_level::state, log_kind::interface_down);
     }
 
     void set_mtu(uint32_t mtu, std::error_code& error) const
@@ -169,6 +186,8 @@ public:
         if (mtu < ETH_HLEN || mtu > 65535)
         {
             error = make_error_code(linux_error::mtu_too_large);
+            Super::do_log(log_level::error, log_kind::set_mtu, mtu,
+                          error.message());
             return;
         }
 
@@ -182,6 +201,8 @@ public:
         ifr.ifr_mtu = mtu;
 
         Super::ioctl(m_dev_fd, SIOCSIFMTU, &ifr, error);
+
+        Super::do_log(log_level::state, log_kind::set_mtu, mtu);
     }
 
     auto mtu(std::error_code& error) const -> uint32_t
@@ -194,6 +215,8 @@ public:
         }
 
         Super::ioctl(m_dev_fd, SIOCGIFMTU, &ifr, error);
+
+        Super::do_log(log_level::state, log_kind::interface_mtu, ifr.ifr_mtu);
 
         return ifr.ifr_mtu;
     }
@@ -232,6 +255,8 @@ public:
         mask->sin_addr.s_addr = INADDR_ANY;
 
         Super::ioctl(m_dev_fd, SIOCADDRT, &route, error);
+
+        Super::do_log(log_level::state, log_kind::enable_default_route);
     }
 
     void disable_default_route(std::error_code& error) const
@@ -268,6 +293,8 @@ public:
         mask->sin_addr.s_addr = INADDR_ANY;
 
         Super::ioctl(m_dev_fd, SIOCDELRT, &route, error);
+
+        Super::do_log(log_level::state, log_kind::disable_default_route);
     }
 
     auto ipv4(std::error_code& error) const -> std::string
@@ -290,7 +317,11 @@ public:
 
         struct sockaddr_in* addr_in = (struct sockaddr_in*)&ifr.ifr_addr;
 
-        return ::inet_ntoa(addr_in->sin_addr);
+        auto ip = ::inet_ntoa(addr_in->sin_addr);
+
+        Super::do_log(log_level::state, log_kind::interface_ipv4, ip);
+
+        return ip;
     }
 
     auto ipv4_netmask(std::error_code& error) const -> std::string
@@ -313,7 +344,12 @@ public:
 
         struct sockaddr_in* addr_in = (struct sockaddr_in*)&ifr.ifr_addr;
 
-        return ::inet_ntoa(addr_in->sin_addr);
+        auto ip_netmask = ::inet_ntoa(addr_in->sin_addr);
+
+        Super::do_log(log_level::state, log_kind::interface_ipv4_netmask,
+                      ip_netmask);
+
+        return ip_netmask;
     }
 
     void set_ipv4(const std::string& address, std::error_code& error) const
@@ -339,6 +375,8 @@ public:
         ifr.ifr_addr = addr;
 
         Super::ioctl(m_dev_fd, SIOCSIFADDR, &ifr, error);
+
+        Super::do_log(log_level::state, log_kind::set_ipv4, address);
     }
 
     void set_ipv4_netmask(const std::string& netmask,
@@ -363,6 +401,8 @@ public:
         ifr.ifr_netmask = mask;
 
         Super::ioctl(m_dev_fd, SIOCSIFNETMASK, &ifr, error);
+
+        Super::do_log(log_level::state, log_kind::set_ipv4_netmask, netmask);
     }
 
 private:
@@ -377,10 +417,16 @@ private:
         if (::inet_aton(ip.c_str(), &addr_in->sin_addr) < 0)
         {
             error = std::error_code(errno, std::generic_category());
+
+            Super::do_log(log_level::error, log_kind::make_sockaddr, ip,
+                          error.message());
+
             return {};
         }
 
         addr_in->sin_family = AF_INET;
+
+        Super::do_log(log_level::debug, log_kind::make_sockaddr, ip);
 
         return addr;
     }

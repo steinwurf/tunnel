@@ -11,7 +11,6 @@
 int main()
 {
     tunnel::tun_interface iface;
-    iface.enable_log_stdout();
     iface.create("tuniface");
 
     if (iface.is_up())

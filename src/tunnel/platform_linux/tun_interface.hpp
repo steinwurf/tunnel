@@ -22,12 +22,14 @@
 
 #include "error.hpp"
 #include "layer_linux.hpp"
-#include "layer_log.hpp"
 
 #include "layer_netdevice.hpp"
 #include "layer_netlink_v4.hpp"
 #include "layer_tun.hpp"
 #include "scoped_file_descriptor.hpp"
+
+#include "../detail/layer_final.hpp"
+#include "../detail/layer_monitor.hpp"
 
 namespace tunnel
 {
@@ -42,11 +44,17 @@ struct tun_interface : public
     layer_netdevice<
     layer_tun<
     layer_linux<
-    layer_log>>>>
+    tunnel::detail::layer_monitor<
+    tunnel::detail::layer_final<tun_interface>>>>>>
 {
     static auto is_platform_supported() -> bool
     {
         return true;
+    }
+
+    static auto type() -> std::string
+    {
+        return "tunnel::platform_linux::tun_interface";
     }
 };
 // clang-format on

@@ -442,24 +442,6 @@ void tun_interface::set_ipv4_netmask(const std::string& mask,
     m_impl->set_ipv4_netmask(mask, error);
 }
 
-void tun_interface::disable_log_stdout()
-{
-    assert(m_impl);
-    m_impl->disable_log_stdout();
-}
-
-void tun_interface::enable_log_stdout()
-{
-    assert(m_impl);
-    m_impl->enable_log_stdout();
-}
-
-auto tun_interface::is_log_enabled() const -> bool
-{
-    assert(m_impl);
-    return m_impl->is_log_enabled();
-}
-
 auto tun_interface::native_handle() const -> int
 {
     assert(m_impl);

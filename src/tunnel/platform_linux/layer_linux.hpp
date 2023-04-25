@@ -15,6 +15,9 @@
 
 #include "scoped_file_descriptor.hpp"
 
+#include "../log_kind.hpp"
+#include "../log_level.hpp"
+
 namespace tunnel
 {
 namespace platform_linux
@@ -35,8 +38,13 @@ struct layer_linux : public Super
         if (fd < 0)
         {
             error = std::error_code(errno, std::generic_category());
+            Super::do_log(log_level::error, log_kind::open, path.c_str(), flags,
+                          error.message());
             return scoped_file_descriptor{};
         }
+
+        Super::do_log(log_level::debug, log_kind::open, path.c_str(), flags,
+                      fd);
 
         return scoped_file_descriptor{fd};
     }
@@ -51,8 +59,14 @@ struct layer_linux : public Super
         if (fd < 0)
         {
             error = std::error_code(errno, std::generic_category());
+            Super::do_log(log_level::error, log_kind::socket, domain, type,
+                          protocol, error.message());
+
             return scoped_file_descriptor{};
         }
+
+        Super::do_log(log_level::debug, log_kind::socket, domain, type,
+                      protocol, fd);
 
         return scoped_file_descriptor{fd};
     }
@@ -68,7 +82,11 @@ struct layer_linux : public Super
         if (::ioctl(fd.native_handle(), request, arg) == -1)
         {
             error.assign(errno, std::generic_category());
+            Super::do_log(log_level::error, log_kind::ioctl, request,
+                          error.message());
         }
+
+        Super::do_log(log_level::debug, log_kind::ioctl, request, fd);
     }
 
     auto send(const scoped_file_descriptor& fd, void* data, uint32_t size,
@@ -84,8 +102,12 @@ struct layer_linux : public Super
         if (res < 0)
         {
             error = std::error_code(errno, std::generic_category());
+            Super::do_log(log_level::error, log_kind::send, "size=", size,
+                          flags, error.message());
             return 0;
         }
+
+        Super::do_log(log_level::debug, log_kind::send, size, flags, fd, res);
 
         return res;
     }
@@ -103,8 +125,12 @@ struct layer_linux : public Super
         if (res < 0)
         {
             error = std::error_code(errno, std::generic_category());
+            Super::do_log(log_level::error, log_kind::recv, size, flags,
+                          error.message());
             return 0;
         }
+
+        Super::do_log(log_level::debug, log_kind::recv, size, flags, fd, res);
 
         return res;
     }
@@ -122,8 +148,12 @@ struct layer_linux : public Super
         if (res < 0)
         {
             error = std::error_code(errno, std::generic_category());
+            Super::do_log(log_level::error, log_kind::bind, addrlen,
+                          error.message());
             return 0;
         }
+
+        Super::do_log(log_level::debug, log_kind::bind, addrlen, fd, res);
 
         return res;
     }
@@ -139,6 +169,8 @@ struct layer_linux : public Super
         if (current_offset < 0)
         {
             error = std::error_code(errno, std::generic_category());
+            Super::do_log(log_level::error, log_kind::size, current_offset,
+                          error.message());
             return 0;
         }
 
@@ -147,6 +179,8 @@ struct layer_linux : public Super
         if (offset < 0)
         {
             error = std::error_code(errno, std::generic_category());
+            Super::do_log(log_level::error, log_kind::size, offset,
+                          error.message());
             return 0;
         }
 
@@ -156,8 +190,12 @@ struct layer_linux : public Super
         if (set_offset < 0)
         {
             error = std::error_code(errno, std::generic_category());
+            Super::do_log(log_level::error, log_kind::size, set_offset,
+                          error.message());
             return 0;
         }
+
+        Super::do_log(log_level::debug, log_kind::size, offset, fd);
 
         return offset;
     }
@@ -175,8 +213,12 @@ struct layer_linux : public Super
         if (res == -1)
         {
             error = std::error_code(errno, std::generic_category());
+            Super::do_log(log_level::error, log_kind::read, size,
+                          error.message());
             return 0;
         }
+
+        Super::do_log(log_level::debug, log_kind::read, size, fd, res);
 
         return res;
     }

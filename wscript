@@ -52,7 +52,7 @@ def build(bld):
         features="cxx",
         source=bld.path.ant_glob("src/**/*.cpp"),
         target="tunnel",
-        use=["platform_includes"],
+        use=["platform_includes", "poke"],
         export_includes=["src"],
     )
 

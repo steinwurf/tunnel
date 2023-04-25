@@ -24,6 +24,11 @@ if(NOT TARGET steinwurf::platform)
     add_subdirectory("${STEINWURF_RESOLVE}/platform" platform EXCLUDE_FROM_ALL)
 endif()
 
+# poke dependency
+if(NOT TARGET steinwurf::poke)
+    add_subdirectory("${STEINWURF_RESOLVE}/poke" poke EXCLUDE_FROM_ALL)
+endif()
+
 # Define library
 file(GLOB_RECURSE tunnel_sources ./src/*.cpp)
 
@@ -45,6 +50,7 @@ endif()
 
 # Link header only dependencies
 target_link_libraries(tunnel PRIVATE platform)
+target_link_libraries(tunnel PRIVATE poke)
 
 # Set include directories
 target_include_directories(tunnel INTERFACE src)

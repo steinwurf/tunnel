@@ -9,6 +9,8 @@
 #include <string>
 #include <system_error>
 
+#include "monitor.hpp"
+
 namespace tunnel
 {
 class tun_interface
@@ -129,14 +131,9 @@ public:
     void set_ipv4_netmask(const std::string& mask,
                           std::error_code& error) const;
 
-    /// Enable printing log information to stdout
-    void enable_log_stdout();
+    auto monitor() const -> const tunnel::monitor&;
 
-    /// Disable printing log information to stdout
-    void disable_log_stdout();
-
-    /// Check if printing log information to stdout
-    auto is_log_enabled() const -> bool;
+    auto monitor() -> tunnel::monitor&;
 
     static auto is_platform_supported() -> bool;
 
