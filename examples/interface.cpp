@@ -14,7 +14,7 @@ int main()
     { std::cout << message << std::endl; };
 
     tunnel::tun_interface iface;
-    iface.monitor().enable_log(tunnel::log_level::debug, log);
+    iface.monitor().enable_log(tunnel::log_level::state, log);
     iface.create("tuniface");
 
     if (iface.is_up())
