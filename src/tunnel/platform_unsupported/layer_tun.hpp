@@ -13,23 +13,30 @@ class layer_tun : public Super
 public:
     void create(const std::string& interface_name, std::error_code& error)
     {
+        (void)interface_name;
+
         Super::do_log(log_level::error, log_kind::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
     }
     void rename(const std::string& interface_name, std::error_code& error) const
     {
+        (void)interface_name;
+
         Super::do_log(log_level::error, log_kind::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
     }
 
     void set_owner(const std::string& owner, std::error_code& error) const
     {
+        (void)owner;
+
         Super::do_log(log_level::error, log_kind::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
     }
 
     void set_group(const std::string& group, std::error_code& error) const
     {
+        (void)group;
         Super::do_log(log_level::error, log_kind::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
     }
@@ -109,12 +116,14 @@ public:
 
     void set_mtu(int mtu, std::error_code& error) const
     {
+        (void)mtu;
         Super::do_log(log_level::error, log_kind::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
     }
 
     void set_ipv4(const std::string& address, std::error_code& error) const
     {
+        (void)address;
         Super::do_log(log_level::error, log_kind::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
     }
