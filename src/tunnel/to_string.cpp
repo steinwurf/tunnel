@@ -12,6 +12,8 @@ auto to_string(log_kind kind) -> std::string
 {
     switch (kind)
     {
+    case log_kind::initialized:
+        return "initialized";
     case log_kind::interface_created:
         return "interface_created";
     case log_kind::interface_renamed:
@@ -54,6 +56,28 @@ auto to_string(log_kind kind) -> std::string
         return "interface_ipv4_netmask";
     case log_kind::set_ipv4_netmask:
         return "set_ipv4_netmask";
+    case log_kind::make_sockaddr:
+        return "make_sockaddr";
+    case log_kind::send_netlink:
+        return "send_netlink";
+    case log_kind::recv_netlink_message:
+        return "recv_netlink_message";
+    case log_kind::open:
+        return "open";
+    case log_kind::socket:
+        return "socket";
+    case log_kind::ioctl:
+        return "ioctl";
+    case log_kind::send:
+        return "send";
+    case log_kind::recv:
+        return "recv";
+    case log_kind::bind:
+        return "bind";
+    case log_kind::size:
+        return "size";
+    case log_kind::read:
+        return "read";
     case log_kind::unsupported_platform:
         return "unsupported_platform";
     default:

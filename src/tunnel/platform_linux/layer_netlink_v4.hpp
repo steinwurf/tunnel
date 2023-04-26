@@ -31,6 +31,7 @@
 #include <unistd.h>
 #include <vector>
 
+#include "../detail/log.hpp"
 #include "detail/if_nametoindex.hpp"
 #include "error.hpp"
 #include "scoped_file_descriptor.hpp"
@@ -136,8 +137,10 @@ public:
             return false;
         }
 
-        Super::do_log(log_level::state, log_kind::is_default_route,
-                      "is_default_route=", default_interface == tun_interface);
+        Super::do_log(
+            log_level::state, log_kind::is_default_route,
+            tunnel::detail::log::boolean{"is_default_route",
+                                         default_interface == tun_interface});
 
         return default_interface == tun_interface;
     }
@@ -167,9 +170,11 @@ private:
 
         Super::send(m_dev_fd, message.data(), message.size(), 0, error);
 
-        Super::do_log(log_level::debug, log_kind::send_netlink,
-                      "nlmsg_pid=", header->nlmsg_pid,
-                      " nlmsg_seq=", header->nlmsg_seq, " error=", error);
+        Super::do_log(
+            log_level::debug, log_kind::send_netlink,
+            tunnel::detail::log::uinteger{"nlmsg_pid", header->nlmsg_pid},
+            tunnel::detail::log::uinteger{"nlmsg_seq", header->nlmsg_seq},
+            tunnel::detail::log::str{"error", error.message().c_str()});
     }
 
     auto recv_netlink(std::error_code& error) -> std::string
@@ -255,7 +260,7 @@ private:
             }
 
             Super::do_log(log_level::debug, log_kind::recv_netlink_message,
-                          "message received: size=", size);
+                          tunnel::detail::log::uinteger{"size", size});
 
             message.resize(size, 0);
 
@@ -275,11 +280,12 @@ private:
                 return {};
             }
 
-            Super::do_log(log_level::debug, log_kind::recv_netlink_message,
-                          "nlmsg_pid=", header->nlmsg_pid,
-                          ", nlmsg_seq=", header->nlmsg_seq,
-                          ", m_netlink_port=", m_netlink_port,
-                          " error=", error);
+            Super::do_log(
+                log_level::debug, log_kind::recv_netlink_message,
+                tunnel::detail::log::uinteger{"nlmsg_pid", header->nlmsg_pid},
+                tunnel::detail::log::uinteger{"nlmsg_seq", header->nlmsg_seq},
+                tunnel::detail::log::integer{"m_netlink_port", m_netlink_port},
+                tunnel::detail::log::str{"error", error.message().c_str()});
 
             // Filter out messages not for us
         } while ((pid_t)header->nlmsg_pid != m_netlink_port);

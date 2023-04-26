@@ -27,7 +27,7 @@ template <class Super>
 class layer_monitor : public Super
 {
 public:
-    layer_monitor() : m_impl(Super::stack().type())
+    layer_monitor() : m_impl(Super::stack().type(), {})
     {
         m_impl.m_monitor.set_log_initializer(
             [this]() { Super::stack().log_initialize(); });

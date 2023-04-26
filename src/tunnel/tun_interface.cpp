@@ -448,6 +448,18 @@ auto tun_interface::native_handle() const -> int
     return m_impl->native_handle();
 }
 
+auto tun_interface::monitor() const -> const tunnel::monitor&
+{
+    assert(m_impl);
+    return m_impl->monitor();
+}
+
+auto tun_interface::monitor() -> tunnel::monitor&
+{
+    assert(m_impl);
+    return m_impl->monitor();
+}
+
 auto tun_interface::is_platform_supported() -> bool
 {
     return platform_tun_interface::is_platform_supported();

@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <system_error>
 
+#include "../detail/log.hpp"
 #include "scoped_file_descriptor.hpp"
 
 #include "../log_kind.hpp"
@@ -38,13 +39,18 @@ struct layer_linux : public Super
         if (fd < 0)
         {
             error = std::error_code(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::open, path.c_str(), flags,
-                          error.message());
+            Super::do_log(
+                log_level::error, log_kind::open,
+                tunnel::detail::log::str{"path", path.c_str()},
+                tunnel::detail::log::integer{"flags", flags},
+                tunnel::detail::log::str{"error", error.message().c_str()});
             return scoped_file_descriptor{};
         }
 
-        Super::do_log(log_level::debug, log_kind::open, path.c_str(), flags,
-                      fd);
+        Super::do_log(log_level::debug, log_kind::open,
+                      tunnel::detail::log::str{"path", path.c_str()},
+                      tunnel::detail::log::integer{"flags", flags},
+                      tunnel::detail::log::integer{"fd", fd});
 
         return scoped_file_descriptor{fd};
     }
@@ -59,14 +65,21 @@ struct layer_linux : public Super
         if (fd < 0)
         {
             error = std::error_code(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::socket, domain, type,
-                          protocol, error.message());
+            Super::do_log(
+                log_level::error, log_kind::socket,
+                tunnel::detail::log::integer{"domain", domain},
+                tunnel::detail::log::integer{"type", type},
+                tunnel::detail::log::integer{"protocol", protocol},
+                tunnel::detail::log::str{"error", error.message().c_str()});
 
             return scoped_file_descriptor{};
         }
 
-        Super::do_log(log_level::debug, log_kind::socket, domain, type,
-                      protocol, fd);
+        Super::do_log(log_level::debug, log_kind::socket,
+                      tunnel::detail::log::integer{"domain", domain},
+                      tunnel::detail::log::integer{"type", type},
+                      tunnel::detail::log::integer{"protocol", protocol},
+                      tunnel::detail::log::integer{"fd", fd});
 
         return scoped_file_descriptor{fd};
     }
@@ -82,11 +95,15 @@ struct layer_linux : public Super
         if (::ioctl(fd.native_handle(), request, arg) == -1)
         {
             error.assign(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::ioctl, request,
-                          error.message());
+            Super::do_log(
+                log_level::error, log_kind::ioctl,
+                tunnel::detail::log::uinteger{"request", request},
+                tunnel::detail::log::str{"error", error.message().c_str()});
         }
 
-        Super::do_log(log_level::debug, log_kind::ioctl, request, fd);
+        Super::do_log(log_level::debug, log_kind::ioctl,
+                      tunnel::detail::log::uinteger{"request", request},
+                      tunnel::detail::log::integer{"fd", fd.native_handle()});
     }
 
     auto send(const scoped_file_descriptor& fd, void* data, uint32_t size,
@@ -102,12 +119,19 @@ struct layer_linux : public Super
         if (res < 0)
         {
             error = std::error_code(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::send, "size=", size,
-                          flags, error.message());
+            Super::do_log(
+                log_level::error, log_kind::send,
+                tunnel::detail::log::uinteger{"size", size},
+                tunnel::detail::log::integer{"flags", flags},
+                tunnel::detail::log::str{"error", error.message().c_str()});
             return 0;
         }
 
-        Super::do_log(log_level::debug, log_kind::send, size, flags, fd, res);
+        Super::do_log(log_level::debug, log_kind::send,
+                      tunnel::detail::log::uinteger{"size", size},
+                      tunnel::detail::log::integer{"flags", flags},
+                      tunnel::detail::log::integer{"fd", fd.native_handle()},
+                      tunnel::detail::log::integer{"res", res});
 
         return res;
     }
@@ -125,12 +149,19 @@ struct layer_linux : public Super
         if (res < 0)
         {
             error = std::error_code(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::recv, size, flags,
-                          error.message());
+            Super::do_log(
+                log_level::error, log_kind::recv,
+                tunnel::detail::log::uinteger{"size", size},
+                tunnel::detail::log::integer{"flags", flags},
+                tunnel::detail::log::str{"error", error.message().c_str()});
             return 0;
         }
 
-        Super::do_log(log_level::debug, log_kind::recv, size, flags, fd, res);
+        Super::do_log(log_level::debug, log_kind::recv,
+                      tunnel::detail::log::uinteger{"size", size},
+                      tunnel::detail::log::integer{"flags", flags},
+                      tunnel::detail::log::integer{"fd", fd.native_handle()},
+                      tunnel::detail::log::integer{"res", res});
 
         return res;
     }
@@ -148,12 +179,17 @@ struct layer_linux : public Super
         if (res < 0)
         {
             error = std::error_code(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::bind, addrlen,
-                          error.message());
+            Super::do_log(
+                log_level::error, log_kind::bind,
+                tunnel::detail::log::uinteger{"addrlen", addrlen},
+                tunnel::detail::log::str{"error", error.message().c_str()});
             return 0;
         }
 
-        Super::do_log(log_level::debug, log_kind::bind, addrlen, fd, res);
+        Super::do_log(log_level::debug, log_kind::bind,
+                      tunnel::detail::log::uinteger{"addrlen", addrlen},
+                      tunnel::detail::log::integer{"fd", fd.native_handle()},
+                      tunnel::detail::log::integer{"res", res});
 
         return res;
     }
@@ -169,8 +205,10 @@ struct layer_linux : public Super
         if (current_offset < 0)
         {
             error = std::error_code(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::size, current_offset,
-                          error.message());
+            Super::do_log(
+                log_level::error, log_kind::size,
+                tunnel::detail::log::integer{"current_offset", current_offset},
+                tunnel::detail::log::str{"error", error.message().c_str()});
             return 0;
         }
 
@@ -179,8 +217,10 @@ struct layer_linux : public Super
         if (offset < 0)
         {
             error = std::error_code(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::size, offset,
-                          error.message());
+            Super::do_log(
+                log_level::error, log_kind::size,
+                tunnel::detail::log::integer{"offset", offset},
+                tunnel::detail::log::str{"error", error.message().c_str()});
             return 0;
         }
 
@@ -190,12 +230,16 @@ struct layer_linux : public Super
         if (set_offset < 0)
         {
             error = std::error_code(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::size, set_offset,
-                          error.message());
+            Super::do_log(
+                log_level::error, log_kind::size,
+                tunnel::detail::log::integer{"set_offset", set_offset},
+                tunnel::detail::log::str{"error", error.message().c_str()});
             return 0;
         }
 
-        Super::do_log(log_level::debug, log_kind::size, offset, fd);
+        Super::do_log(log_level::debug, log_kind::size,
+                      tunnel::detail::log::integer{"offset", offset},
+                      tunnel::detail::log::integer{"fd", fd.native_handle()});
 
         return offset;
     }
@@ -213,12 +257,17 @@ struct layer_linux : public Super
         if (res == -1)
         {
             error = std::error_code(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::read, size,
-                          error.message());
+            Super::do_log(
+                log_level::error, log_kind::read,
+                tunnel::detail::log::uinteger{"size", size},
+                tunnel::detail::log::str{"error", error.message().c_str()});
             return 0;
         }
 
-        Super::do_log(log_level::debug, log_kind::read, size, fd, res);
+        Super::do_log(log_level::debug, log_kind::read,
+                      tunnel::detail::log::uinteger{"size", size},
+                      tunnel::detail::log::integer{"fd", fd.native_handle()},
+                      tunnel::detail::log::integer{"res", res});
 
         return res;
     }

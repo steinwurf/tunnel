@@ -22,7 +22,7 @@ namespace tunnel
 
 inline void format_to(fmt::memory_buffer& buffer, tunnel::log_kind kind)
 {
-    fmt::format_to(std::back_inserter(buffer), R"("{}": "{}")",
+    fmt::format_to(std::back_inserter(buffer), R"("kind": "{}")",
                    tunnel::to_string(kind));
 }
 
