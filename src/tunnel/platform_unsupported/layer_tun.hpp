@@ -10,6 +10,7 @@ namespace platform_unsupported
 template <class Super>
 class layer_tun : public Super
 {
+public:
     void create(const std::string& interface_name, std::error_code& error)
     {
         Super::do_log(log_level::error, log_kind::unsupported_platform);

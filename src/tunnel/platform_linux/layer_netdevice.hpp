@@ -211,7 +211,7 @@ public:
         Super::ioctl(m_dev_fd, SIOCSIFMTU, &ifr, error);
 
         Super::do_log(log_level::state, log_kind::set_mtu,
-                      tunnel::detail::log::uinteger{"mtu", mtu});
+                      tunnel::detail::log::integer{"mtu", mtu});
     }
 
     auto mtu(std::error_code& error) const -> uint32_t
@@ -226,7 +226,7 @@ public:
         Super::ioctl(m_dev_fd, SIOCGIFMTU, &ifr, error);
 
         Super::do_log(log_level::state, log_kind::interface_mtu,
-                      tunnel::detail::log::uinteger{"mtu", ifr.ifr_mtu});
+                      tunnel::detail::log::integer{"mtu", ifr.ifr_mtu});
 
         return ifr.ifr_mtu;
     }

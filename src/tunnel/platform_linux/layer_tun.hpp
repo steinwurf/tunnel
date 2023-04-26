@@ -303,7 +303,7 @@ private:
 
         std::vector<uint8_t> data(size, 0);
 
-        uint32_t read = Super::read(fd, data.data(), data.size(), error);
+        Super::read(fd, data.data(), data.size(), error);
 
         if (error)
         {
