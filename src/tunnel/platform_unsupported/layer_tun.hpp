@@ -164,6 +164,8 @@ public:
     void set_ipv4_netmask(const std::string& netmask,
                           std::error_code& error) const
     {
+        (void)netmask;
+
         Super::do_log(log_level::error, log_kind::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
     }
