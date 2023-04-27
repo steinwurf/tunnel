@@ -6,6 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+7.0.0
+-----
 * Major: Added a dependency on `poke`
 * Minor: Added an empty Windows and Mac implementation of tun_interface.
   Will throw errors if used.
