@@ -8,16 +8,14 @@
 #include <asm/types.h>
 #include <cstdint>
 #include <iostream>
-// clang-format off
+
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <linux/if.h>
-// clang-format on
 
-// clang-format off
+#include <linux/if.h>
+
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
-// clang-format on
 
 #include <cstring>
 #include <netinet/in.h>

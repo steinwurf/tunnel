@@ -3,55 +3,24 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
-// clang-format off
-#include "throw_if_error.hpp"
 #include "tun_interface.hpp"
-// clang-format on
+#include "throw_if_error.hpp"
 
 #include <cassert>
 
 #include <platform/config.hpp>
 
-// Waf has some problems with this macro which means that
-// in the linux/*.hpp files change. If you run
-// ./waf build --zone deps you will see that the dependencies
-// for this .cpp files does not include the headers if these
-// #ifdef are active...
-//
-// #ifdef PLATFORM_LINUX
-
 #if defined(PLATFORM_LINUX)
-#include "platform_linux/tun_interface.hpp"
 
+#include "platform_linux/tun_interface.hpp"
 using platform_tun_interface = tunnel::platform_linux::tun_interface;
 
 #else
-#include "platform_unsupported/tun_interface.hpp"
 
+#include "platform_unsupported/tun_interface.hpp"
 using platform_tun_interface = tunnel::platform_unsupported::tun_interface;
 
 #endif
-// #endif
-
-// #ifdef APPLE
-// #include "platform_mac/tun_interface.hpp"
-
-// using platform_tun_interface = tunnel::platform_mac::tun_interface;
-
-// #endif
-
-// #ifdef WIN32
-// #include "platform_windows/tun_interface.hpp"
-
-// using platform_tun_interface = tunnel::platform_windows::tun_interface;
-
-// #endif
-
-// #else
-
-// #error "Not a supported platform"
-
-// #endif
 
 namespace tunnel
 {

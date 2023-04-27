@@ -3,6 +3,8 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
+#pragma once
+
 #include <cassert>
 #include <cstring>
 #include <string>
@@ -14,11 +16,9 @@
 #include <fcntl.h>
 #include <linux/if_tun.h>
 
-// clang-format off
+#include <linux/if.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <linux/if.h>
-// clang-format on
 
 #include "error.hpp"
 #include "layer_linux.hpp"
