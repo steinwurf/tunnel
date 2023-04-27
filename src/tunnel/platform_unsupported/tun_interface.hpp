@@ -12,18 +12,18 @@ struct tun_interface : public
     layer_tun<
     detail::layer_monitor<
     detail::layer_final<tun_interface>>>
-{
-
-static bool is_platform_supported()
-{
-    return false;
-}
-
-static auto type() -> std::string
-{
-    return "tunnel::platform_unsupported::tun_interface";
-}
-};
 // clang-format on
+{
+    static bool is_platform_supported()
+    {
+        return false;
+    }
+
+    static auto type() -> std::string
+    {
+        return "tunnel::platform_unsupported::tun_interface";
+    }
+};
+
 }
 }
