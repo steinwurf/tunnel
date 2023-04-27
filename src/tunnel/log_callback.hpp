@@ -1,20 +1,18 @@
-// Copyright (c) 2016 Steinwurf ApS
+// Copyright (c) 2017 Steinwurf ApS
 // All Rights Reserved
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
 #pragma once
 
-#include <cstdint>
 #include <string>
+
+#include "delegate.hpp"
 
 namespace tunnel
 {
-namespace platform_linux
-{
-namespace detail
-{
-auto if_indextoname(uint32_t index) -> std::string;
-}
-}
+
+/// The logging callback
+using log_callback = delegate<void(const std::string&)>;
+
 }

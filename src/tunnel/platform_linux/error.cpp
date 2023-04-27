@@ -3,6 +3,10 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
+#include <platform/config.hpp>
+
+#if defined(PLATFORM_LINUX)
+
 #include "error.hpp"
 
 #include <cassert>
@@ -38,16 +42,18 @@ class linux_category : public std::error_category
     }
 };
 
-const linux_category& error_category()
+auto error_category() -> const linux_category&
 {
     static linux_category category;
     return category;
 }
 
-std::error_code make_error_code(linux_error error)
+auto make_error_code(linux_error error) -> std::error_code
 {
     return {static_cast<int>(error), error_category()};
 }
 
 }
 }
+
+#endif

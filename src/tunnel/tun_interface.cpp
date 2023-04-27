@@ -10,23 +10,17 @@
 
 #include <platform/config.hpp>
 
-// Waf has some problems with this macro which means that
-// in the linux/*.hpp files change. If you run
-// ./waf build --zone deps you will see that the dependencies
-// for this .cpp files does not include the headers if these
-// #ifdef are active...
-//
-// #ifdef PLATFORM_LINUX
+#if defined(PLATFORM_LINUX)
 
 #include "platform_linux/tun_interface.hpp"
-
 using platform_tun_interface = tunnel::platform_linux::tun_interface;
 
-// #else
+#else
 
-// #error "Not a supported platform"
+#include "platform_unsupported/tun_interface.hpp"
+using platform_tun_interface = tunnel::platform_unsupported::tun_interface;
 
-// #endif
+#endif
 
 namespace tunnel
 {
@@ -100,7 +94,7 @@ void tun_interface::rename(const std::string& interface_name,
     m_impl->rename(interface_name, error);
 }
 
-std::string tun_interface::owner() const
+auto tun_interface::owner() const -> std::string
 {
     assert(m_impl);
 
@@ -109,13 +103,13 @@ std::string tun_interface::owner() const
     throw_if_error(error);
     return own;
 }
-std::string tun_interface::owner(std::error_code& error) const
+auto tun_interface::owner(std::error_code& error) const -> std::string
 {
     assert(m_impl);
     return m_impl->owner(error);
 }
 
-std::string tun_interface::group() const
+auto tun_interface::group() const -> std::string
 {
     assert(m_impl);
 
@@ -124,7 +118,7 @@ std::string tun_interface::group() const
     throw_if_error(error);
     return grp;
 }
-std::string tun_interface::group(std::error_code& error) const
+auto tun_interface::group(std::error_code& error) const -> std::string
 {
     assert(m_impl);
     return m_impl->group(error);
@@ -160,7 +154,7 @@ void tun_interface::set_group(const std::string& group,
     m_impl->set_group(group, error);
 }
 
-std::string tun_interface::interface_name() const
+auto tun_interface::interface_name() const -> std::string
 {
     assert(m_impl);
 
@@ -170,19 +164,19 @@ std::string tun_interface::interface_name() const
     return name;
 }
 
-std::string tun_interface::interface_name(std::error_code& error) const
+auto tun_interface::interface_name(std::error_code& error) const -> std::string
 {
     assert(m_impl);
     return m_impl->interface_name(error);
 }
 
-bool tun_interface::is_persistent(std::error_code& error) const
+auto tun_interface::is_persistent(std::error_code& error) const -> bool
 {
     assert(m_impl);
     return m_impl->is_persistent(error);
 }
 
-bool tun_interface::is_persistent() const
+auto tun_interface::is_persistent() const -> bool
 {
     assert(m_impl);
 
@@ -192,13 +186,13 @@ bool tun_interface::is_persistent() const
     return persistent;
 }
 
-bool tun_interface::is_up(std::error_code& error) const
+auto tun_interface::is_up(std::error_code& error) const -> bool
 {
     assert(m_impl);
     return m_impl->is_up(error);
 }
 
-bool tun_interface::is_up() const
+auto tun_interface::is_up() const -> bool
 {
     assert(m_impl);
 
@@ -208,13 +202,13 @@ bool tun_interface::is_up() const
     return up;
 }
 
-bool tun_interface::is_down(std::error_code& error) const
+auto tun_interface::is_down(std::error_code& error) const -> bool
 {
     assert(m_impl);
     return m_impl->is_down(error);
 }
 
-bool tun_interface::is_down() const
+auto tun_interface::is_down() const -> bool
 {
     assert(m_impl);
 
@@ -280,7 +274,7 @@ void tun_interface::set_non_persistent()
     throw_if_error(error);
 }
 
-uint32_t tun_interface::mtu() const
+auto tun_interface::mtu() const -> uint32_t
 {
     assert(m_impl);
 
@@ -289,7 +283,8 @@ uint32_t tun_interface::mtu() const
     throw_if_error(error);
     return mtu;
 }
-uint32_t tun_interface::mtu(std::error_code& error) const
+
+auto tun_interface::mtu(std::error_code& error) const -> uint32_t
 {
     assert(m_impl);
     return m_impl->mtu(error);
@@ -337,7 +332,7 @@ void tun_interface::disable_default_route(std::error_code& error) const
     m_impl->disable_default_route(error);
 }
 
-bool tun_interface::is_default_route() const
+auto tun_interface::is_default_route() const -> bool
 {
     assert(m_impl);
 
@@ -346,13 +341,14 @@ bool tun_interface::is_default_route() const
     throw_if_error(error);
     return is_default;
 }
-bool tun_interface::is_default_route(std::error_code& error) const
+
+auto tun_interface::is_default_route(std::error_code& error) const -> bool
 {
     assert(m_impl);
     return m_impl->is_default_route(error);
 }
 
-std::string tun_interface::ipv4() const
+auto tun_interface::ipv4() const -> std::string
 {
     assert(m_impl);
 
@@ -362,13 +358,13 @@ std::string tun_interface::ipv4() const
     return ip;
 }
 
-std::string tun_interface::ipv4(std::error_code& error) const
+auto tun_interface::ipv4(std::error_code& error) const -> std::string
 {
     assert(m_impl);
     return m_impl->ipv4(error);
 }
 
-std::string tun_interface::ipv4_netmask() const
+auto tun_interface::ipv4_netmask() const -> std::string
 {
     assert(m_impl);
 
@@ -378,7 +374,7 @@ std::string tun_interface::ipv4_netmask() const
     return ip;
 }
 
-std::string tun_interface::ipv4_netmask(std::error_code& error) const
+auto tun_interface::ipv4_netmask(std::error_code& error) const -> std::string
 {
     assert(m_impl);
     return m_impl->ipv4_netmask(error);
@@ -415,28 +411,27 @@ void tun_interface::set_ipv4_netmask(const std::string& mask,
     m_impl->set_ipv4_netmask(mask, error);
 }
 
-void tun_interface::disable_log_stdout()
-{
-    assert(m_impl);
-    m_impl->disable_log_stdout();
-}
-
-void tun_interface::enable_log_stdout()
-{
-    assert(m_impl);
-    m_impl->enable_log_stdout();
-}
-
-bool tun_interface::is_log_enabled() const
-{
-    assert(m_impl);
-    return m_impl->is_log_enabled();
-}
-
-int tun_interface::native_handle() const
+auto tun_interface::native_handle() const -> int
 {
     assert(m_impl);
     return m_impl->native_handle();
+}
+
+auto tun_interface::monitor() const -> const tunnel::monitor&
+{
+    assert(m_impl);
+    return m_impl->monitor();
+}
+
+auto tun_interface::monitor() -> tunnel::monitor&
+{
+    assert(m_impl);
+    return m_impl->monitor();
+}
+
+auto tun_interface::is_platform_supported() -> bool
+{
+    return platform_tun_interface::is_platform_supported();
 }
 
 }

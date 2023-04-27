@@ -199,7 +199,6 @@ int main(int argc, char* argv[])
               << std::endl;
 
     tunnel::tun_interface iface;
-    iface.enable_log_stdout();
 
     iface.create();
     iface.up();

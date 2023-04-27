@@ -3,6 +3,8 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
+#pragma once
+
 #include <cassert>
 #include <cstring>
 #include <string>
@@ -14,20 +16,20 @@
 #include <fcntl.h>
 #include <linux/if_tun.h>
 
-// clang-format off
+#include <linux/if.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <linux/if.h>
-// clang-format on
 
 #include "error.hpp"
 #include "layer_linux.hpp"
-#include "layer_log.hpp"
 
 #include "layer_netdevice.hpp"
 #include "layer_netlink_v4.hpp"
 #include "layer_tun.hpp"
 #include "scoped_file_descriptor.hpp"
+
+#include "../detail/layer_final.hpp"
+#include "../detail/layer_monitor.hpp"
 
 namespace tunnel
 {
@@ -42,8 +44,18 @@ struct tun_interface : public
     layer_netdevice<
     layer_tun<
     layer_linux<
-    layer_log>>>>
+    tunnel::detail::layer_monitor<
+    tunnel::detail::layer_final<tun_interface>>>>>>
 {
+    static auto is_platform_supported() -> bool
+    {
+        return true;
+    }
+
+    static auto type() -> std::string
+    {
+        return "tunnel::platform_linux::tun_interface";
+    }
 };
 // clang-format on
 }

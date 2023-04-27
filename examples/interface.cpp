@@ -10,8 +10,11 @@
 
 int main()
 {
+    auto log = [](const std::string& message)
+    { std::cout << message << std::endl; };
+
     tunnel::tun_interface iface;
-    iface.enable_log_stdout();
+    iface.monitor().enable_log(tunnel::log_level::state, log);
     iface.create("tuniface");
 
     if (iface.is_up())

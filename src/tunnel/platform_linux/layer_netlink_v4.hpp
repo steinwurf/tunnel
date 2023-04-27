@@ -8,16 +8,14 @@
 #include <asm/types.h>
 #include <cstdint>
 #include <iostream>
-// clang-format off
+
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <linux/if.h>
-// clang-format on
 
-// clang-format off
+#include <linux/if.h>
+
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
-// clang-format on
 
 #include <cstring>
 #include <netinet/in.h>
@@ -31,9 +29,13 @@
 #include <unistd.h>
 #include <vector>
 
+#include "../detail/log.hpp"
 #include "detail/if_nametoindex.hpp"
 #include "error.hpp"
 #include "scoped_file_descriptor.hpp"
+
+#include "../log_kind.hpp"
+#include "../log_level.hpp"
 
 namespace tunnel
 {
@@ -85,11 +87,6 @@ public:
         }
 
         m_dev_fd = Super::socket(AF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE, error);
-        Super::write_log("netlink_v4: m_dev_fd=", m_dev_fd.native_handle(),
-                         " error=", error);
-
-        Super::write_log("netlik_v4: m_netlink_port=", m_netlink_port,
-                         ", getpid=", ::getpid());
 
         if (error)
         {
@@ -106,7 +103,7 @@ public:
         Super::bind(m_dev_fd, (struct sockaddr*)&sa, sizeof(sa), error);
     }
 
-    bool is_default_route(std::error_code& error)
+    auto is_default_route(std::error_code& error) -> bool
     {
         struct rtmsg payload
         {
@@ -138,6 +135,11 @@ public:
             return false;
         }
 
+        Super::do_log(
+            log_level::state, log_kind::is_default_route,
+            tunnel::detail::log::boolean{"is_default_route",
+                                         default_interface == tun_interface});
+
         return default_interface == tun_interface;
     }
 
@@ -166,11 +168,14 @@ private:
 
         Super::send(m_dev_fd, message.data(), message.size(), 0, error);
 
-        Super::write_log("message send: nlmsg_pid=", header->nlmsg_pid,
-                         " nlmsg_seq=", header->nlmsg_seq, " error=", error);
+        Super::do_log(
+            log_level::debug, log_kind::send_netlink,
+            tunnel::detail::log::uinteger{"nlmsg_pid", header->nlmsg_pid},
+            tunnel::detail::log::uinteger{"nlmsg_seq", header->nlmsg_seq},
+            tunnel::detail::log::str{"error", error.message().c_str()});
     }
 
-    std::string recv_netlink(std::error_code& error)
+    auto recv_netlink(std::error_code& error) -> std::string
     {
         assert(!error);
 
@@ -235,7 +240,7 @@ private:
         return {};
     }
 
-    std::vector<uint8_t> recv_netlink_message(std::error_code& error)
+    auto recv_netlink_message(std::error_code& error) -> std::vector<uint8_t>
     {
         std::vector<uint8_t> message;
 
@@ -252,7 +257,8 @@ private:
                 return {};
             }
 
-            Super::write_log("message received: size=", size);
+            Super::do_log(log_level::debug, log_kind::recv_netlink_message,
+                          tunnel::detail::log::uinteger{"size", size});
 
             message.resize(size, 0);
 
@@ -272,10 +278,12 @@ private:
                 return {};
             }
 
-            Super::write_log("message received: nlmsg_pid=", header->nlmsg_pid,
-                             ", nlmsg_seq=", header->nlmsg_seq,
-                             ", m_netlink_port=", m_netlink_port,
-                             " error=", error);
+            Super::do_log(
+                log_level::debug, log_kind::recv_netlink_message,
+                tunnel::detail::log::uinteger{"nlmsg_pid", header->nlmsg_pid},
+                tunnel::detail::log::uinteger{"nlmsg_seq", header->nlmsg_seq},
+                tunnel::detail::log::integer{"m_netlink_port", m_netlink_port},
+                tunnel::detail::log::str{"error", error.message().c_str()});
 
             // Filter out messages not for us
         } while ((pid_t)header->nlmsg_pid != m_netlink_port);
@@ -283,8 +291,8 @@ private:
         return message;
     }
 
-    std::vector<std::vector<uint8_t>>
-    recv_netlink_messages(std::error_code& error)
+    auto recv_netlink_messages(std::error_code& error)
+        -> std::vector<std::vector<uint8_t>>
     {
         std::vector<std::vector<uint8_t>> messages;
 

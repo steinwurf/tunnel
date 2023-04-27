@@ -29,6 +29,11 @@
 #include "error.hpp"
 #include "scoped_file_descriptor.hpp"
 
+#include "../detail/log.hpp"
+
+#include "../log_kind.hpp"
+#include "../log_level.hpp"
+
 namespace tunnel
 {
 namespace platform_linux
@@ -49,6 +54,11 @@ struct layer_tun : public Super
         if (interface_name.size() > IFNAMSIZ - 1)
         {
             error = make_error_code(linux_error::interface_name_too_long);
+
+            Super::do_log(
+                log_level::error, log_kind::interface_created,
+                tunnel::detail::log::str{"error", error.message().c_str()});
+
             return;
         }
 
@@ -87,16 +97,18 @@ struct layer_tun : public Super
 
         Super::ioctl(m_tun_fd, TUNSETIFF, (void*)&ifr, error);
 
-        Super::write_log("create interface ", ifr.ifr_name, " error=", error);
+        Super::do_log(log_level::state, log_kind::interface_created,
+                      tunnel::detail::log::str{"name", interface_name.c_str()});
     }
 
-    std::string owner(std::error_code& error) const
+    auto owner(std::error_code& error) const -> std::string
     {
         assert(!error);
 
         std::string o = read_property("owner", error);
 
-        Super::write_log("layer_tun: owner=", o, " error=", error);
+        Super::do_log(log_level::state, log_kind::owner,
+                      tunnel::detail::log::str{"owner", o.c_str()});
 
         if (error)
         {
@@ -127,6 +139,9 @@ struct layer_tun : public Super
         assert(!error);
         assert(!owner.empty());
 
+        Super::do_log(log_level::state, log_kind::set_owner,
+                      tunnel::detail::log::str{"owner", owner.c_str()});
+
         struct passwd* pwd = getpwnam(owner.c_str());
 
         if (pwd == nullptr)
@@ -139,11 +154,12 @@ struct layer_tun : public Super
                      error);
     }
 
-    std::string group(std::error_code& error) const
+    auto group(std::error_code& error) const -> std::string
     {
         std::string o = read_property("group", error);
 
-        Super::write_log("layer_tun: group=", o, " error=", error);
+        Super::do_log(log_level::state, log_kind::group,
+                      tunnel::detail::log::str{"group", o.c_str()});
 
         if (error)
         {
@@ -175,6 +191,9 @@ struct layer_tun : public Super
         assert(!group.empty());
         assert(m_tun_fd);
 
+        Super::do_log(log_level::state, log_kind::set_group,
+                      tunnel::detail::log::str{"group", group.c_str()});
+
         struct group* grp = getgrnam(group.c_str());
 
         if (grp == nullptr)
@@ -187,7 +206,7 @@ struct layer_tun : public Super
                      error);
     }
 
-    bool is_persistent(std::error_code& error) const
+    auto is_persistent(std::error_code& error) const -> bool
     {
         assert(m_tun_fd);
         assert(!error);
@@ -197,13 +216,20 @@ struct layer_tun : public Super
         };
         Super::ioctl(m_tun_fd, TUNGETIFF, (void*)&ifr, error);
 
-        return ifr.ifr_flags & IFF_PERSIST;
+        bool persistent = ifr.ifr_flags & IFF_PERSIST;
+
+        Super::do_log(log_level::state, log_kind::interface_is_persistent,
+                      tunnel::detail::log::boolean{"persistent", persistent});
+        return persistent;
     }
 
     void set_persistent(std::error_code& error) const
     {
         assert(m_tun_fd);
         assert(!error);
+
+        Super::do_log(log_level::state, log_kind::set_persistent,
+                      tunnel::detail::log::str{"", ""});
 
         Super::ioctl(m_tun_fd, TUNSETPERSIST, (void*)1, error);
     }
@@ -213,10 +239,13 @@ struct layer_tun : public Super
         assert(m_tun_fd);
         assert(!error);
 
+        Super::do_log(log_level::state, log_kind::set_non_persistent,
+                      tunnel::detail::log::str{"", ""});
+
         Super::ioctl(m_tun_fd, TUNSETPERSIST, (void*)0, error);
     }
 
-    std::string interface_name(std::error_code& error) const
+    auto interface_name(std::error_code& error) const -> std::string
     {
         assert(m_tun_fd);
         assert(!error);
@@ -226,19 +255,26 @@ struct layer_tun : public Super
         };
         Super::ioctl(m_tun_fd, TUNGETIFF, (void*)&ifr, error);
 
+        Super::do_log(log_level::state, log_kind::interface_name,
+                      tunnel::detail::log::str{"name", ifr.ifr_name});
+
         return ifr.ifr_name;
     }
 
-    int native_handle() const
+    auto native_handle() const -> int
     {
         assert(m_tun_fd);
+
+        Super::do_log(
+            log_level::state, log_kind::native_handle,
+            tunnel::detail::log::integer{"handle", m_tun_fd.native_handle()});
 
         return m_tun_fd.native_handle();
     }
 
 private:
-    std::string read_property(const std::string& property,
-                              std::error_code& error) const
+    auto read_property(const std::string& property,
+                       std::error_code& error) const -> std::string
     {
         std::string name = interface_name(error);
 
@@ -260,8 +296,6 @@ private:
 
         uint32_t size = Super::size(fd, error);
 
-        Super::write_log("layer_tun: property=", ss.str(), " size=", size);
-
         if (error)
         {
             return {};
@@ -269,7 +303,7 @@ private:
 
         std::vector<uint8_t> data(size, 0);
 
-        uint32_t read = Super::read(fd, data.data(), data.size(), error);
+        Super::read(fd, data.data(), data.size(), error);
 
         if (error)
         {
@@ -277,8 +311,6 @@ private:
         }
 
         std::string value(data.begin(), data.end());
-
-        Super::write_log("layer_tun: property read=", read, " value=", value);
 
         return value;
     }

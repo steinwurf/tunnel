@@ -3,6 +3,10 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
+#include <platform/config.hpp>
+
+#if defined(PLATFORM_LINUX)
+
 #include <cassert>
 #include <cstdint>
 #include <net/if.h>
@@ -16,7 +20,7 @@ namespace detail
 {
 // Bug in the Linux headers.
 // https://bugzilla.redhat.com/show_bug.cgi?id=1300256
-std::string if_indextoname(uint32_t index)
+auto if_indextoname(uint32_t index) -> std::string
 {
 
     char ifname[IF_NAMESIZE];
@@ -28,3 +32,4 @@ std::string if_indextoname(uint32_t index)
 }
 }
 }
+#endif

@@ -13,7 +13,11 @@
 #include <sys/types.h>
 #include <system_error>
 
+#include "../detail/log.hpp"
 #include "scoped_file_descriptor.hpp"
+
+#include "../log_kind.hpp"
+#include "../log_level.hpp"
 
 namespace tunnel
 {
@@ -24,8 +28,8 @@ namespace platform_linux
 template <class Super>
 struct layer_linux : public Super
 {
-    scoped_file_descriptor open(const std::string& path, int flags,
-                                std::error_code& error) const
+    auto open(const std::string& path, int flags, std::error_code& error) const
+        -> scoped_file_descriptor
     {
         assert(!error);
         assert(!path.empty());
@@ -35,14 +39,24 @@ struct layer_linux : public Super
         if (fd < 0)
         {
             error = std::error_code(errno, std::generic_category());
+            Super::do_log(
+                log_level::error, log_kind::open,
+                tunnel::detail::log::str{"path", path.c_str()},
+                tunnel::detail::log::integer{"flags", flags},
+                tunnel::detail::log::str{"error", error.message().c_str()});
             return scoped_file_descriptor{};
         }
+
+        Super::do_log(log_level::debug, log_kind::open,
+                      tunnel::detail::log::str{"path", path.c_str()},
+                      tunnel::detail::log::integer{"flags", flags},
+                      tunnel::detail::log::integer{"fd", fd});
 
         return scoped_file_descriptor{fd};
     }
 
-    scoped_file_descriptor socket(int domain, int type, int protocol,
-                                  std::error_code& error) const
+    auto socket(int domain, int type, int protocol,
+                std::error_code& error) const -> scoped_file_descriptor
     {
         assert(!error);
 
@@ -51,8 +65,21 @@ struct layer_linux : public Super
         if (fd < 0)
         {
             error = std::error_code(errno, std::generic_category());
+            Super::do_log(
+                log_level::error, log_kind::socket,
+                tunnel::detail::log::integer{"domain", domain},
+                tunnel::detail::log::integer{"type", type},
+                tunnel::detail::log::integer{"protocol", protocol},
+                tunnel::detail::log::str{"error", error.message().c_str()});
+
             return scoped_file_descriptor{};
         }
+
+        Super::do_log(log_level::debug, log_kind::socket,
+                      tunnel::detail::log::integer{"domain", domain},
+                      tunnel::detail::log::integer{"type", type},
+                      tunnel::detail::log::integer{"protocol", protocol},
+                      tunnel::detail::log::integer{"fd", fd});
 
         return scoped_file_descriptor{fd};
     }
@@ -68,11 +95,19 @@ struct layer_linux : public Super
         if (::ioctl(fd.native_handle(), request, arg) == -1)
         {
             error.assign(errno, std::generic_category());
+            Super::do_log(
+                log_level::error, log_kind::ioctl,
+                tunnel::detail::log::uinteger{"request", request},
+                tunnel::detail::log::str{"error", error.message().c_str()});
         }
+
+        Super::do_log(log_level::debug, log_kind::ioctl,
+                      tunnel::detail::log::uinteger{"request", request},
+                      tunnel::detail::log::integer{"fd", fd.native_handle()});
     }
 
-    uint32_t send(const scoped_file_descriptor& fd, void* data, uint32_t size,
-                  int flags, std::error_code& error) const
+    auto send(const scoped_file_descriptor& fd, void* data, uint32_t size,
+              int flags, std::error_code& error) const -> uint32_t
     {
         assert(!error);
         assert(fd);
@@ -84,14 +119,25 @@ struct layer_linux : public Super
         if (res < 0)
         {
             error = std::error_code(errno, std::generic_category());
+            Super::do_log(
+                log_level::error, log_kind::send,
+                tunnel::detail::log::uinteger{"size", size},
+                tunnel::detail::log::integer{"flags", flags},
+                tunnel::detail::log::str{"error", error.message().c_str()});
             return 0;
         }
+
+        Super::do_log(log_level::debug, log_kind::send,
+                      tunnel::detail::log::uinteger{"size", size},
+                      tunnel::detail::log::integer{"flags", flags},
+                      tunnel::detail::log::integer{"fd", fd.native_handle()},
+                      tunnel::detail::log::integer{"res", res});
 
         return res;
     }
 
-    uint32_t recv(const scoped_file_descriptor& fd, void* data, uint32_t size,
-                  int flags, std::error_code& error) const
+    auto recv(const scoped_file_descriptor& fd, void* data, uint32_t size,
+              int flags, std::error_code& error) const -> uint32_t
     {
         assert(!error);
         assert(fd);
@@ -103,14 +149,25 @@ struct layer_linux : public Super
         if (res < 0)
         {
             error = std::error_code(errno, std::generic_category());
+            Super::do_log(
+                log_level::error, log_kind::recv,
+                tunnel::detail::log::uinteger{"size", size},
+                tunnel::detail::log::integer{"flags", flags},
+                tunnel::detail::log::str{"error", error.message().c_str()});
             return 0;
         }
+
+        Super::do_log(log_level::debug, log_kind::recv,
+                      tunnel::detail::log::uinteger{"size", size},
+                      tunnel::detail::log::integer{"flags", flags},
+                      tunnel::detail::log::integer{"fd", fd.native_handle()},
+                      tunnel::detail::log::integer{"res", res});
 
         return res;
     }
 
-    int bind(const scoped_file_descriptor& fd, const struct sockaddr* addr,
-             socklen_t addrlen, std::error_code& error)
+    auto bind(const scoped_file_descriptor& fd, const struct sockaddr* addr,
+              socklen_t addrlen, std::error_code& error) -> uint32_t
     {
         assert(!error);
         assert(fd);
@@ -122,14 +179,23 @@ struct layer_linux : public Super
         if (res < 0)
         {
             error = std::error_code(errno, std::generic_category());
+            Super::do_log(
+                log_level::error, log_kind::bind,
+                tunnel::detail::log::uinteger{"addrlen", addrlen},
+                tunnel::detail::log::str{"error", error.message().c_str()});
             return 0;
         }
+
+        Super::do_log(log_level::debug, log_kind::bind,
+                      tunnel::detail::log::uinteger{"addrlen", addrlen},
+                      tunnel::detail::log::integer{"fd", fd.native_handle()},
+                      tunnel::detail::log::integer{"res", res});
 
         return res;
     }
 
-    uint32_t size(const scoped_file_descriptor& fd,
-                  std::error_code& error) const
+    auto size(const scoped_file_descriptor& fd, std::error_code& error) const
+        -> uint32_t
     {
         assert(fd);
         assert(!error);
@@ -139,6 +205,10 @@ struct layer_linux : public Super
         if (current_offset < 0)
         {
             error = std::error_code(errno, std::generic_category());
+            Super::do_log(
+                log_level::error, log_kind::size,
+                tunnel::detail::log::integer{"current_offset", current_offset},
+                tunnel::detail::log::str{"error", error.message().c_str()});
             return 0;
         }
 
@@ -147,6 +217,10 @@ struct layer_linux : public Super
         if (offset < 0)
         {
             error = std::error_code(errno, std::generic_category());
+            Super::do_log(
+                log_level::error, log_kind::size,
+                tunnel::detail::log::integer{"offset", offset},
+                tunnel::detail::log::str{"error", error.message().c_str()});
             return 0;
         }
 
@@ -156,14 +230,22 @@ struct layer_linux : public Super
         if (set_offset < 0)
         {
             error = std::error_code(errno, std::generic_category());
+            Super::do_log(
+                log_level::error, log_kind::size,
+                tunnel::detail::log::integer{"set_offset", set_offset},
+                tunnel::detail::log::str{"error", error.message().c_str()});
             return 0;
         }
+
+        Super::do_log(log_level::debug, log_kind::size,
+                      tunnel::detail::log::integer{"offset", offset},
+                      tunnel::detail::log::integer{"fd", fd.native_handle()});
 
         return offset;
     }
 
-    uint32_t read(const scoped_file_descriptor& fd, void* buf, uint32_t size,
-                  std::error_code& error) const
+    auto read(const scoped_file_descriptor& fd, void* buf, uint32_t size,
+              std::error_code& error) const -> uint32_t
     {
         assert(fd);
         assert(buf);
@@ -175,8 +257,17 @@ struct layer_linux : public Super
         if (res == -1)
         {
             error = std::error_code(errno, std::generic_category());
+            Super::do_log(
+                log_level::error, log_kind::read,
+                tunnel::detail::log::uinteger{"size", size},
+                tunnel::detail::log::str{"error", error.message().c_str()});
             return 0;
         }
+
+        Super::do_log(log_level::debug, log_kind::read,
+                      tunnel::detail::log::uinteger{"size", size},
+                      tunnel::detail::log::integer{"fd", fd.native_handle()},
+                      tunnel::detail::log::integer{"res", res});
 
         return res;
     }

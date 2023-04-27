@@ -1,4 +1,4 @@
-// Copyright (c) 2016 Steinwurf ApS
+// Copyright (c) 2017 Steinwurf ApS
 // All Rights Reserved
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
@@ -6,15 +6,16 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
 
 namespace tunnel
 {
-namespace platform_linux
+
+/// The log level
+enum class log_level : uint8_t
 {
-namespace detail
-{
-auto if_indextoname(uint32_t index) -> std::string;
-}
-}
+    state = 0,
+    debug,
+    error
+};
+
 }

@@ -21,7 +21,7 @@ enum class linux_error
 
 };
 
-std::error_code make_error_code(linux_error error);
+auto make_error_code(linux_error error) -> std::error_code;
 
 }
 }
