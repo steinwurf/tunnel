@@ -5,8 +5,8 @@
 
 #pragma once
 
+#include "../../log_level.hpp"
 #include "../log_kind.hpp"
-#include "log_level.hpp"
 
 namespace tunnel
 {
