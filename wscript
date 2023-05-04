@@ -6,7 +6,7 @@ import sys
 import waflib
 
 APPNAME = "tunnel"
-VERSION = "7.0.0"
+VERSION = "8.0.0"
 
 
 def options(opt):
