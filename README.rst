@@ -22,7 +22,7 @@ tunnel
 .. |Cppcheck| image:: https://github.com/steinwurf/tunnel/actions/workflows/cppcheck.yml/badge.svg
       :target: https://github.com/steinwurf/tunnel/actions/workflows/cppcheck.yml
 
-The tunnel lib allow you to create an manipulate a tun interfaces on Linux.
+The tunnel lib allows you to create an manipulate TUN interfaces on Linux.
 A tun interface is essentially a virtual network interface on the IP (layer 3).
 
 
@@ -38,18 +38,18 @@ Here is how you use it...
 
 
 
-Route a vlc stream over a tunnel
+Route a VLC stream over a tunnel
 --------------------------------
 
 Using the sample_tunnel example located in /examples we can do a small test.
-Two machines that can access each other over a network, and each with the tunnel
-project compiled and vlc installed is needed.
+Two machines that can access each other over a network and each with the tunnel
+project compiled and VLC installed are needed.
 
-You also need to know the ip addresses of the two machines the "server" and the
-"client", here we assume  that the server have the IP 10.10.0.1 and the client
+You also need to know the IP addresses of the two machines the "server" and the
+"client", here we assume  that the server has the IP 10.10.0.1 and the client
 10.10.0.2.
 
-On the server side start a tunnel and a vlc server:
+On the server side start a tunnel and a VLC server:
 
 ::
 
@@ -57,11 +57,11 @@ On the server side start a tunnel and a vlc server:
     ./build_current/examples/sample_tunnel --local_ip 10.10.0.1 --remote_ip 10.10.0.2 --tunnel_ip 10.0.0.13
 
 This will create a tun interface "tun0" with ip 10.0.0.100, traffic arriving
-from the remote will be routed to the tun0 inteface, and all traffic sent on
-the tun0 interface will be routed to the remote ip .
+from the remote will be routed to the tun0 interface, and all traffic sent on
+the tun0 interface will be routed to the remote IP.
 
 
-if you run ifconfig you should be able to verify that a new interface have been created
+if you run ifconfig you should be able to verify that a new interface has been created
 
 ::
 
@@ -77,7 +77,7 @@ if you run ifconfig you should be able to verify that a new interface have been 
         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 
 
-And start a vlc stream using some local video file.
+And start a VLC stream using a local video file.
 
 ::
 
@@ -85,7 +85,7 @@ And start a vlc stream using some local video file.
 
 
 
-On the Client side open a tunnel and vlc viewer
+On the Client side open a tunnel and VLC viewer
 
 ::
 

@@ -89,7 +89,7 @@ public:
     void set_persistent();
     void set_persistent(std::error_code& error);
 
-    /// Set the interface non persistant i.e. the interface will only
+    /// Set the interface non-persistent, i.e., the interface will only
     /// be around for as long as the application keeps it alive.
     void set_non_persistent();
     void set_non_persistent(std::error_code& error);
