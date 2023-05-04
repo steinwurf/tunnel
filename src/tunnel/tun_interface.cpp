@@ -12,14 +12,15 @@
 
 #if defined(PLATFORM_LINUX)
 
-#include "detail/platform_linux/tun_interface.hpp"
-using platform_tun_interface = tunnel::detail::platform_linux::tun_interface;
+#include "detail/platform_linux/stack_tun_interface.hpp"
+using platform_tun_interface =
+    tunnel::detail::platform_linux::stack_tun_interface;
 
 #else
 
-#include "detail/platform_unsupported/tun_interface.hpp"
+#include "detail/platform_unsupported/stack_tun_interface.hpp"
 using platform_tun_interface =
-    tunnel::detail::platform_unsupported::tun_interface;
+    tunnel::detail::platform_unsupported::stack_tun_interface;
 
 #endif
 

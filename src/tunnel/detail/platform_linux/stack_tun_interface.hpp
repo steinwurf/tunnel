@@ -41,13 +41,13 @@ namespace platform_linux
 /// here: https://www.kernel.org/doc/Documentation/networking/tuntap.txt
 
 // clang-format off
-struct tun_interface : public
+struct stack_tun_interface : public
     layer_netlink_v4<
     layer_netdevice<
     layer_tun<
     layer_linux<
     layer_monitor<
-    layer_final<tun_interface>>>>>>
+    layer_final<stack_tun_interface>>>>>>
 {
     static auto is_platform_supported() -> bool
     {
@@ -56,7 +56,7 @@ struct tun_interface : public
 
     static auto type() -> std::string
     {
-        return "tunnel::detail::platform_linux::tun_interface";
+        return "tunnel::detail::platform_linux::stack_tun_interface";
     }
 };
 // clang-format on
