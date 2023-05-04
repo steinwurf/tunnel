@@ -7,6 +7,7 @@ every change, see the Git log.
 Latest
 ------
 * Major: Upgrade to poke version 5.
+* Major: Change structure so that details are now under ``detail`` namespace.
 
 7.0.0
 -----
