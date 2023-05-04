@@ -98,7 +98,7 @@ struct layer_tun : public Super
 
         Super::ioctl(m_tun_fd, TUNSETIFF, (void*)&ifr, error);
 
-        Super::do_log(log_level::state, log_kind::interface_created,
+        Super::do_log(log_level::debug, log_kind::interface_created,
                       log::str{"name", interface_name.c_str()});
     }
 
@@ -108,7 +108,7 @@ struct layer_tun : public Super
 
         std::string o = read_property("owner", error);
 
-        Super::do_log(log_level::state, log_kind::owner,
+        Super::do_log(log_level::debug, log_kind::owner,
                       log::str{"owner", o.c_str()});
 
         if (error)
@@ -140,7 +140,7 @@ struct layer_tun : public Super
         assert(!error);
         assert(!owner.empty());
 
-        Super::do_log(log_level::state, log_kind::set_owner,
+        Super::do_log(log_level::debug, log_kind::set_owner,
                       log::str{"owner", owner.c_str()});
 
         struct passwd* pwd = getpwnam(owner.c_str());
@@ -159,7 +159,7 @@ struct layer_tun : public Super
     {
         std::string o = read_property("group", error);
 
-        Super::do_log(log_level::state, log_kind::group,
+        Super::do_log(log_level::debug, log_kind::group,
                       log::str{"group", o.c_str()});
 
         if (error)
@@ -192,7 +192,7 @@ struct layer_tun : public Super
         assert(!group.empty());
         assert(m_tun_fd);
 
-        Super::do_log(log_level::state, log_kind::set_group,
+        Super::do_log(log_level::debug, log_kind::set_group,
                       log::str{"group", group.c_str()});
 
         struct group* grp = getgrnam(group.c_str());
@@ -219,7 +219,7 @@ struct layer_tun : public Super
 
         bool persistent = ifr.ifr_flags & IFF_PERSIST;
 
-        Super::do_log(log_level::state, log_kind::interface_is_persistent,
+        Super::do_log(log_level::debug, log_kind::interface_is_persistent,
                       log::boolean{"persistent", persistent});
         return persistent;
     }
@@ -229,7 +229,7 @@ struct layer_tun : public Super
         assert(m_tun_fd);
         assert(!error);
 
-        Super::do_log(log_level::state, log_kind::set_persistent,
+        Super::do_log(log_level::debug, log_kind::set_persistent,
                       log::str{"", ""});
 
         Super::ioctl(m_tun_fd, TUNSETPERSIST, (void*)1, error);
@@ -240,7 +240,7 @@ struct layer_tun : public Super
         assert(m_tun_fd);
         assert(!error);
 
-        Super::do_log(log_level::state, log_kind::set_non_persistent,
+        Super::do_log(log_level::debug, log_kind::set_non_persistent,
                       log::str{"", ""});
 
         Super::ioctl(m_tun_fd, TUNSETPERSIST, (void*)0, error);
@@ -256,7 +256,7 @@ struct layer_tun : public Super
         };
         Super::ioctl(m_tun_fd, TUNGETIFF, (void*)&ifr, error);
 
-        Super::do_log(log_level::state, log_kind::interface_name,
+        Super::do_log(log_level::debug, log_kind::interface_name,
                       log::str{"name", ifr.ifr_name});
 
         return ifr.ifr_name;
@@ -266,7 +266,7 @@ struct layer_tun : public Super
     {
         assert(m_tun_fd);
 
-        Super::do_log(log_level::state, log_kind::native_handle,
+        Super::do_log(log_level::debug, log_kind::native_handle,
                       log::integer{"handle", m_tun_fd.native_handle()});
 
         return m_tun_fd.native_handle();

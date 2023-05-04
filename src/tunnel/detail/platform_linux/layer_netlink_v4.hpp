@@ -134,7 +134,7 @@ public:
             return false;
         }
 
-        Super::do_log(log_level::state, log_kind::is_default_route,
+        Super::do_log(log_level::debug, log_kind::is_default_route,
                       log::boolean{"is_default_route",
                                    default_interface == tun_interface});
 

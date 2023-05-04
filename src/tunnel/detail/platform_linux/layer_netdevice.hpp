@@ -95,7 +95,7 @@ public:
             return;
         }
 
-        Super::do_log(log_level::state, log_kind::interface_renamed,
+        Super::do_log(log_level::debug, log_kind::interface_renamed,
                       log::str{"interface_name", interface_name.c_str()});
 
         if (iface_up)
@@ -124,7 +124,7 @@ public:
 
         bool is_if_up = (ifr.ifr_flags & IFF_UP) != 0;
 
-        Super::do_log(log_level::state, log_kind::is_up,
+        Super::do_log(log_level::debug, log_kind::is_up,
                       log::boolean{"is_up", is_if_up});
 
         return is_if_up;
@@ -151,13 +151,13 @@ public:
         ifr.ifr_flags |= IFF_UP;
         Super::ioctl(m_dev_fd, SIOCSIFFLAGS, &ifr, error);
 
-        Super::do_log(log_level::state, log_kind::interface_up);
+        Super::do_log(log_level::debug, log_kind::interface_up);
     }
 
     auto is_down(std::error_code& error) const -> bool
     {
         assert(!error);
-        Super::do_log(log_level::state, log_kind::is_down);
+        Super::do_log(log_level::debug, log_kind::is_down);
         return !is_up(error);
     }
 
@@ -182,7 +182,7 @@ public:
         ifr.ifr_flags &= ~IFF_UP;
         Super::ioctl(m_dev_fd, SIOCSIFFLAGS, &ifr, error);
 
-        Super::do_log(log_level::state, log_kind::interface_down);
+        Super::do_log(log_level::debug, log_kind::interface_down);
     }
 
     void set_mtu(uint32_t mtu, std::error_code& error) const
@@ -209,7 +209,7 @@ public:
 
         Super::ioctl(m_dev_fd, SIOCSIFMTU, &ifr, error);
 
-        Super::do_log(log_level::state, log_kind::set_mtu,
+        Super::do_log(log_level::debug, log_kind::set_mtu,
                       log::integer{"mtu", mtu});
     }
 
@@ -224,7 +224,7 @@ public:
 
         Super::ioctl(m_dev_fd, SIOCGIFMTU, &ifr, error);
 
-        Super::do_log(log_level::state, log_kind::interface_mtu,
+        Super::do_log(log_level::debug, log_kind::interface_mtu,
                       log::integer{"mtu", ifr.ifr_mtu});
 
         return ifr.ifr_mtu;
@@ -265,7 +265,7 @@ public:
 
         Super::ioctl(m_dev_fd, SIOCADDRT, &route, error);
 
-        Super::do_log(log_level::state, log_kind::enable_default_route);
+        Super::do_log(log_level::debug, log_kind::enable_default_route);
     }
 
     void disable_default_route(std::error_code& error) const
@@ -303,7 +303,7 @@ public:
 
         Super::ioctl(m_dev_fd, SIOCDELRT, &route, error);
 
-        Super::do_log(log_level::state, log_kind::disable_default_route);
+        Super::do_log(log_level::debug, log_kind::disable_default_route);
     }
 
     auto ipv4(std::error_code& error) const -> std::string
@@ -326,7 +326,7 @@ public:
 
         struct sockaddr_in* addr_in = (struct sockaddr_in*)&ifr.ifr_addr;
 
-        Super::do_log(log_level::state, log_kind::interface_ipv4,
+        Super::do_log(log_level::debug, log_kind::interface_ipv4,
                       log::str{"ip", ::inet_ntoa(addr_in->sin_addr)});
 
         return ::inet_ntoa(addr_in->sin_addr);
@@ -352,7 +352,7 @@ public:
 
         struct sockaddr_in* addr_in = (struct sockaddr_in*)&ifr.ifr_addr;
 
-        Super::do_log(log_level::state, log_kind::interface_ipv4_netmask,
+        Super::do_log(log_level::debug, log_kind::interface_ipv4_netmask,
                       log::str{"netmask", ::inet_ntoa(addr_in->sin_addr)});
 
         return ::inet_ntoa(addr_in->sin_addr);
@@ -382,7 +382,7 @@ public:
 
         Super::ioctl(m_dev_fd, SIOCSIFADDR, &ifr, error);
 
-        Super::do_log(log_level::state, log_kind::set_ipv4,
+        Super::do_log(log_level::debug, log_kind::set_ipv4,
                       log::str{"ip", address.c_str()});
     }
 
@@ -409,7 +409,7 @@ public:
 
         Super::ioctl(m_dev_fd, SIOCSIFNETMASK, &ifr, error);
 
-        Super::do_log(log_level::state, log_kind::set_ipv4_netmask,
+        Super::do_log(log_level::debug, log_kind::set_ipv4_netmask,
                       log::str{"netmask", netmask.c_str()});
     }
 
