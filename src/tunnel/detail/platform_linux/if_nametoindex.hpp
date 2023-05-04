@@ -10,9 +10,9 @@
 
 namespace tunnel
 {
-namespace platform_linux
-{
 namespace detail
+{
+namespace platform_linux
 {
 auto if_indextoname(uint32_t index) -> std::string;
 }

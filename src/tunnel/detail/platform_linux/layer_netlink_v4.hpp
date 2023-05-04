@@ -29,19 +29,19 @@
 #include <unistd.h>
 #include <vector>
 
-#include "../detail/log.hpp"
-#include "detail/if_nametoindex.hpp"
+#include "../log.hpp"
+#include "../log_kind.hpp"
 #include "error.hpp"
+#include "if_nametoindex.hpp"
 #include "scoped_file_descriptor.hpp"
 
-#include "../log_kind.hpp"
-#include "../log_level.hpp"
+#include "../../log_level.hpp"
 
 namespace tunnel
 {
-namespace platform_linux
-{
 namespace detail
+{
+namespace platform_linux
 {
 inline int32_t netlink_port()
 {
@@ -60,7 +60,6 @@ inline uint32_t sequence_number()
 {
     static uint32_t number = 0;
     return number++;
-}
 }
 
 /// rtnetlink - Linux IPv4 routing socket
@@ -135,10 +134,9 @@ public:
             return false;
         }
 
-        Super::do_log(
-            log_level::state, log_kind::is_default_route,
-            tunnel::detail::log::boolean{"is_default_route",
-                                         default_interface == tun_interface});
+        Super::do_log(log_level::state, log_kind::is_default_route,
+                      log::boolean{"is_default_route",
+                                   default_interface == tun_interface});
 
         return default_interface == tun_interface;
     }
@@ -160,7 +158,7 @@ private:
         header->nlmsg_len = NLMSG_LENGTH(size);
         header->nlmsg_type = type;
         header->nlmsg_flags = flags;
-        header->nlmsg_seq = detail::sequence_number();
+        header->nlmsg_seq = sequence_number();
         header->nlmsg_pid = 111;
 
         void* dst_data = NLMSG_DATA(header);
@@ -168,11 +166,10 @@ private:
 
         Super::send(m_dev_fd, message.data(), message.size(), 0, error);
 
-        Super::do_log(
-            log_level::debug, log_kind::send_netlink,
-            tunnel::detail::log::uinteger{"nlmsg_pid", header->nlmsg_pid},
-            tunnel::detail::log::uinteger{"nlmsg_seq", header->nlmsg_seq},
-            tunnel::detail::log::str{"error", error.message().c_str()});
+        Super::do_log(log_level::debug, log_kind::send_netlink,
+                      log::uinteger{"nlmsg_pid", header->nlmsg_pid},
+                      log::uinteger{"nlmsg_seq", header->nlmsg_seq},
+                      log::str{"error", error.message().c_str()});
     }
 
     auto recv_netlink(std::error_code& error) -> std::string
@@ -215,7 +212,7 @@ private:
                 case RTA_OIF:
                 {
                     uint32_t index = *(uint32_t*)RTA_DATA(attr);
-                    name = detail::if_indextoname(index);
+                    name = if_indextoname(index);
                     break;
                 }
                 case RTA_DST:
@@ -258,7 +255,7 @@ private:
             }
 
             Super::do_log(log_level::debug, log_kind::recv_netlink_message,
-                          tunnel::detail::log::uinteger{"size", size});
+                          log::uinteger{"size", size});
 
             message.resize(size, 0);
 
@@ -278,12 +275,11 @@ private:
                 return {};
             }
 
-            Super::do_log(
-                log_level::debug, log_kind::recv_netlink_message,
-                tunnel::detail::log::uinteger{"nlmsg_pid", header->nlmsg_pid},
-                tunnel::detail::log::uinteger{"nlmsg_seq", header->nlmsg_seq},
-                tunnel::detail::log::integer{"m_netlink_port", m_netlink_port},
-                tunnel::detail::log::str{"error", error.message().c_str()});
+            Super::do_log(log_level::debug, log_kind::recv_netlink_message,
+                          log::uinteger{"nlmsg_pid", header->nlmsg_pid},
+                          log::uinteger{"nlmsg_seq", header->nlmsg_seq},
+                          log::integer{"m_netlink_port", m_netlink_port},
+                          log::str{"error", error.message().c_str()});
 
             // Filter out messages not for us
         } while ((pid_t)header->nlmsg_pid != m_netlink_port);
@@ -334,7 +330,8 @@ private:
 
 private:
     scoped_file_descriptor m_dev_fd;
-    const pid_t m_netlink_port = detail::netlink_port();
+    const pid_t m_netlink_port = netlink_port();
 };
+}
 }
 }

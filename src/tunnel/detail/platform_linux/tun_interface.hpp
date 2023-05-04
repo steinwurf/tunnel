@@ -28,10 +28,12 @@
 #include "layer_tun.hpp"
 #include "scoped_file_descriptor.hpp"
 
-#include "../detail/layer_final.hpp"
-#include "../detail/layer_monitor.hpp"
+#include "../layer_final.hpp"
+#include "../layer_monitor.hpp"
 
 namespace tunnel
+{
+namespace detail
 {
 namespace platform_linux
 {
@@ -44,8 +46,8 @@ struct tun_interface : public
     layer_netdevice<
     layer_tun<
     layer_linux<
-    tunnel::detail::layer_monitor<
-    tunnel::detail::layer_final<tun_interface>>>>>>
+    layer_monitor<
+    layer_final<tun_interface>>>>>>
 {
     static auto is_platform_supported() -> bool
     {
@@ -54,9 +56,10 @@ struct tun_interface : public
 
     static auto type() -> std::string
     {
-        return "tunnel::platform_linux::tun_interface";
+        return "tunnel::detail::platform_linux::tun_interface";
     }
 };
 // clang-format on
+}
 }
 }

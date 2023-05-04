@@ -10,6 +10,8 @@
 
 namespace tunnel
 {
+namespace detail
+{
 namespace platform_linux
 {
 /// RAII (Resource Allocation Is Initialization) wrapper for a file
@@ -96,5 +98,6 @@ private:
     int m_file_descriptor;
 };
 
+}
 }
 }

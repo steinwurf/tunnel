@@ -14,9 +14,9 @@
 
 namespace tunnel
 {
-namespace platform_linux
-{
 namespace detail
+{
+namespace platform_linux
 {
 // Bug in the Linux headers.
 // https://bugzilla.redhat.com/show_bug.cgi?id=1300256

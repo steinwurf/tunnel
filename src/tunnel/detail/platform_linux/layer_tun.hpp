@@ -29,12 +29,14 @@
 #include "error.hpp"
 #include "scoped_file_descriptor.hpp"
 
-#include "../detail/log.hpp"
-
+#include "../log.hpp"
 #include "../log_kind.hpp"
-#include "../log_level.hpp"
+
+#include "../../log_level.hpp"
 
 namespace tunnel
+{
+namespace detail
 {
 namespace platform_linux
 {
@@ -55,9 +57,8 @@ struct layer_tun : public Super
         {
             error = make_error_code(linux_error::interface_name_too_long);
 
-            Super::do_log(
-                log_level::error, log_kind::interface_created,
-                tunnel::detail::log::str{"error", error.message().c_str()});
+            Super::do_log(log_level::error, log_kind::interface_created,
+                          log::str{"error", error.message().c_str()});
 
             return;
         }
@@ -98,7 +99,7 @@ struct layer_tun : public Super
         Super::ioctl(m_tun_fd, TUNSETIFF, (void*)&ifr, error);
 
         Super::do_log(log_level::state, log_kind::interface_created,
-                      tunnel::detail::log::str{"name", interface_name.c_str()});
+                      log::str{"name", interface_name.c_str()});
     }
 
     auto owner(std::error_code& error) const -> std::string
@@ -108,7 +109,7 @@ struct layer_tun : public Super
         std::string o = read_property("owner", error);
 
         Super::do_log(log_level::state, log_kind::owner,
-                      tunnel::detail::log::str{"owner", o.c_str()});
+                      log::str{"owner", o.c_str()});
 
         if (error)
         {
@@ -140,7 +141,7 @@ struct layer_tun : public Super
         assert(!owner.empty());
 
         Super::do_log(log_level::state, log_kind::set_owner,
-                      tunnel::detail::log::str{"owner", owner.c_str()});
+                      log::str{"owner", owner.c_str()});
 
         struct passwd* pwd = getpwnam(owner.c_str());
 
@@ -159,7 +160,7 @@ struct layer_tun : public Super
         std::string o = read_property("group", error);
 
         Super::do_log(log_level::state, log_kind::group,
-                      tunnel::detail::log::str{"group", o.c_str()});
+                      log::str{"group", o.c_str()});
 
         if (error)
         {
@@ -192,7 +193,7 @@ struct layer_tun : public Super
         assert(m_tun_fd);
 
         Super::do_log(log_level::state, log_kind::set_group,
-                      tunnel::detail::log::str{"group", group.c_str()});
+                      log::str{"group", group.c_str()});
 
         struct group* grp = getgrnam(group.c_str());
 
@@ -219,7 +220,7 @@ struct layer_tun : public Super
         bool persistent = ifr.ifr_flags & IFF_PERSIST;
 
         Super::do_log(log_level::state, log_kind::interface_is_persistent,
-                      tunnel::detail::log::boolean{"persistent", persistent});
+                      log::boolean{"persistent", persistent});
         return persistent;
     }
 
@@ -229,7 +230,7 @@ struct layer_tun : public Super
         assert(!error);
 
         Super::do_log(log_level::state, log_kind::set_persistent,
-                      tunnel::detail::log::str{"", ""});
+                      log::str{"", ""});
 
         Super::ioctl(m_tun_fd, TUNSETPERSIST, (void*)1, error);
     }
@@ -240,7 +241,7 @@ struct layer_tun : public Super
         assert(!error);
 
         Super::do_log(log_level::state, log_kind::set_non_persistent,
-                      tunnel::detail::log::str{"", ""});
+                      log::str{"", ""});
 
         Super::ioctl(m_tun_fd, TUNSETPERSIST, (void*)0, error);
     }
@@ -256,7 +257,7 @@ struct layer_tun : public Super
         Super::ioctl(m_tun_fd, TUNGETIFF, (void*)&ifr, error);
 
         Super::do_log(log_level::state, log_kind::interface_name,
-                      tunnel::detail::log::str{"name", ifr.ifr_name});
+                      log::str{"name", ifr.ifr_name});
 
         return ifr.ifr_name;
     }
@@ -265,9 +266,8 @@ struct layer_tun : public Super
     {
         assert(m_tun_fd);
 
-        Super::do_log(
-            log_level::state, log_kind::native_handle,
-            tunnel::detail::log::integer{"handle", m_tun_fd.native_handle()});
+        Super::do_log(log_level::state, log_kind::native_handle,
+                      log::integer{"handle", m_tun_fd.native_handle()});
 
         return m_tun_fd.native_handle();
     }
@@ -318,5 +318,6 @@ private:
 private:
     scoped_file_descriptor m_tun_fd;
 };
+}
 }
 }

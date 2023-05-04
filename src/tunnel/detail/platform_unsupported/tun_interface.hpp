@@ -7,17 +7,19 @@
 
 #include "layer_tun.hpp"
 
-#include "../detail/layer_final.hpp"
-#include "../detail/layer_monitor.hpp"
+#include "../layer_final.hpp"
+#include "../layer_monitor.hpp"
 namespace tunnel
+{
+namespace detail
 {
 namespace platform_unsupported
 {
 // clang-format off
 struct tun_interface : public
     layer_tun<
-    detail::layer_monitor<
-    detail::layer_final<tun_interface>>>
+    layer_monitor<
+    layer_final<tun_interface>>>
 // clang-format on
 {
     static bool is_platform_supported()
@@ -31,5 +33,6 @@ struct tun_interface : public
     }
 };
 
+}
 }
 }

@@ -14,6 +14,8 @@
 
 namespace tunnel
 {
+namespace detail
+{
 namespace platform_linux
 {
 
@@ -53,6 +55,7 @@ auto make_error_code(linux_error error) -> std::error_code
     return {static_cast<int>(error), error_category()};
 }
 
+}
 }
 }
 

@@ -14,14 +14,17 @@
 #include <sys/ioctl.h>
 #include <system_error>
 
-#include "../detail/log.hpp"
+#include "../log.hpp"
+#include "../log_kind.hpp"
+
 #include "error.hpp"
 #include "scoped_file_descriptor.hpp"
 
-#include "../log_kind.hpp"
-#include "../log_level.hpp"
+#include "../../log_level.hpp"
 
 namespace tunnel
+{
+namespace detail
 {
 namespace platform_linux
 {
@@ -53,11 +56,9 @@ public:
         if (interface_name.size() > IFNAMSIZ - 1)
         {
             error = make_error_code(linux_error::interface_name_too_long);
-            Super::do_log(
-                log_level::error, log_kind::interface_renamed,
-                tunnel::detail::log::str{"interface_name",
-                                         interface_name.c_str()},
-                tunnel::detail::log::str{"error", error.message().c_str()});
+            Super::do_log(log_level::error, log_kind::interface_renamed,
+                          log::str{"interface_name", interface_name.c_str()},
+                          log::str{"error", error.message().c_str()});
             return;
         }
 
@@ -94,9 +95,8 @@ public:
             return;
         }
 
-        Super::do_log(
-            log_level::state, log_kind::interface_renamed,
-            tunnel::detail::log::str{"interface_name", interface_name.c_str()});
+        Super::do_log(log_level::state, log_kind::interface_renamed,
+                      log::str{"interface_name", interface_name.c_str()});
 
         if (iface_up)
         {
@@ -125,7 +125,7 @@ public:
         bool is_if_up = (ifr.ifr_flags & IFF_UP) != 0;
 
         Super::do_log(log_level::state, log_kind::is_up,
-                      tunnel::detail::log::boolean{"is_up", is_if_up});
+                      log::boolean{"is_up", is_if_up});
 
         return is_if_up;
     }
@@ -192,10 +192,9 @@ public:
         if (mtu < ETH_HLEN || mtu > 65535)
         {
             error = make_error_code(linux_error::mtu_too_large);
-            Super::do_log(
-                log_level::error, log_kind::set_mtu,
-                tunnel::detail::log::uinteger{"mtu", mtu},
-                tunnel::detail::log::str{"error", error.message().c_str()});
+            Super::do_log(log_level::error, log_kind::set_mtu,
+                          log::uinteger{"mtu", mtu},
+                          log::str{"error", error.message().c_str()});
             return;
         }
 
@@ -211,7 +210,7 @@ public:
         Super::ioctl(m_dev_fd, SIOCSIFMTU, &ifr, error);
 
         Super::do_log(log_level::state, log_kind::set_mtu,
-                      tunnel::detail::log::integer{"mtu", mtu});
+                      log::integer{"mtu", mtu});
     }
 
     auto mtu(std::error_code& error) const -> uint32_t
@@ -226,7 +225,7 @@ public:
         Super::ioctl(m_dev_fd, SIOCGIFMTU, &ifr, error);
 
         Super::do_log(log_level::state, log_kind::interface_mtu,
-                      tunnel::detail::log::integer{"mtu", ifr.ifr_mtu});
+                      log::integer{"mtu", ifr.ifr_mtu});
 
         return ifr.ifr_mtu;
     }
@@ -327,9 +326,8 @@ public:
 
         struct sockaddr_in* addr_in = (struct sockaddr_in*)&ifr.ifr_addr;
 
-        Super::do_log(
-            log_level::state, log_kind::interface_ipv4,
-            tunnel::detail::log::str{"ip", ::inet_ntoa(addr_in->sin_addr)});
+        Super::do_log(log_level::state, log_kind::interface_ipv4,
+                      log::str{"ip", ::inet_ntoa(addr_in->sin_addr)});
 
         return ::inet_ntoa(addr_in->sin_addr);
     }
@@ -355,8 +353,7 @@ public:
         struct sockaddr_in* addr_in = (struct sockaddr_in*)&ifr.ifr_addr;
 
         Super::do_log(log_level::state, log_kind::interface_ipv4_netmask,
-                      tunnel::detail::log::str{"netmask",
-                                               ::inet_ntoa(addr_in->sin_addr)});
+                      log::str{"netmask", ::inet_ntoa(addr_in->sin_addr)});
 
         return ::inet_ntoa(addr_in->sin_addr);
     }
@@ -386,7 +383,7 @@ public:
         Super::ioctl(m_dev_fd, SIOCSIFADDR, &ifr, error);
 
         Super::do_log(log_level::state, log_kind::set_ipv4,
-                      tunnel::detail::log::str{"ip", address.c_str()});
+                      log::str{"ip", address.c_str()});
     }
 
     void set_ipv4_netmask(const std::string& netmask,
@@ -413,7 +410,7 @@ public:
         Super::ioctl(m_dev_fd, SIOCSIFNETMASK, &ifr, error);
 
         Super::do_log(log_level::state, log_kind::set_ipv4_netmask,
-                      tunnel::detail::log::str{"netmask", netmask.c_str()});
+                      log::str{"netmask", netmask.c_str()});
     }
 
 private:
@@ -429,10 +426,9 @@ private:
         {
             error = std::error_code(errno, std::generic_category());
 
-            Super::do_log(
-                log_level::error, log_kind::make_sockaddr,
-                tunnel::detail::log::str{"ip", ip.c_str()},
-                tunnel::detail::log::str{"error", error.message().c_str()});
+            Super::do_log(log_level::error, log_kind::make_sockaddr,
+                          log::str{"ip", ip.c_str()},
+                          log::str{"error", error.message().c_str()});
 
             return {};
         }
@@ -440,7 +436,7 @@ private:
         addr_in->sin_family = AF_INET;
 
         Super::do_log(log_level::debug, log_kind::make_sockaddr,
-                      detail::log::str{"ip", ip.c_str()});
+                      log::str{"ip", ip.c_str()});
 
         return addr;
     }
@@ -464,7 +460,10 @@ private:
         return ifr;
     }
 
-    private : scoped_file_descriptor m_dev_fd;
+    private :
+
+        scoped_file_descriptor m_dev_fd;
 };
+}
 }
 }

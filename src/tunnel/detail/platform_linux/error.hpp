@@ -8,6 +8,8 @@
 
 namespace tunnel
 {
+namespace detail
+{
 namespace platform_linux
 {
 
@@ -23,5 +25,6 @@ enum class linux_error
 
 auto make_error_code(linux_error error) -> std::error_code;
 
+}
 }
 }

@@ -3,4 +3,4 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
-#include <tunnel/platform_linux/error.hpp>
+#include <tunnel/detail/platform_linux/scoped_file_descriptor.hpp>

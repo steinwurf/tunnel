@@ -4,8 +4,11 @@
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
 #include "to_string.hpp"
+#include "log_kind.hpp"
 
 namespace tunnel
+{
+namespace detail
 {
 
 auto to_string(log_kind kind) -> std::string
@@ -83,6 +86,7 @@ auto to_string(log_kind kind) -> std::string
     default:
         return "unknown";
     }
+}
 }
 
 }

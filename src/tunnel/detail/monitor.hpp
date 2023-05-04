@@ -7,8 +7,9 @@
 
 #include <string>
 
+#include "log_kind.hpp"
+
 #include "../log_callback.hpp"
-#include "../log_kind.hpp"
 #include "../log_level.hpp"
 
 #include <abacus/metric_info.hpp>
