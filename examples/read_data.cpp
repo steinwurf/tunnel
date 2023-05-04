@@ -26,7 +26,7 @@ int main()
     { std::cout << message << std::endl; };
 
     tunnel::tun_interface iface;
-    iface.monitor().enable_log(tunnel::log_level::state, log);
+    iface.monitor().enable_log(log);
 
     iface.create();
     iface.set_ipv4("10.0.0.1");

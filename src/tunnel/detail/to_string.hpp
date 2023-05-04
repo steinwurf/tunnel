@@ -11,10 +11,12 @@
 
 namespace tunnel
 {
-
+namespace detail
+{
 /// Convert a log_kind to a string
 /// @param kind The log_kind
 /// @return The human-readable string value
 auto to_string(log_kind kind) -> std::string;
 
+}
 }

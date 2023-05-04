@@ -5,10 +5,12 @@
 
 #pragma once
 
+#include "../../log_level.hpp"
 #include "../log_kind.hpp"
-#include "../log_level.hpp"
 
 namespace tunnel
+{
+namespace detail
 {
 namespace platform_unsupported
 {
@@ -201,5 +203,6 @@ public:
         return -1;
     }
 };
+}
 }
 }

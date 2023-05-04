@@ -3,4 +3,4 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
-#include <tunnel/platform_linux/layer_linux.hpp>
+#include <tunnel/detail/platform_linux/layer_netdevice.hpp>

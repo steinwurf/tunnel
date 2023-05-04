@@ -12,23 +12,21 @@
 #include <fmt/ostream.h>
 
 #include "log.hpp"
+#include "log_kind.hpp"
+#include "to_string.hpp"
 
 #include "../log_callback.hpp"
-#include "../log_kind.hpp"
-#include "../to_string.hpp"
 
 namespace tunnel
 {
-
-inline void format_to(fmt::memory_buffer& buffer, tunnel::log_kind kind)
-{
-    fmt::format_to(std::back_inserter(buffer), R"("kind": "{}")",
-                   tunnel::to_string(kind));
-}
-
 namespace detail
 {
 
+inline void format_to(fmt::memory_buffer& buffer, log_kind kind)
+{
+    fmt::format_to(std::back_inserter(buffer), R"("kind": "{}")",
+                   to_string(kind));
+}
 inline void format_to(fmt::memory_buffer& buffer, log::boolean element)
 {
     fmt::format_to(std::back_inserter(buffer), R"("{}": {})", element.name,

@@ -14,8 +14,8 @@
 
 #include "format_to.hpp"
 #include "log.hpp"
+#include "log_kind.hpp"
 
-#include "../log_kind.hpp"
 #include "../log_level.hpp"
 
 namespace tunnel

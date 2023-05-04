@@ -7,7 +7,8 @@
 
 namespace tunnel
 {
-
+namespace detail
+{
 /// The different kinds of possible log messages
 enum class log_kind
 {
@@ -105,4 +106,5 @@ enum class log_kind
     /// Unsupported platform
     unsupported_platform,
 };
+}
 }
