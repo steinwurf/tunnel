@@ -10,29 +10,30 @@
 
 #include "log_callback.hpp"
 #include "log_level.hpp"
+#include "visit_callback.hpp"
 
 namespace tunnel
 {
 
 struct monitor
 {
-    /// @return The type.
-    virtual auto type() const -> const std::string& = 0;
-
-    /// @return The path.
-    virtual auto path() const -> const std::string& = 0;
-
-    /// Enables the log.
+    /// Visit all underlying objects and print their type and path.
+    /// The type and path can be used for filtering both the log and metrics.
     ///
-    /// @param level The log level.
-    /// @param callback The callback that handles the log message.
-    /// @param type_filter The type filter determines which log messages
-    ///                    are handled by the callback.
-    /// @param path_filter The path filter determines which log messages
-    ///                    are handled by the callback.
-    virtual void enable_log(log_level level, const log_callback& callback,
-                            const std::string& type_filter = "*",
-                            const std::string& path_filter = "*") = 0;
+    /// @param callback The callback that handles the visited objects.
+    virtual void visit(const visit_callback& callback) const = 0;
+
+    /// Enable the log. If type and path filter is given, the log will
+    /// be propagated to all underlying objects matching the given
+    /// type and path filter.
+    /// @param callback The callback to receive the log messages
+    /// @param level The log level
+    /// @param type_filter The type filter "*" matches all types.
+    /// @param path_filter The path filter "*" matches all paths.
+    virtual void enable_log(const log_callback& callback,
+                            log_level level = log_level::state,
+                            const std::string& type_filter = "",
+                            const std::string& path_filter = "") = 0;
 
     /// Disables all the logging.
     virtual void disable_log() = 0;

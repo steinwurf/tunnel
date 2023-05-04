@@ -45,27 +45,23 @@ struct monitor : tunnel::monitor
     {
     }
 
-    virtual auto type() const -> const std::string& override
+    virtual void visit(const visit_callback& callback) const override
     {
-        return m_monitor.type();
+        m_monitor.visit([&callback](const poke::monitor& monitor)
+                        { callback(monitor.type(), monitor.path()); });
     }
 
-    virtual auto path() const -> const std::string& override
+    virtual void enable_log(const log_callback& callback,
+                            log_level level = log_level::state,
+                            const std::string& type_filter = "",
+                            const std::string& path_filter = "") override
     {
-        return m_monitor.path();
+        m_monitor.enable_log({callback.invoke(), callback.storage()},
+                             to_poke_log_level(level), type_filter,
+                             path_filter);
     }
 
-    virtual auto enable_log(log_level level, const log_callback& callback,
-                            const std::string& type_filter = "*",
-                            const std::string& path_filter = "*")
-        -> void override
-    {
-        m_monitor.enable_log(to_poke_log_level(level),
-                             {callback.invoke(), callback.storage()},
-                             type_filter, path_filter);
-    }
-
-    virtual auto disable_log() -> void override
+    virtual void disable_log() override
     {
         m_monitor.disable_log();
     }
