@@ -6,11 +6,31 @@
 #include <tunnel/tun_interface.hpp>
 
 #include <cassert>
+#include <cstring>
 #include <iostream>
+extern "C"
+{
+
+#include <sys/types.h>
+
 #include <linux/if_tun.h>
+    // #include <linux/virtio_net.h>
+}
+#include <net/if.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <vector>
+struct virtio_net_hdr
+{
+    /* See VIRTIO_NET_HDR_F_* */
+    __u8 flags;
+    /* See VIRTIO_NET_HDR_GSO_* */
+    __u8 gso_type;
+    __u16 hdr_len;     /* Ethernet + IP + tcp/udp hdrs */
+    __u16 gso_size;    /* Bytes to append to hdr_len per frame */
+    __u16 csum_start;  /* Position to start checksumming from */
+    __u16 csum_offset; /* Offset after that to place checksum */
+};
 
 /// In this example we read data from the TUN interface
 ///
@@ -38,12 +58,21 @@ int main()
     iface1.create();
     iface1.set_ipv4("10.0.0.1");
     iface1.set_ipv4_netmask("255.255.255.0");
-    iface1.set_mtu(1500);
+    iface1.set_mtu(6000);
     iface1.up();
 
-    int error = ::ioctl(iface1.native_handle(), TUNSETOFFLOAD, 1);
+    // Enable offload
+    struct ifreq ifr;
+    memset(&ifr, 0, sizeof(ifr));
 
-    if (error < 0)
+    // get the current flags
+
+    // Enable offloa
+    int off_load_flags = TUN_F_CSUM | TUN_F_TSO4 | TUN_F_UFO;
+
+    int offload =
+        ::ioctl(iface1.native_handle(), TUNSETOFFLOAD, off_load_flags);
+    if (offload < 0)
     {
         std::cout << "Error setting offload" << std::endl;
         exit(1);
@@ -61,15 +90,23 @@ int main()
 
     while (true)
     {
-        int read = ::read(iface1.native_handle(), buffer.data(), buffer.size());
 
-        if (read < 0)
+        // msg read from tun
+        int recv = read(iface1.native_handle(), buffer.data(), buffer.size());
+
+        struct virtio_net_hdr* hdr = (struct virtio_net_hdr*)buffer.data();
+
+        std::cout << "flags: " << (int)hdr->flags << std::endl;
+        std::cout << "gso_type: " << (int)hdr->gso_type << std::endl;
+
+        if (recv < 0)
         {
             std::cout << "Error reading from TUN" << std::endl;
+            perror("read");
             exit(1);
         }
 
-        std::cout << packets << ": Read " << read << " bytes" << std::endl;
+        std::cout << packets << ": Read " << recv << " bytes" << std::endl;
         ++packets;
     }
 

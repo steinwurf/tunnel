@@ -86,7 +86,7 @@ struct layer_tun : public Super
         // network packet.
         // Since the first two values are largely redundant, most applications
         // will probably want to set this flag, hence we do so here.
-        ifr.ifr_flags |= IFF_NO_PI;
+        ifr.ifr_flags |= IFF_NO_PI | IFF_VNET_HDR;
 
         if (!interface_name.empty())
         {
