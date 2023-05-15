@@ -32,6 +32,13 @@ public:
     void create(const std::string& interface_name);
     void create(const std::string& interface_name, std::error_code& error);
 
+    /// Create the interface with the specified name and optional vnet_hdr
+    /// support
+
+    void create(const std::string& interface_name, bool vnet_hdr);
+    void create(const std::string& interface_name, bool vnet_hdr,
+                std::error_code& error);
+
     /// Rename the interface
     void rename(const std::string& interface_name) const;
     void rename(const std::string& interface_name,

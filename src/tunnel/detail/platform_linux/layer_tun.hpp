@@ -45,7 +45,8 @@ template <class Super>
 struct layer_tun : public Super
 {
 
-    void create(const std::string& interface_name, std::error_code& error)
+    void create(const std::string& interface_name, std::error_code& error,
+                bool vnet_hdr = false)
     {
         assert(!error);
 
@@ -86,8 +87,16 @@ struct layer_tun : public Super
         // network packet.
         // Since the first two values are largely redundant, most applications
         // will probably want to set this flag, hence we do so here.
-        ifr.ifr_flags |= IFF_NO_PI | IFF_VNET_HDR;
+        ifr.ifr_flags |= IFF_NO_PI;
 
+        // If the vnet_hdr flag is set, we want to enable the virtio-net-header
+        // feature. This feature is used to pass additional information about
+        // GSO packets to and from the kernel.
+        if (vnet_hdr)
+        {
+            ifr.ifr_flags |= IFF_VNET_HDR;
+        }
+        //
         if (!interface_name.empty())
         {
             // If a device name was specified, put it in the structure;
@@ -100,6 +109,14 @@ struct layer_tun : public Super
 
         Super::do_log(log_level::debug, log_kind::interface_created,
                       log::str{"name", interface_name.c_str()});
+
+        if (vnet_hdr)
+        {
+            int offload_flags = TUN_F_CSUM | TUN_F_TSO4 | TUN_F_UFO;
+            Super::ioctl(m_tun_fd, TUNSETOFFLOAD, offload_flags, error);
+            Super::do_log(log_level::debug, log_kind::interface_created,
+                          log::str{"vnet_hdr + GSO", "enabled"});
+        }
     }
 
     auto owner(std::error_code& error) const -> std::string

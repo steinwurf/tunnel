@@ -47,6 +47,20 @@ public:
 
         m_dev_fd = Super::socket(AF_INET, SOCK_STREAM, 0, error);
     }
+    void create(const std::string& interface_name, std::error_code& error,
+                bool vnet_hdr)
+    {
+        assert(!error);
+
+        Super::create(interface_name, error, vnet_hdr);
+
+        if (error)
+        {
+            return;
+        }
+
+        m_dev_fd = Super::socket(AF_INET, SOCK_STREAM, 0, error);
+    }
 
     void rename(const std::string& interface_name, std::error_code& error) const
     {
