@@ -25,6 +25,14 @@ public:
         Super::do_log(log_level::error, log_kind::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
     }
+    void create(const std::string& interface_name, std::error_code& error,
+                bool vnet_hdr)
+    {
+        (void)interface_name;
+        (void)vnet_hdr;
+        Super::do_log(log_level::error, log_kind::unsupported_platform);
+        error = std::make_error_code(std::errc::not_supported);
+    }
     void rename(const std::string& interface_name, std::error_code& error) const
     {
         (void)interface_name;
