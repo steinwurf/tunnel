@@ -8,6 +8,10 @@ Latest
 ------
 * tbd
 
+8.1.0
+-----
+* Minor: Support for TSO and UFO on Linux.
+
 8.0.0
 -----
 * Major: Upgrade to poke version 5.
