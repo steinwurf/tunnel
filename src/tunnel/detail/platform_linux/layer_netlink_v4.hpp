@@ -101,6 +101,34 @@ public:
 
         Super::bind(m_dev_fd, (struct sockaddr*)&sa, sizeof(sa), error);
     }
+    void create(const std::string& interface_name, std::error_code& error,
+                bool vnet_hdr)
+    {
+        assert(!error);
+
+        Super::create(interface_name, error, vnet_hdr);
+
+        if (error)
+        {
+            return;
+        }
+
+        m_dev_fd = Super::socket(AF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE, error);
+
+        if (error)
+        {
+            return;
+        }
+
+        struct sockaddr_nl sa
+        {
+        };
+
+        sa.nl_family = AF_NETLINK;
+        sa.nl_pid = m_netlink_port;
+
+        Super::bind(m_dev_fd, (struct sockaddr*)&sa, sizeof(sa), error);
+    }
 
     auto is_default_route(std::error_code& error) -> bool
     {

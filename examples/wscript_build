@@ -30,3 +30,11 @@ bld.program(
     linkflags=linkflags,
     use=['tunnel', 'boost_asio_includes', 'boost_system',
          'boost_program_options'])
+
+bld.program(
+    features='cxx',
+    source=['backtobacktun.cpp'],
+    target='backtobacktun',
+    linkflags=linkflags,
+    use=['tunnel', 'boost_asio_includes', 'boost_system',
+         'boost_program_options'])

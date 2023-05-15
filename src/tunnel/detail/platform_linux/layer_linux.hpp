@@ -104,6 +104,28 @@ struct layer_linux : public Super
                       log::integer{"fd", fd.native_handle()});
     }
 
+    /// Passes an ioctl request that take an int argument (not all request types
+    /// takes a pointer to some value) to the TUN driver that we are using or
+    /// sets the error_code.
+    void ioctl(const scoped_file_descriptor& fd, uint64_t request, int arg,
+               std::error_code& error) const
+    {
+        assert(!error);
+        assert(fd);
+
+        if (::ioctl(fd.native_handle(), request, arg) == -1)
+        {
+            error.assign(errno, std::generic_category());
+            Super::do_log(log_level::error, log_kind::ioctl,
+                          log::uinteger{"request", request},
+                          log::str{"error", error.message().c_str()});
+        }
+
+        Super::do_log(log_level::debug, log_kind::ioctl,
+                      log::uinteger{"request", request},
+                      log::integer{"fd", fd.native_handle()});
+    }
+
     auto send(const scoped_file_descriptor& fd, void* data, uint32_t size,
               int flags, std::error_code& error) const -> uint32_t
     {
