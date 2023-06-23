@@ -4,37 +4,39 @@
 linkflags = []
 CXX = bld.env.get_flat("CXX")
 # Matches both g++ and clang++
-if 'g++' in CXX or 'clang' in CXX:
+if "g++" in CXX or "clang" in CXX:
     # The binary might be executed in a VM running an older system
     # where libstdc++ could be incompatible, so we link it statically.
-    linkflags += ['-static-libstdc++']
+    linkflags += ["-static-libstdc++"]
 
 bld.program(
-    features='cxx',
-    source=['interface.cpp'],
-    target='interface',
+    features="cxx",
+    source=["interface.cpp"],
+    target="interface",
     linkflags=linkflags,
-    use=['tunnel'])
+    use=["tunnel"],
+)
 
 bld.program(
-    features='cxx',
-    source=['read_data.cpp'],
-    target='read_data',
+    features="cxx",
+    source=["read_data.cpp"],
+    target="read_data",
     linkflags=linkflags,
-    use=['tunnel'])
+    use=["tunnel"],
+)
 
 bld.program(
-    features='cxx',
-    source=['sample_tunnel.cpp'],
-    target='sample_tunnel',
+    features="cxx",
+    source=["sample_tunnel.cpp"],
+    target="sample_tunnel",
     linkflags=linkflags,
-    use=['tunnel', 'boost_asio_includes', 'boost_system',
-         'boost_program_options'])
+    use=["tunnel", "asio_includes", "cli11"],
+)
 
 bld.program(
-    features='cxx',
-    source=['backtobacktun.cpp'],
-    target='backtobacktun',
+    features="cxx",
+    source=["backtobacktun.cpp"],
+    target="backtobacktun",
     linkflags=linkflags,
-    use=['tunnel', 'boost_asio_includes', 'boost_system',
-         'boost_program_options'])
+    use=["tunnel"],
+)

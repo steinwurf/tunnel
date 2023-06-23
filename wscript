@@ -29,6 +29,7 @@ def options(opt):
 
 
 def configure(conf):
+    conf.set_cxx_std(11)
 
     if not conf.is_toplevel():
         return
@@ -43,11 +44,6 @@ def configure(conf):
 
 
 def build(bld):
-
-    bld.env.append_unique(
-        "DEFINES_STEINWURF_VERSION", 'STEINWURF_TUNNEL_VERSION="{}"'.format(VERSION)
-    )
-
     bld.stlib(
         features="cxx",
         source=bld.path.ant_glob("src/**/*.cpp"),
@@ -57,7 +53,6 @@ def build(bld):
     )
 
     if bld.is_toplevel() and bld.is_mkspec_platform("linux"):
-
         # Only build tests when executed from the top-level wscript,
         # i.e. not when included as a dependency
         bld.recurse("test")
@@ -67,7 +62,6 @@ def build(bld):
 
 
 def run_mininet_tests(bld):
-
     if not bld.options.run_mininet_tests:
         return
 
