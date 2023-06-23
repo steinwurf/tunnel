@@ -3,7 +3,8 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
-#include <boost/asio.hpp>
+#include <CLI/CLI.hpp>
+#include <asio.hpp>
 #include <tunnel/tun_interface.hpp>
 
 #include <cassert>
@@ -11,9 +12,6 @@
 #include <iostream>
 #include <unistd.h>
 #include <vector>
-
-#include <boost/asio.hpp>
-#include <boost/program_options.hpp>
 
 /**
  * Create Tunnel:
@@ -36,9 +34,9 @@
 class sample_tunnel
 {
 public:
-    sample_tunnel(boost::asio::io_service& io, int tun_fd, uint32_t mtu,
-                  boost::asio::ip::udp::endpoint local_endpoint,
-                  boost::asio::ip::udp::endpoint remote_endpoint) :
+    sample_tunnel(asio::io_service& io, int tun_fd, uint32_t mtu,
+                  asio::ip::udp::endpoint local_endpoint,
+                  asio::ip::udp::endpoint remote_endpoint) :
         m_socket(io),
         m_mtu(mtu), m_stream_descriptor(io), m_local_endpoint(local_endpoint),
         m_remote_endpoint(remote_endpoint)
@@ -53,8 +51,8 @@ public:
         // bind to specified address
         m_socket.bind(m_local_endpoint);
 
-        // allow socket to transmit broadcast packets
-        m_socket.set_option(boost::asio::socket_base::broadcast(true));
+        // allow the socket to transmit broadcast packets
+        m_socket.set_option(asio::socket_base::broadcast(true));
 
         async_network_receive();
         async_tun_read();
@@ -72,15 +70,15 @@ private:
     {
         m_rx_buffer.resize(m_mtu);
         m_socket.async_receive(
-            boost::asio::buffer(m_rx_buffer),
+            asio::buffer(m_rx_buffer),
             std::bind(&sample_tunnel::handle_async_network_receive, this,
                       std::placeholders::_1, std::placeholders::_2));
     }
 
-    void handle_async_network_receive(const boost::system::error_code& ec,
+    void handle_async_network_receive(const asio::error_code& ec,
                                       std::size_t bytes)
     {
-        if (ec == boost::system::errc::operation_canceled)
+        if (ec == asio::error::operation_aborted)
         {
             return;
         }
@@ -92,8 +90,7 @@ private:
         }
         std::cout << "udp receive " << bytes << std::endl;
         m_rx_buffer.resize(bytes);
-        boost::asio::write(m_stream_descriptor,
-                           boost::asio::buffer(m_rx_buffer));
+        asio::write(m_stream_descriptor, asio::buffer(m_rx_buffer));
         async_network_receive();
     }
 
@@ -101,15 +98,14 @@ private:
     {
         m_tx_buffer.resize(m_mtu);
         m_stream_descriptor.async_read_some(
-            boost::asio::buffer(m_tx_buffer),
+            asio::buffer(m_tx_buffer),
             std::bind(&sample_tunnel::handle_async_tun_read, this,
                       std::placeholders::_1, std::placeholders::_2));
     }
 
-    void handle_async_tun_read(const boost::system::error_code& ec,
-                               std::size_t bytes)
+    void handle_async_tun_read(const asio::error_code& ec, std::size_t bytes)
     {
-        if (ec == boost::system::errc::operation_canceled)
+        if (ec == asio::error::operation_aborted)
         {
             return;
         }
@@ -120,20 +116,20 @@ private:
         }
         std::cout << "tun read " << bytes << std::endl;
         m_tx_buffer.resize(bytes);
-        m_socket.send_to(boost::asio::buffer(m_tx_buffer), m_remote_endpoint);
+        m_socket.send_to(asio::buffer(m_tx_buffer), m_remote_endpoint);
         async_tun_read();
     }
 
 private:
-    boost::asio::ip::udp::socket m_socket;
+    asio::ip::udp::socket m_socket;
 
     const uint32_t m_mtu;
 
     // The tun file descriptor stream descriptor
-    boost::asio::posix::stream_descriptor m_stream_descriptor;
+    asio::posix::stream_descriptor m_stream_descriptor;
 
-    const boost::asio::ip::udp::endpoint m_local_endpoint;
-    const boost::asio::ip::udp::endpoint m_remote_endpoint;
+    const asio::ip::udp::endpoint m_local_endpoint;
+    const asio::ip::udp::endpoint m_remote_endpoint;
 
     std::vector<uint8_t> m_rx_buffer;
     std::vector<uint8_t> m_tx_buffer;
@@ -141,59 +137,35 @@ private:
 
 int main(int argc, char* argv[])
 {
-    namespace bpo = boost::program_options;
-
     std::string local_ip;
     std::string remote_ip;
     uint16_t port;
     std::string tunnel_ip;
 
-    // Parse the prorgram options
-    bpo::options_description options("Commandline Options");
+    CLI::App app{"Sample Tunnel"};
 
-    options.add_options()(
-        "tunnel_ip,t", bpo::value<std::string>(&tunnel_ip)->required(),
-        "Specify the IPv4 address to set on the created tunnel "
-        "interface [required]")(
-        "local_ip,l", bpo::value<std::string>(&local_ip)->required(),
-        "Specify the IPv4 address of the local interface that the tunnel "
-        "should send to and receive from [required]")(
-        "remote_ip,r", bpo::value<std::string>(&remote_ip)->required(),
-        "Specify the remote IPv4 address the tunnel should send to and receive "
-        "from [required]")("port,p",
-                           bpo::value<uint16_t>(&port)->default_value(9999),
-                           "Set the port to use for the udp tunnel")(
-        "help,h", "Print this help message");
+    app.add_option("-t,--tunnel_ip", tunnel_ip,
+                   "Specify the IPv4 address to set on the created tunnel "
+                   "interface")
+        ->required();
+    app.add_option("-l,--local_ip", local_ip,
+                   "Specify the IPv4 address of the local interface that the "
+                   "tunnel should send to and receive from")
+        ->required();
+    app.add_option("-r,--remote_ip", remote_ip,
+                   "Specify the remote IPv4 address the tunnel should send to "
+                   "and receive from")
+        ->required();
+    app.add_option("-p,--port", port, "Set the port to use for the UDP tunnel")
+        ->default_val(9999);
 
-    bpo::variables_map opts;
-
-    // Verify all required options are present
-    try
-    {
-        bpo::store(bpo::parse_command_line(argc, argv, options), opts);
-
-        if (opts.count("help"))
-        {
-            std::cout << options << std::endl;
-            return 0;
-        }
-
-        bpo::notify(opts);
-    }
-    catch (const std::exception& e)
-    {
-        std::cout << "Error when parsing commandline options: " << e.what()
-                  << std::endl;
-        std::cout << "See list of options with \"" << argv[0] << " --help\""
-                  << std::endl;
-        return 0;
-    }
+    CLI11_PARSE(app, argc, argv);
 
     // Print results of argument parse
     std::cout << "Setting up udp tunnel between endpoints " << local_ip << ":"
               << port << " (local) and " << remote_ip << ":" << port
               << " (remote)." << std::endl;
-    std::cout << "Setting up virtual interface with ip " << tunnel_ip
+    std::cout << "Setting up the virtual interface with ip " << tunnel_ip
               << ". All communication on this interface will go through the "
                  "udp tunnel."
               << std::endl;
@@ -206,13 +178,13 @@ int main(int argc, char* argv[])
     iface.set_ipv4(tunnel_ip);
     iface.set_ipv4_netmask("255.255.255.0");
 
-    boost::asio::io_service io;
+    asio::io_service io;
 
-    auto local_endpoint = boost::asio::ip::udp::endpoint(
-        boost::asio::ip::address_v4::from_string(local_ip), port);
+    auto local_endpoint = asio::ip::udp::endpoint(
+        asio::ip::address_v4::from_string(local_ip), port);
 
-    auto remote_endpoint = boost::asio::ip::udp::endpoint(
-        boost::asio::ip::address_v4::from_string(remote_ip), port);
+    auto remote_endpoint = asio::ip::udp::endpoint(
+        asio::ip::address_v4::from_string(remote_ip), port);
 
     sample_tunnel tunnel(io, iface.native_handle(), iface.mtu(), local_endpoint,
                          remote_endpoint);

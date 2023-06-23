@@ -3,7 +3,7 @@
         "name": "waf-tools",
         "resolver": "git",
         "method": "semver",
-        "major": 4,
+        "major": 5,
         "sources": [
             "github.com/steinwurf/waf-tools.git"
         ]
@@ -12,36 +12,16 @@
         "name": "platform",
         "resolver": "git",
         "method": "semver",
-        "major": 4,
+        "major": 5,
         "sources": [
             "github.com/steinwurf/platform.git"
-        ]
-    },
-    {
-        "name": "boost",
-        "internal": true,
-        "resolver": "git",
-        "method": "semver",
-        "major": 4,
-        "sources": [
-            "github.com/steinwurf/boost.git"
-        ]
-    },
-    {
-        "name": "gtest",
-        "internal": true,
-        "resolver": "git",
-        "method": "semver",
-        "major": 4,
-        "sources": [
-            "github.com/steinwurf/gtest.git"
         ]
     },
     {
         "name": "poke",
         "resolver": "git",
         "method": "semver",
-        "major": 5,
+        "major": 6,
         "sources": [
             "github.com/steinwurf/poke.git"
         ]
@@ -50,9 +30,39 @@
         "name": "abacus",
         "resolver": "git",
         "method": "semver",
-        "major": 4,
+        "major": 5,
         "sources": [
             "github.com/steinwurf/abacus.git"
+        ]
+    },
+    {
+        "name": "CLI11",
+        "resolver": "git",
+        "internal": true,
+        "method": "semver",
+        "major": 2,
+        "sources": [
+            "github.com/steinwurf/CLI11.git"
+        ]
+    },
+    {
+        "name": "asio",
+        "internal": true,
+        "resolver": "git",
+        "method": "semver",
+        "major": 2,
+        "sources": [
+            "github.com/steinwurf/asio.git"
+        ]
+    },
+    {
+        "name": "gtest",
+        "internal": true,
+        "resolver": "git",
+        "method": "semver",
+        "major": 5,
+        "sources": [
+            "github.com/steinwurf/gtest.git"
         ]
     }
 ]
