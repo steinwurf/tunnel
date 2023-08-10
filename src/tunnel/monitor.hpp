@@ -31,7 +31,7 @@ struct monitor
     /// @param type_filter The type filter "*" matches all types.
     /// @param path_filter The path filter "*" matches all paths.
     virtual void enable_log(const log_callback& callback,
-                            log_level level = log_level::state,
+                            log_level level = log_level::trace,
                             const std::string& type_filter = "",
                             const std::string& path_filter = "") = 0;
 

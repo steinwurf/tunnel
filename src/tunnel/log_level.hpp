@@ -13,9 +13,12 @@ namespace tunnel
 /// The log level
 enum class log_level : uint8_t
 {
-    state = 0,
+    trace = 0,
     debug,
-    error
+    info,
+    warn,
+    error,
+    fatal
 };
 
 }

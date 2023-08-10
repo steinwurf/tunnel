@@ -46,7 +46,7 @@ public:
     template <class... Args>
     void log_initialize(Args&&... args)
     {
-        do_log(log_level::state, log_kind::initialized,
+        do_log(log_level::trace, log_kind::initialized,
                std::forward<Args>(args)...);
     }
 
