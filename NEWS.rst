@@ -6,6 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+9.0.1
+-----
 * Patch: Fixed a bug where insufficient permissions would cause the library to
   assert instead of throwing an exception when using the exception-based API.
 
