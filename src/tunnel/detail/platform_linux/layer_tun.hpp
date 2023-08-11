@@ -51,7 +51,7 @@ struct layer_tun : public Super
         assert(!error);
 
         // Check that the interface name is not too long
-        // Seems in this patch the name has to be zero teminated so the actual
+        // Seems in this patch the name has to be zero-terminated so the actual
         // size we can use is IFNAMSIZ - 1:
         // https://www.spinics.net/lists/netdev/msg445126.html
         if (interface_name.size() > IFNAMSIZ - 1)
@@ -60,7 +60,7 @@ struct layer_tun : public Super
 
             Super::do_log(log_level::error, log_kind::interface_created,
                           log::str{"error", error.message().c_str()});
-
+            assert(error);
             return;
         }
 
@@ -106,6 +106,10 @@ struct layer_tun : public Super
         }
 
         Super::ioctl(m_tun_fd, TUNSETIFF, (void*)&ifr, error);
+        if (error)
+        {
+            return;
+        }
 
         Super::do_log(log_level::debug, log_kind::interface_created,
                       log::str{"name", interface_name.c_str()});

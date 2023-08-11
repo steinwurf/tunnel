@@ -4,6 +4,7 @@
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
 #ifdef ERROR_TAG
+ERROR_TAG(no_error, "No error.")
 ERROR_TAG(interface_name_too_long,
           "The interface name is too long, max size is IFNAMSIZ")
 ERROR_TAG(mtu_too_large, "The MTU value specified is too large.")
