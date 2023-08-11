@@ -13,7 +13,7 @@ TEST(test_tun_interface, construct_no_su_fail)
     (void)t;
 }
 
-TEST(test_tun_interface, create_su_expect_fail)
+TEST(test_tun_interface, create_no_su_expect_fail)
 {
     // Check if we are root
     if (getuid() == 0)
