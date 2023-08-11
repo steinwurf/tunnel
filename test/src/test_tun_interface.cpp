@@ -16,7 +16,7 @@ TEST(test_tun_interface, construct_no_su_fail)
 TEST(test_tun_interface, create_no_su_expect_fail)
 {
     // Check if we are root
-    if (getuid() == 0)
+    if (getuid() != 0)
     {
         tunnel::tun_interface t;
         EXPECT_THROW(t.create("dummy", false), std::system_error);
