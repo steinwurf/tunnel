@@ -27,8 +27,8 @@ struct monitor : tunnel::monitor
     {
         switch (level)
         {
-        case log_level::trace:
-            return poke::log_level::trace;
+        case log_level::state:
+            return poke::log_level::state;
         case log_level::debug:
             return poke::log_level::debug;
         case log_level::info:
@@ -42,7 +42,7 @@ struct monitor : tunnel::monitor
         default:
             assert(false);
         }
-        return poke::log_level::trace;
+        return poke::log_level::state;
     }
 
     monitor(const std::string& type,
@@ -58,7 +58,7 @@ struct monitor : tunnel::monitor
     }
 
     virtual void enable_log(const log_callback& callback,
-                            log_level level = log_level::trace,
+                            log_level level = log_level::state,
                             const std::string& type_filter = "",
                             const std::string& path_filter = "") override
     {
