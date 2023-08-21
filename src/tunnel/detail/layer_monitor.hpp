@@ -12,9 +12,9 @@
 
 #include "monitor.hpp"
 
-#include "format_to.hpp"
 #include "log.hpp"
 #include "log_kind.hpp"
+#include "to_json_property.hpp"
 
 #include "../log_level.hpp"
 
