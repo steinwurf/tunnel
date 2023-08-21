@@ -22,11 +22,12 @@
 
 int main()
 {
-    auto log = [](const std::string& message)
+    auto log = [](auto, const std::string& message)
     { std::cout << message << std::endl; };
 
     tunnel::tun_interface iface;
-    iface.monitor().enable_log(log);
+    iface.set_log_callback(log);
+    iface.monitor().enable_log();
 
     iface.create();
     iface.set_ipv4("10.0.0.1");

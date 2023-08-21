@@ -3,8 +3,8 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
-#include "tun_interface.hpp"
 #include "throw_if_error.hpp"
+#include "tun_interface.hpp"
 
 #include <cassert>
 
@@ -445,6 +445,12 @@ auto tun_interface::monitor() -> tunnel::monitor&
 {
     assert(m_impl);
     return m_impl->monitor();
+}
+
+auto tun_interface::set_log_callback(const log_callback& callback) -> void
+{
+    assert(m_impl);
+    m_impl->set_log_callback(callback);
 }
 
 auto tun_interface::is_platform_supported() -> bool

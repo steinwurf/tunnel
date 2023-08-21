@@ -50,11 +50,22 @@ public:
                std::forward<Args>(args)...);
     }
 
+    void set_log_callback(const tunnel::log_callback& callback)
+    {
+        m_impl.set_log_callback(callback);
+    }
+
+    void enable_log(log_level level = log_level::state,
+                    std::string path_filter = "", std::string type_filter = "")
+    {
+        m_impl.enable_log(level, path_filter, type_filter);
+    }
+
 protected:
     template <class Kind, class... Args>
     void do_log(log_level level, const Kind& kind, Args&&... args) const
     {
-        m_impl.m_monitor.log(monitor::to_poke_log_level(level), kind,
+        m_impl.m_monitor.log(static_cast<poke::log_level>(level), kind,
                              std::forward<const Args>(args)...);
     }
 

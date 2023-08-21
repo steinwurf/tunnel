@@ -8,11 +8,12 @@
 #include <string>
 
 #include "delegate.hpp"
+#include "log_level.hpp"
 
 namespace tunnel
 {
 
 /// The logging callback
-using log_callback = delegate<void(const std::string&)>;
+using log_callback = delegate<void(tunnel::log_level, const std::string&)>;
 
 }

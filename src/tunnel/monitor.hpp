@@ -23,15 +23,18 @@ struct monitor
     /// @param callback The callback that handles the visited objects.
     virtual void visit(const visit_callback& callback) const = 0;
 
+    /// Set the log callback
+    /// @param callback The callback is used when a log message is
+    ///        generated.
+    virtual void set_log_callback(const log_callback& callback) = 0;
+
     /// Enable the log. If type and path filter is given, the log will
     /// be propagated to all underlying objects matching the given
     /// type and path filter.
-    /// @param callback The callback to receive the log messages
     /// @param level The log level
     /// @param type_filter The type filter "*" matches all types.
     /// @param path_filter The path filter "*" matches all paths.
-    virtual void enable_log(const log_callback& callback,
-                            log_level level = log_level::state,
+    virtual void enable_log(log_level level = log_level::state,
                             const std::string& type_filter = "",
                             const std::string& path_filter = "") = 0;
 

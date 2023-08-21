@@ -142,6 +142,8 @@ public:
 
     auto monitor() -> tunnel::monitor&;
 
+    void set_log_callback(const tunnel::log_callback& callback);
+
     static auto is_platform_supported() -> bool;
 
 private:

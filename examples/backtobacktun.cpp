@@ -44,16 +44,18 @@ struct virtio_net_hdr
 
 int main()
 {
-    auto log1 = [](const std::string& message)
+    auto log1 = [](auto, const std::string& message)
     { std::cout << "iface1: " << message << std::endl; };
 
-    auto log2 = [](const std::string& message)
+    auto log2 = [](auto, const std::string& message)
     { std::cout << "iface2: " << message << std::endl; };
 
     tunnel::tun_interface iface1;
     tunnel::tun_interface iface2;
-    iface1.monitor().enable_log(log1);
-    iface2.monitor().enable_log(log2);
+    iface1.set_log_callback(log1);
+    iface1.monitor().enable_log();
+    iface2.set_log_callback(log2);
+    iface2.monitor().enable_log();
 
     iface1.create();
     iface1.set_ipv4("10.0.0.1");
