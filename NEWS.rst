@@ -6,7 +6,7 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Major: Update dependencies to use Poke 7.
 
 9.0.1
 -----
