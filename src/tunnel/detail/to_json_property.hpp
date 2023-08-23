@@ -22,42 +22,42 @@ namespace tunnel
 namespace detail
 {
 
-inline void format_to(fmt::memory_buffer& buffer, log_kind kind)
+inline void to_json_property(fmt::memory_buffer& buffer, log_kind kind)
 {
     fmt::format_to(std::back_inserter(buffer), R"("kind": "{}")",
                    to_string(kind));
 }
-inline void format_to(fmt::memory_buffer& buffer, log::boolean element)
+inline void to_json_property(fmt::memory_buffer& buffer, log::boolean element)
 {
     fmt::format_to(std::back_inserter(buffer), R"("{}": {})", element.name,
                    element.value ? "true" : "false");
 }
 
-inline void format_to(fmt::memory_buffer& buffer, log::integer element)
+inline void to_json_property(fmt::memory_buffer& buffer, log::integer element)
 {
     fmt::format_to(std::back_inserter(buffer), R"("{}": {})", element.name,
                    element.value);
 }
 
-inline void format_to(fmt::memory_buffer& buffer, log::uinteger element)
+inline void to_json_property(fmt::memory_buffer& buffer, log::uinteger element)
 {
     fmt::format_to(std::back_inserter(buffer), R"("{}": {})", element.name,
                    element.value);
 }
 
-inline void format_to(fmt::memory_buffer& buffer, log::float64 element)
+inline void to_json_property(fmt::memory_buffer& buffer, log::float64 element)
 {
     fmt::format_to(std::back_inserter(buffer), R"("{}": {})", element.name,
                    element.value);
 }
 
-inline void format_to(fmt::memory_buffer& buffer, log::str element)
+inline void to_json_property(fmt::memory_buffer& buffer, log::str element)
 {
     fmt::format_to(std::back_inserter(buffer), R"("{}": "{}")", element.name,
                    element.value);
 }
 
-inline void format_to(fmt::memory_buffer& buffer, log::ptr element)
+inline void to_json_property(fmt::memory_buffer& buffer, log::ptr element)
 {
     fmt::format_to(std::back_inserter(buffer), R"("{}": "{}")", element.name,
                    (uint64_t)element.value);
