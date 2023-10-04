@@ -14,7 +14,7 @@ name: Linux C++ make-specs
 jobs:
   Linux-mkspecs:
     name: Linux C++ make-specs
-    uses: steinwurf/linux-mkspecs-action/.github/workflows/action.yml@update-compilers
+    uses: steinwurf/linux-mkspecs-action/.github/workflows/action.yml@7.0.0
     with:
       extra_resolve_options: ${{ github.event.inputs.extra_resolve_options }}
 concurrency:
