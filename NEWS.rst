@@ -6,7 +6,7 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Patch: Upgraded poke to use 8.0.0.
 
 10.0.0
 ------
