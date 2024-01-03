@@ -21,7 +21,7 @@
         "name": "poke",
         "resolver": "git",
         "method": "semver",
-        "major": 8,
+        "major": 9,
         "sources": [
             "github.com/steinwurf/poke.git"
         ]
@@ -30,7 +30,7 @@
         "name": "abacus",
         "resolver": "git",
         "method": "semver",
-        "major": 5,
+        "major": 6,
         "sources": [
             "github.com/steinwurf/abacus.git"
         ]

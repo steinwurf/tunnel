@@ -6,7 +6,8 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Patch: Upgraded poke to use 9.
+* Patch: Upgraded abacus to use 6.
 
 10.0.1
 ------
