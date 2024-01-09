@@ -44,10 +44,10 @@ struct virtio_net_hdr
 
 int main()
 {
-    auto log1 = [](auto, const std::string& message)
+    auto log1 = [](auto, const std::string& message, auto)
     { std::cout << "iface1: " << message << std::endl; };
 
-    auto log2 = [](auto, const std::string& message)
+    auto log2 = [](auto, const std::string& message, auto)
     { std::cout << "iface2: " << message << std::endl; };
 
     tunnel::tun_interface iface1;

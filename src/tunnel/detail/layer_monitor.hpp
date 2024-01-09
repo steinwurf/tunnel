@@ -56,9 +56,10 @@ public:
     }
 
     void enable_log(log_level level = log_level::state,
-                    std::string path_filter = "", std::string type_filter = "")
+                    std::string path_filter = "", std::string type_filter = "",
+                    std::any user_data = {})
     {
-        m_impl.enable_log(level, path_filter, type_filter);
+        m_impl.enable_log(level, path_filter, type_filter, user_data);
     }
 
 protected:
