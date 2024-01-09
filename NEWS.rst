@@ -6,6 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+11.0.0
+------
 * Minor: Updated poke to use version 10.
 * Major: Extended the log_callback to now also take a std::any user data argument.
 
