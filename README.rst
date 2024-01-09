@@ -22,7 +22,7 @@ tunnel
 .. |Cppcheck| image:: https://github.com/steinwurf/tunnel/actions/workflows/cppcheck.yml/badge.svg
       :target: https://github.com/steinwurf/tunnel/actions/workflows/cppcheck.yml
 
-The tunnel lib allows you to create an manipulate TUN interfaces on Linux.
+The tunnel lib allows you to create and manipulate TUN interfaces on Linux.
 A tun interface is essentially a virtual network interface on the IP (layer 3).
 
 
@@ -32,11 +32,7 @@ A tun interface is essentially a virtual network interface on the IP (layer 3).
 Usage
 =====
 
-
-
 Here is how you use it...
-
-
 
 Route a VLC stream over a tunnel
 --------------------------------
