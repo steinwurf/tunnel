@@ -21,7 +21,7 @@
         "name": "poke",
         "resolver": "git",
         "method": "semver",
-        "major": 9,
+        "major": 10,
         "sources": [
             "github.com/steinwurf/poke.git"
         ]

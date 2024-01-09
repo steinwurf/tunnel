@@ -56,7 +56,7 @@ target_link_libraries(tunnel PRIVATE poke)
 target_include_directories(tunnel INTERFACE src)
 
 # Set properties
-target_compile_features(tunnel PUBLIC cxx_std_14)
+target_compile_features(tunnel PUBLIC cxx_std_17)
 
 # Add alias for tunnel
 add_library(steinwurf::tunnel ALIAS tunnel)

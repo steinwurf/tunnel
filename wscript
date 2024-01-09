@@ -29,7 +29,7 @@ def options(opt):
 
 
 def configure(conf):
-    conf.set_cxx_std(11)
+    conf.set_cxx_std(17)
 
     if not conf.is_toplevel():
         return

@@ -34,9 +34,11 @@ struct monitor
     /// @param level The log level
     /// @param type_filter The type filter "*" matches all types.
     /// @param path_filter The path filter "*" matches all paths.
+    /// @param user_data User data that will be passed to the log callback.
     virtual void enable_log(log_level level = log_level::state,
                             const std::string& type_filter = "",
-                            const std::string& path_filter = "") = 0;
+                            const std::string& path_filter = "",
+                            std::any user_data = {}) = 0;
 
     /// Disables all the logging.
     virtual void disable_log() = 0;

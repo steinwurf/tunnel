@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <any>
 #include <string>
 
 #include "log_kind.hpp"
@@ -63,17 +64,20 @@ struct monitor : tunnel::monitor
     {
         m_log_callback = callback;
         m_monitor.set_log_callback(
-            [this](poke::log_level level, const std::string& message) {
-                m_log_callback(static_cast<tunnel::log_level>(level), message);
+            [this](poke::log_level level, const std::string& message,
+                   const std::any& user_data) {
+                m_log_callback(static_cast<tunnel::log_level>(level), message,
+                               user_data);
             });
     }
 
     virtual void enable_log(log_level level = log_level::state,
                             const std::string& type_filter = "",
-                            const std::string& path_filter = "") override
+                            const std::string& path_filter = "",
+                            std::any user_data = {}) override
     {
         m_monitor.enable_log(static_cast<poke::log_level>(level), type_filter,
-                             path_filter);
+                             path_filter, user_data);
     }
 
     virtual void disable_log() override

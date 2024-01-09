@@ -10,7 +10,7 @@
 
 int main()
 {
-    auto log = [](auto, const std::string& message)
+    auto log = [](auto, const std::string& message, auto)
     { std::cout << message << std::endl; };
 
     tunnel::tun_interface iface;
