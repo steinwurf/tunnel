@@ -185,25 +185,6 @@ public:
         error = std::make_error_code(std::errc::not_supported);
     }
 
-    void disable_log_stdout() const
-    {
-        Super::do_log(log_level::error, log_kind::unsupported_platform);
-        throw std::runtime_error("not supported");
-    }
-
-    void enable_log_stdout() const
-    {
-        Super::do_log(log_level::error, log_kind::unsupported_platform);
-        throw std::runtime_error("not supported");
-    }
-
-    bool is_log_enabled() const
-    {
-        Super::do_log(log_level::error, log_kind::unsupported_platform);
-        throw std::runtime_error("not supported");
-        return false;
-    }
-
     int native_handle() const
     {
         Super::do_log(log_level::error, log_kind::unsupported_platform);

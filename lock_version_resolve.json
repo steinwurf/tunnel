@@ -5,8 +5,8 @@
         "sha1": "ab7745dea45fcc70fbc0177dcf7d9fc65089fffa"
     },
     "abacus": {
-        "commit_id": "76680ecd04a0d932ccaa6102b11a15c141ac0698",
-        "resolver_info": "6.0.0",
+        "commit_id": "4c174d9383bdf0c61ef6cbc8b43d7bed4af73127",
+        "resolver_info": "6.0.1",
         "sha1": "672c4c4d312b34f23e0461486087863d132c042c"
     },
     "asio": {
@@ -60,9 +60,9 @@
         "sha1": "f6bc772cf920c024726ebd12a5a38f123d057adb"
     },
     "poke": {
-        "commit_id": "34a599a90fe992673ed220e034e3996f8e52624a",
-        "resolver_info": "10.0.0",
-        "sha1": "20b37ceae11b20f774fbd32fc60839cb900a0cb5"
+        "commit_id": "b8910406eb34bbeba013624c4741dc9287d0623f",
+        "resolver_info": "11.0.0",
+        "sha1": "39ac0c4b81a64afb7f2efaaf7efa95056870d16c"
     },
     "protobuf": {
         "commit_id": "8c097d481bb76bafafea87d56c8627c9b82014cd",
