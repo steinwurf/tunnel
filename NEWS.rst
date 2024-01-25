@@ -6,7 +6,7 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Major: Updated poke to use version 11.
 
 11.0.0
 ------
