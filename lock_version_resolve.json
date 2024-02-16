@@ -60,9 +60,9 @@
         "sha1": "f6bc772cf920c024726ebd12a5a38f123d057adb"
     },
     "poke": {
-        "commit_id": "b8910406eb34bbeba013624c4741dc9287d0623f",
-        "resolver_info": "11.0.0",
-        "sha1": "39ac0c4b81a64afb7f2efaaf7efa95056870d16c"
+        "commit_id": "979541088e6f455877113e7b3c8414668e11e346",
+        "resolver_info": "12.0.0",
+        "sha1": "a9c36bf7bf1941b25d3e6b2eda2580489f16de77"
     },
     "protobuf": {
         "commit_id": "8c097d481bb76bafafea87d56c8627c9b82014cd",
