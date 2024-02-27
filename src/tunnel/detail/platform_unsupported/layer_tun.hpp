@@ -5,6 +5,9 @@
 
 #pragma once
 
+#include <string>
+#include <system_error>
+
 #include "../../log_level.hpp"
 #include "../log_kind.hpp"
 
