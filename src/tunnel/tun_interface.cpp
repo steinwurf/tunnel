@@ -64,22 +64,14 @@ void tun_interface::create()
 void tun_interface::create(std::error_code& error)
 {
     assert(m_impl);
-    m_impl->create("", error);
+    create("", false, error);
 }
 
-void tun_interface::create(const std::string& device_name)
-{
-    assert(m_impl);
-
-    std::error_code error;
-    m_impl->create(device_name, error);
-    throw_if_error(error);
-}
 void tun_interface::create(const std::string& device_name,
                            std::error_code& error)
 {
     assert(m_impl);
-    m_impl->create(device_name, error);
+    create(device_name, false, error);
 }
 
 void tun_interface::create(const std::string& device_name, bool vnet_hdr)
@@ -87,7 +79,7 @@ void tun_interface::create(const std::string& device_name, bool vnet_hdr)
     assert(m_impl);
 
     std::error_code error;
-    m_impl->create(device_name, error, vnet_hdr);
+    create(device_name, vnet_hdr, error);
     throw_if_error(error);
 }
 
@@ -95,7 +87,7 @@ void tun_interface::create(const std::string& device_name, bool vnet_hdr,
                            std::error_code& error)
 {
     assert(m_impl);
-    m_impl->create(device_name, error, vnet_hdr);
+    m_impl->create(device_name, vnet_hdr, error);
 }
 
 void tun_interface::rename(const std::string& interface_name) const

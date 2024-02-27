@@ -6,7 +6,9 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Minor: Added documentation for all functions in the ``tun_interface`` class.
+* Minor: Changed backend parameter order to always have the error code last.
+* Patch: Removed duplicated code.
 
 13.0.0
 ------

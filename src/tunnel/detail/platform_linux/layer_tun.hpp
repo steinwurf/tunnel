@@ -46,7 +46,7 @@ struct layer_tun : public Super
 {
 
     void create(const std::string& interface_name, std::error_code& error,
-                bool vnet_hdr = false)
+                bool vnet_hdr)
     {
         assert(!error);
 
@@ -96,12 +96,12 @@ struct layer_tun : public Super
         {
             ifr.ifr_flags |= IFF_VNET_HDR;
         }
-        //
+
+        // If a device name was specified, put it in the structure;
+        // otherwise, the kernel will try to allocate the "next" device of
+        // the specified type
         if (!interface_name.empty())
         {
-            // If a device name was specified, put it in the structure;
-            // otherwise, the kernel will try to allocate the "next" device of
-            // the specified type
             interface_name.copy(ifr.ifr_name, interface_name.size());
         }
 
@@ -111,16 +111,19 @@ struct layer_tun : public Super
             return;
         }
 
-        Super::do_log(log_level::debug, log_kind::interface_created,
-                      log::str{"name", interface_name.c_str()});
-
         if (vnet_hdr)
         {
             int offload_flags = TUN_F_CSUM | TUN_F_TSO4 | TUN_F_UFO;
             Super::ioctl(m_tun_fd, TUNSETOFFLOAD, offload_flags, error);
-            Super::do_log(log_level::debug, log_kind::interface_created,
-                          log::str{"vnet_hdr + GSO", "enabled"});
+            if (error)
+            {
+                return;
+            }
         }
+
+        Super::do_log(log_level::debug, log_kind::interface_created,
+                      log::str{"name", interface_name.c_str()},
+                      log::boolean{"vnet_hdr", vnet_hdr});
     }
 
     auto owner(std::error_code& error) const -> std::string
