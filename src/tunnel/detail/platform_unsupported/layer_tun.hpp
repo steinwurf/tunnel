@@ -18,8 +18,8 @@ template <class Super>
 class layer_tun : public Super
 {
 public:
-    void create(const std::string& interface_name, std::error_code& error,
-                bool vnet_hdr)
+    void create(const std::string& interface_name, bool vnet_hdr,
+                std::error_code& error)
     {
         (void)interface_name;
         (void)vnet_hdr;
