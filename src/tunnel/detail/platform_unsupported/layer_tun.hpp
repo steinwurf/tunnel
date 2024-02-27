@@ -5,6 +5,9 @@
 
 #pragma once
 
+#include <string>
+#include <system_error>
+
 #include "../../log_level.hpp"
 #include "../log_kind.hpp"
 
@@ -18,21 +21,15 @@ template <class Super>
 class layer_tun : public Super
 {
 public:
-    void create(const std::string& interface_name, std::error_code& error)
-    {
-        (void)interface_name;
-
-        Super::do_log(log_level::error, log_kind::unsupported_platform);
-        error = std::make_error_code(std::errc::not_supported);
-    }
-    void create(const std::string& interface_name, std::error_code& error,
-                bool vnet_hdr)
+    void create(const std::string& interface_name, bool vnet_hdr,
+                std::error_code& error)
     {
         (void)interface_name;
         (void)vnet_hdr;
         Super::do_log(log_level::error, log_kind::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
     }
+
     void rename(const std::string& interface_name, std::error_code& error) const
     {
         (void)interface_name;

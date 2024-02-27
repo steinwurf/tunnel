@@ -34,19 +34,6 @@ template <class Super>
 class layer_netdevice : public Super
 {
 public:
-    void create(const std::string& interface_name, std::error_code& error)
-    {
-        assert(!error);
-
-        Super::create(interface_name, error);
-
-        if (error)
-        {
-            return;
-        }
-
-        m_dev_fd = Super::socket(AF_INET, SOCK_STREAM, 0, error);
-    }
     void create(const std::string& interface_name, std::error_code& error,
                 bool vnet_hdr)
     {
