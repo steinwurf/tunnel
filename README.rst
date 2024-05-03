@@ -38,7 +38,7 @@ Route a VLC stream over a tunnel
 --------------------------------
 
 Using the sample_tunnel example located in /examples we can do a small test.
-Two machines that can access each other over a network and each with the tunnel
+Two machines that can access each other over a network each with the tunnel
 project compiled and VLC installed are needed.
 
 You also need to know the IP addresses of the two machines the "server" and the
