@@ -1,7 +1,7 @@
 {
     "CLI11": {
-        "commit_id": "ff5b095669bb09dadfc09d72eaa6e1da4fd829a4",
-        "resolver_info": "2.0.0",
+        "commit_id": "b1003a44f018255c409c43d5f35e71ab8f7eef62",
+        "resolver_info": "2.0.1",
         "sha1": "ab7745dea45fcc70fbc0177dcf7d9fc65089fffa"
     },
     "abacus": {
@@ -60,9 +60,9 @@
         "sha1": "f6bc772cf920c024726ebd12a5a38f123d057adb"
     },
     "poke": {
-        "commit_id": "979541088e6f455877113e7b3c8414668e11e346",
-        "resolver_info": "12.0.0",
-        "sha1": "a9c36bf7bf1941b25d3e6b2eda2580489f16de77"
+        "commit_id": "17efddfa40a5d8a7ad2e7912f385c2ace5bfcb71",
+        "resolver_info": "13.0.0",
+        "sha1": "792e4aecebe15ef24e9aa66a000b2751c485c340"
     },
     "protobuf": {
         "commit_id": "8c097d481bb76bafafea87d56c8627c9b82014cd",
