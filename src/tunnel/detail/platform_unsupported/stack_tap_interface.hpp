@@ -16,10 +16,10 @@ namespace detail
 namespace platform_unsupported
 {
 // clang-format off
-struct stack_tun_interface : public
+struct stack_tap_interface : public
     layer_tap<
     layer_monitor<
-    layer_final<stack_tun_interface>>>
+    layer_final<stack_tap_interface>>>
 // clang-format on
 {
     static bool is_platform_supported()
