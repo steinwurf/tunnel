@@ -113,7 +113,7 @@ struct layer_tap : public Super
         }
 
         // there are some support for offloading but it is not clear how and if
-        // they work 
+        // they work
 
         Super::do_log(log_level::debug, log_kind::interface_created,
                       log::str{"name", interface_name.c_str()},
