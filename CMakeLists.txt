@@ -69,6 +69,8 @@ endif()
 target_link_libraries(tunnel PRIVATE platform)
 target_link_libraries(tunnel PRIVATE poke)
 target_link_libraries(tunnel PRIVATE bourne)
+target_link_libraries(tunnel PRIVATE abacus)
+
 
 # Set include directories
 target_include_directories(tunnel INTERFACE src)
