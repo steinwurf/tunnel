@@ -39,6 +39,12 @@ if(NOT TARGET steinwurf::poke)
     add_subdirectory("${STEINWURF_RESOLVE}/poke" poke EXCLUDE_FROM_ALL)
 endif()
 
+# bourne dependency
+if(NOT TARGET steinwurf::bourne)
+    add_subdirectory("${STEINWURF_RESOLVE}/bourne" bourne EXCLUDE_FROM_ALL)
+endif()
+
+
 
 # Define library
 file(GLOB_RECURSE tunnel_sources ./src/*.cpp)
@@ -62,6 +68,7 @@ endif()
 # Link header only dependencies
 target_link_libraries(tunnel PRIVATE platform)
 target_link_libraries(tunnel PRIVATE poke)
+target_link_libraries(tunnel PRIVATE bourne)
 
 # Set include directories
 target_include_directories(tunnel INTERFACE src)
@@ -119,9 +126,6 @@ if (${PROJECT_NAME} STREQUAL ${STEINWURF_TOP_NAME})
     # Build test executable
     add_executable(tunnel_tests ${tunnel_test_sources})
     target_link_libraries(tunnel_tests gtest_main)
-    target_link_libraries(tunnel_tests steinwurf::asio)
-    target_link_libraries(tunnel_tests steinwurf::endian)
-    target_link_libraries(tunnel_tests steinwurf::poke)
     target_link_libraries(tunnel_tests steinwurf::tunnel)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
         target_link_libraries(tunnel_tests stdc++fs)

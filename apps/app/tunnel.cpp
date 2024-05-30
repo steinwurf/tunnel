@@ -1,5 +1,8 @@
 #include <CLI/CLI.hpp>
 #include <asio.hpp>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
 #include <tunnel/tap_interface.hpp>
 #include <tunnel/tun_interface.hpp>
 
@@ -18,12 +21,24 @@ int main(int argc, char** argv)
     { std::cout << "iface2: " << message << std::endl; };
 
     CLI11_PARSE(app, argc, argv);
+    asio::io_context io;
 
-    auto tunnel_runner[&](int native_handle)
-    {
-	  asio::a
+    // auto tunnel_runner = [&](int in_fd, int out_fd)
+    // {
+    //     assert(in_fd > 0 && "Invalid file descriptor");
+    //     assert(out_fd > 0 && "Invalid file descriptor");
+    //     auto rx = asio::posix::stream_descriptor(io, in_fd);
+    //     auto tx = asio::posix::stream_descriptor(io, out_fd);
+    //     uint8_t buffer[2000];
+    //     auto rxtx = [&]()
+    //     {
+    //         rx.async_read_some(asio::buffer(buffer, sizeof(buffer)),
+    //                            [&](std::error_code&, std::size_t) { rxtx(); }
 
-    }
+    //         );
+    //     };
+    //     rxtx();
+    // };
 
     if (mode == "tun")
     {
