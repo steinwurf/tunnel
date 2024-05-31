@@ -112,15 +112,15 @@ if (${PROJECT_NAME} STREQUAL ${STEINWURF_TOP_NAME})
 
     if (UNIX AND NOT APPLE)
         # Linux-specific code
-        file(GLOB_RECURSE linux_sources test/src/platform/linux_os/*.cpp)
+        file(GLOB_RECURSE linux_sources test/src/detail/platform_linux/*.cpp)
         list(APPEND tunnel_test_sources ${linux_sources})
     elseif (APPLE)
         # Apple-Darwin-specific code
-        file(GLOB_RECURSE darwin_sources test/src/platform/darwin_os/*.cpp)
+        file(GLOB_RECURSE darwin_sources test/src/detail/platform_unsupported/*.cpp)
         list(APPEND tunnel_test_sources ${darwin_sources})
     elseif (WIN32)
         # Windows-specific code
-        file(GLOB_RECURSE windows_sources test/src/platform/windows_os/*.cpp)
+        file(GLOB_RECURSE windows_sources test/src/detail/platform_unsupported/*.cpp)
         list(APPEND tunnel_test_sources ${windows_sources})
     endif ()
 
