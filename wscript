@@ -18,14 +18,6 @@ def options(opt):
         return
 
     opt.add_option(
-        "--run_mininet_tests",
-        default=None,
-        dest="run_mininet_tests",
-        action="store_true",
-        help="Run the mininet tests",
-    )
-
-    opt.add_option(
         "--pytest_temp",
         default="pytest_temp",
         help="Set the path where pytest executes the tests",
@@ -37,14 +29,6 @@ def configure(conf):
 
     if not conf.is_toplevel():
         return
-
-    # Check if we have vagrant installed, needed to run the mininet
-    # tests
-    conf.find_program("vagrant", mandatory=False)
-
-    # Check if we have VirtualBox installed, needed to run the mininet
-    # tests
-    conf.find_program("VBoxManage", mandatory=False)
 
 
 def build(bld):
