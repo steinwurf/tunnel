@@ -1,0 +1,10 @@
+
+#!/usr/bin/env python
+# encoding: utf-8
+bld.program(
+    features="cxx",
+    source=["tunnel.cpp"],
+    target="tunnel_test_app",
+    linkflags=linkflags,
+    use=["tunnel", "cli11", "asio_includes"],
+)
