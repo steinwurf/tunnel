@@ -91,6 +91,8 @@ install(
 
 # Is top level project?
 if (${PROJECT_NAME} STREQUAL ${STEINWURF_TOP_NAME})
+    if (UNIX AND NOT APPLE)
+
     enable_testing()
 
     if (CMAKE_C_COMPILER_ID MATCHES "MSVC")
@@ -110,19 +112,9 @@ if (${PROJECT_NAME} STREQUAL ${STEINWURF_TOP_NAME})
     list(APPEND tunnel_test_sources test/tunnel_tests.cpp)
     list(FILTER tunnel_test_sources EXCLUDE REGEX "[.]*\/platform[.]*")
 
-    if (UNIX AND NOT APPLE)
-        # Linux-specific code
-        file(GLOB_RECURSE linux_sources test/src/detail/platform_linux/*.cpp)
-        list(APPEND tunnel_test_sources ${linux_sources})
-    elseif (APPLE)
-        # Apple-Darwin-specific code
-        file(GLOB_RECURSE darwin_sources test/src/detail/platform_unsupported/*.cpp)
-        list(APPEND tunnel_test_sources ${darwin_sources})
-    elseif (WIN32)
-        # Windows-specific code
-        file(GLOB_RECURSE windows_sources test/src/detail/platform_unsupported/*.cpp)
-        list(APPEND tunnel_test_sources ${windows_sources})
-    endif ()
+	# Linux-specific code
+	file(GLOB_RECURSE linux_sources test/src/detail/platform_linux/*.cpp)
+	list(APPEND tunnel_test_sources ${linux_sources})
 
 
     # Build test executable
@@ -151,4 +143,5 @@ if (${PROJECT_NAME} STREQUAL ${STEINWURF_TOP_NAME})
     add_test(tunnel_tests tunnel_tests)
 
     add_subdirectory("apps/app")
+	endif ()
 endif ()
