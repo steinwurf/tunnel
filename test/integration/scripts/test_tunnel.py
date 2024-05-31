@@ -1,3 +1,7 @@
+# Copyright (c) 2024 Steinwurf ApS
+# All Rights Reserved
+
+# Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
 import logging
 import dummynet
@@ -46,25 +50,15 @@ def run_test(tunnel_app_path, tunnel_mode):
         demo1.up(interface="demo1-eth0")
         log.info(f"Running: {tunnel_app_path} {tunnel_mode}")
         
-        tunnel_process2 = demo1.run_async(f"{tunnel_app_path} -m {tunnel_mode} -a {tun1} -l {ip2}", daemon=False)
+        tunnel_process2 = demo1.run_async(f"{tunnel_app_path} -m {tunnel_mode} -a {tun1} -l {ip2}", daemon=True)
         time.sleep(1)
-        tunnel_process1 = demo0.run_async(f"{tunnel_app_path} -m {tunnel_mode} -a {tun0} -r {ip2}", daemon=False)
+        tunnel_process1 = demo0.run_async(f"{tunnel_app_path} -m {tunnel_mode} -a {tun0} -r {ip2}", daemon=True)
         time.sleep(1)
-        # while True:
-        #     time.sleep(1)
 
-        ping_process =demo0.run_async("ping -I tun0 10.0.0.2 -c 2")
-
-
-        end_time = 2*test_duration
-        while process_monitor.run():
-            if time.time() >= end_time:
-                log.error("Test timeout")
-                process_monitor.stop()
-                log.info(ping_process.stdout)
-                raise Exception("Test timeout")
-
-
+        ping_process =demo0.run(f"ping -I {tunnel_mode}0 {tun1} -i 0.5 -c 10")
+        log.info(f"ping status: {ping_process.stdout} {ping_process.stderr}")
+        
+        assert "icmp_seq=10" in ping_process.stdout
     finally:
         net.cleanup()
 
@@ -72,6 +66,7 @@ def run_test(tunnel_app_path, tunnel_mode):
 
 def test_tun_tunnel(tunnel_app_path):
     run_test(tunnel_app_path, "tun")
+
 def test_tap_tunnel(tunnel_app_path):
     run_test(tunnel_app_path, "tap")
 

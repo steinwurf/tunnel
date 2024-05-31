@@ -10,6 +10,7 @@
 #include <system_error>
 #include <tunnel/tap_interface.hpp>
 #include <tunnel/tun_interface.hpp>
+
 #if defined(PLATFORM_LINUX)
 #include <sys/resource.h>
 inline void enable_core_dumps()
@@ -84,10 +85,11 @@ asio::ip::udp::endpoint peer;
 auto rx_udp_tx_tun(asio::ip::udp::socket& rx,
                    asio::posix::stream_descriptor& tx) -> void
 {
-    uint8_t buffer[2000];
+    static uint8_t buffer[2000];
     rx.async_receive_from(asio::buffer(buffer, sizeof(buffer)), peer,
-                          [&](const std::error_code&, std::size_t len)
+                          [&](const std::error_code& err, std::size_t len)
                           {
+                              assert(!err);
                               tx.write_some(asio::buffer(buffer, len));
                               rx_udp_tx_tun(rx, tx);
                           });
@@ -95,7 +97,7 @@ auto rx_udp_tx_tun(asio::ip::udp::socket& rx,
 auto rx_tun_tx_udp(asio::posix::stream_descriptor& rx,
                    asio::ip::udp::socket& tx) -> void
 {
-    uint8_t buffer[2000];
+    static uint8_t buffer[2000];
     rx.async_read_some(asio::buffer(buffer, sizeof(buffer)),
                        [&](const std::error_code&, std::size_t len)
                        {
