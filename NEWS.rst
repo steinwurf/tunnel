@@ -6,7 +6,7 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Patch: Only have CLI11 as a dependency if compilation is toplevel
 
 14.1.0
 ------

@@ -29,10 +29,6 @@ if (NOT TARGET steinwurf::asio)
     add_subdirectory("${STEINWURF_RESOLVE}/asio" asio EXCLUDE_FROM_ALL)
 endif ()
 
-# CLI11 dependency
-if (NOT TARGET steinwurf::cli11)
-    add_subdirectory("${STEINWURF_RESOLVE}/cli11-source" CLI11 EXCLUDE_FROM_ALL)
-endif ()
 
 # poke dependency
 if(NOT TARGET steinwurf::poke)
@@ -92,6 +88,8 @@ install(
 # Is top level project?
 if (${PROJECT_NAME} STREQUAL ${STEINWURF_TOP_NAME})
     if (UNIX AND NOT APPLE)
+	  # This is not a lib dependency but only for the app and should not be included onless build is toplevel
+    add_subdirectory("${STEINWURF_RESOLVE}/cli11-source" CLI11 EXCLUDE_FROM_ALL)
 
     enable_testing()
 
