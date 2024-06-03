@@ -8,6 +8,10 @@ Latest
 ------
 * tbd
 
+14.1.0
+------
+* Minor: Add tap support and proper in repository testing 
+
 14.0.0
 ------
 * Major: Updated poke to version 13.
