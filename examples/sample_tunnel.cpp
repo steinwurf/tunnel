@@ -37,9 +37,8 @@ public:
     sample_tunnel(asio::io_service& io, int tun_fd, uint32_t mtu,
                   asio::ip::udp::endpoint local_endpoint,
                   asio::ip::udp::endpoint remote_endpoint) :
-        m_socket(io),
-        m_mtu(mtu), m_stream_descriptor(io), m_local_endpoint(local_endpoint),
-        m_remote_endpoint(remote_endpoint)
+        m_socket(io), m_mtu(mtu), m_stream_descriptor(io),
+        m_local_endpoint(local_endpoint), m_remote_endpoint(remote_endpoint)
     {
         m_stream_descriptor.assign(tun_fd);
     }
@@ -172,7 +171,7 @@ int main(int argc, char* argv[])
 
     tunnel::tun_interface iface;
 
-    iface.create();
+    iface.create({});
     iface.up();
 
     iface.set_ipv4(tunnel_ip);

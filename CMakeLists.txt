@@ -141,5 +141,6 @@ if (${PROJECT_NAME} STREQUAL ${STEINWURF_TOP_NAME})
     add_test(tunnel_tests tunnel_tests)
 
     add_subdirectory("apps/app")
+	add_subdirectory("examples")
 	endif ()
 endif ()
