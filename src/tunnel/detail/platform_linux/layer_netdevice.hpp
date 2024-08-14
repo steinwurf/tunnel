@@ -20,6 +20,7 @@
 #include "error.hpp"
 #include "scoped_file_descriptor.hpp"
 
+#include "../../interface_config.hpp"
 #include "../../log_level.hpp"
 
 namespace tunnel
@@ -34,12 +35,11 @@ template <class Super>
 class layer_netdevice : public Super
 {
 public:
-    void create(const std::string& interface_name, std::error_code& error,
-                bool vnet_hdr)
+    void create(const config& config, std::error_code& error)
     {
         assert(!error);
 
-        Super::create(interface_name, error, vnet_hdr);
+        Super::create(config, error);
 
         if (error)
         {
@@ -415,8 +415,8 @@ public:
     }
 
 private:
-    auto make_sockaddr(const std::string& ip, std::error_code& error) const
-        -> struct sockaddr
+    auto make_sockaddr(const std::string& ip,
+                       std::error_code& error) const -> struct sockaddr
     {
         struct sockaddr addr
         {
