@@ -11,5 +11,5 @@ struct config
     bool vnet_hdr = false;
 
     /// If true the interface will be created with IFF_NO_PI enabled.
-    bool iff_no_pi = false;
+    bool iff_no_pi = true;
 };
