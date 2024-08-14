@@ -1,7 +1,9 @@
 #pragma once
+#include <platform/config.hpp>
 #include <string>
-struct config
 
+#if defined(PLATFORM_LINUX)
+struct config
 {
     /// The name of the interface
     std::string interface_name;
@@ -13,3 +15,11 @@ struct config
     /// If true the interface will be created with IFF_NO_PI enabled.
     bool iff_no_pi = true;
 };
+#else
+struct config
+{
+    /// The name of the interface
+    std::string interface_name;
+};
+
+#endif

@@ -9,6 +9,7 @@
 #include <system_error>
 
 #include "../../log_level.hpp"
+#include "../../interface_config.hpp"
 #include "../log_kind.hpp"
 
 namespace tunnel
@@ -21,11 +22,8 @@ template <class Super>
 class layer_tun : public Super
 {
 public:
-    void create(const std::string& interface_name, bool vnet_hdr,
-                std::error_code& error)
+    void create(const config& config, std::error_code& error)
     {
-        (void)interface_name;
-        (void)vnet_hdr;
         Super::do_log(log_level::error, log_kind::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
     }
