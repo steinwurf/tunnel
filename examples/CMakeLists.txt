@@ -3,17 +3,21 @@ project(tunnel_examples)
 
 add_executable(interface interface.cpp)
 target_link_libraries(interface steinwurf::tunnel)
+target_link_libraries(interface steinwurf::platform)
 
 add_executable(read_data read_data.cpp)
 target_link_libraries(read_data steinwurf::tunnel)
+target_link_libraries(read_data steinwurf::platform)
 
 add_executable(sample_tunnel sample_tunnel.cpp)
 target_link_libraries(sample_tunnel steinwurf::tunnel)
 target_link_libraries(sample_tunnel steinwurf::asio)
 target_link_libraries(sample_tunnel CLI11)
+target_link_libraries(sample_tunnel steinwurf::platform)
 
 add_executable(backtobacktun backtobacktun.cpp)
 target_link_libraries(backtobacktun steinwurf::tunnel)
+target_link_libraries(backtobacktun steinwurf::platform)
 
 target_compile_features(interface PUBLIC cxx_std_17)
 target_compile_features(read_data PUBLIC cxx_std_17)

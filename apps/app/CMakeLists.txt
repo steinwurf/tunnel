@@ -10,6 +10,7 @@ target_compile_features(tunnel_app PUBLIC cxx_std_14)
 
 target_link_libraries(tunnel_app steinwurf::tunnel)
 target_link_libraries(tunnel_app steinwurf::asio)
+target_link_libraries(tunnel_app steinwurf::platform)
 target_link_libraries(tunnel_app CLI11)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
     target_link_libraries(tunnel_app stdc++fs)

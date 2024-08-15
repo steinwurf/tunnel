@@ -37,7 +37,7 @@ jobs:
           name: Clang Thread Sanitizer Latest
           CXX: clang++
           cxx_mkspec: --cxx_mkspec=cxx_clang_thread_sanitizer_x64
-          env: TSAN_OPTIONS="suppressions=../../tsan_suppression.txt"
+          env: 
     runs-on:
     - self-hosted
     - docker

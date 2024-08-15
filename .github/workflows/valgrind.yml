@@ -37,7 +37,7 @@ jobs:
           echo "::add-matcher::.github/gcc-problem-matcher.json"
           python3 waf
       - name: Valgrind Test
-        run: valgrind --suppressions=valgrind_suppressions.txt  build_current/plumr_tests
+        run: valgrind build_current/test/tunnel_tests
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
