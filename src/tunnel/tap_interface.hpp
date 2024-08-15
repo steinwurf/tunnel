@@ -10,24 +10,12 @@
 #include <system_error>
 
 #include "monitor.hpp"
+#include "interface_config.hpp"
 
 namespace tunnel
 {
 class tap_interface
 {
-public:
-    struct config
-    {
-        /// The name of the interface
-        std::string m_interface_name;
-
-        /// If true the interface will be created with Virtual Network
-        /// Device Header enabled.
-        bool m_vnet_hdr = false;
-
-        /// If true the interface will be created with IFF_NO_PI enabled.
-        bool m_iff_no_pi = false;
-    };
 
 public:
     /// Constructor

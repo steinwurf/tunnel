@@ -66,7 +66,7 @@ void tap_interface::create(const config& config)
 void tap_interface::create(const config& config, std::error_code& error)
 {
     assert(m_impl);
-    create(config, error);
+    m_impl->create(config, error);
 }
 
 void tap_interface::rename(const std::string& interface_name) const
