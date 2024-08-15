@@ -6,7 +6,7 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Major: change interface  from seperate args to a struct
 
 14.1.1
 ------
