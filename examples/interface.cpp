@@ -1,4 +1,4 @@
-// Copyright (c) 2016 Steinwurf ApS
+// Copyright (c) 2024 Steinwurf ApS
 // All Rights Reserved
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
@@ -16,7 +16,7 @@ int main()
     tunnel::tun_interface iface;
     iface.set_log_callback(log);
     iface.monitor().enable_log();
-    iface.create("tuniface");
+    iface.create({"tuniface"});
 
     if (iface.is_up())
     {

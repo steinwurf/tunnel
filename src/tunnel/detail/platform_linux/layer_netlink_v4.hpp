@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include <vector>
 
+#include "../../interface_config.hpp"
 #include "../log.hpp"
 #include "../log_kind.hpp"
 #include "error.hpp"
@@ -74,12 +75,11 @@ template <class Super>
 class layer_netlink_v4 : public Super
 {
 public:
-    void create(const std::string& interface_name, bool vnet_hdr,
-                std::error_code& error)
+    void create(const config& config, std::error_code& error)
     {
         assert(!error);
 
-        Super::create(interface_name, error, vnet_hdr);
+        Super::create(config, error);
 
         if (error)
         {

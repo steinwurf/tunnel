@@ -13,10 +13,31 @@ name: Valgrind
   pull_request:
 jobs:
   valgrind:
-    name: Valgrind
-    uses: steinwurf/valgrind-action/.github/workflows/action.yml@5.0.0
-    with:
-      extra_resolve_options: ${{ github.event.inputs.extra_resolve_options }}
+    timeout-minutes: 45
+    name: Valgrind 3.19.0
+    runs-on: [self-hosted, docker, builder]
+    container:
+      image: ghcr.io/steinwurf/valgrind-3.19.0:1.1.0
+      options: --user 0:0 --privileged --ulimit core=-1
+      volumes:
+        - /home/buildbot/.ssh:/root/.ssh
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Configure
+        env:
+          EXTRA_RESOLVE_OPTIONS: ${{ inputs.extra_resolve_options }}
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          timeout_minutes: 15
+          command: python3 waf configure --cxx_debug --git_protocol=git@ ${{ env.EXTRA_RESOLVE_OPTIONS }}
+      - name: Build
+        run: |
+          echo "::add-matcher::.github/gcc-problem-matcher.json"
+          python3 waf
+      - name: Valgrind Test
+        run: valgrind build_current/test/tunnel_tests
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true

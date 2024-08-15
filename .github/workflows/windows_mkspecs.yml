@@ -13,9 +13,35 @@ name: Windows C++ make-specs
   pull_request:
 jobs:
   Windows-mkspecs:
-    uses: steinwurf/windows-mkspecs-action/.github/workflows/action.yml@6.0.0
-    with:
-      extra_resolve_options: ${{ github.event.inputs.extra_resolve_options }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - cxx_mkspec: cxx_msvc17_x86
+            name: MSVC 17 32-bit
+          - cxx_mkspec: cxx_msvc17_x64
+            name: MSVC 17 64-bit
+    runs-on: [self-hosted, "${{ matrix.config.cxx_mkspec }}", builder]
+    name: ${{ matrix.config.name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Configure
+        env:
+          GIT_SSH_COMMAND: "ssh"
+          EXTRA_RESOLVE_OPTIONS: ${{ inputs.extra_resolve_options }}
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          timeout_minutes: 15
+          command: python waf configure --git_protocol=git@ --cxx_mkspec=${{ matrix.config.cxx_mkspec }} ${{ env.EXTRA_RESOLVE_OPTIONS }}
+      - name: Build
+        run: |
+          echo "::add-matcher::.github/gcc-problem-matcher.json"
+          python waf
+      - name: Test
+        run: python waf --run_tests
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true

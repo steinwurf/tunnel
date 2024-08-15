@@ -9,12 +9,14 @@
 #include <string>
 #include <system_error>
 
+#include "interface_config.hpp"
 #include "monitor.hpp"
 
 namespace tunnel
 {
 class tap_interface
 {
+
 public:
     /// Constructor
     tap_interface();
@@ -25,30 +27,11 @@ public:
     ~tap_interface();
 
     /// Create the interface
-    void create();
+    void create(const config& config);
 
     /// Create the interface
-    /// @param error The error code in case of failure
-    void create(std::error_code& error);
-
-    /// Create the interface
-    /// @param interface_name The name of the interface
-    /// @param vnet_hdr If true the interface will be created with Virtual
-    /// Network Device Header enabled.
-    void create(const std::string& interface_name, bool vnet_hdr = false);
-
-    /// Create the interface
-    /// @param interface_name The name of the interface
-    /// @param vnet_hdr If true the interface will be created with Virtual
-    /// Network Device Header enabled.
-    /// @param error The error code in case of failure
-    void create(const std::string& interface_name, bool vnet_hdr,
-                std::error_code& error);
-
-    /// Create the interface
-    /// @param interface_name The name of the interface
-    /// @param error The error code in case of failure
-    void create(const std::string& interface_name, std::error_code& error);
+    /// @param the config for the interface
+    void create(const config& config, std::error_code& error);
 
     /// Rename the interface
     /// @param interface_name The new name of the interface

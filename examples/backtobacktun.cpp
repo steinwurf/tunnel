@@ -57,7 +57,7 @@ int main()
     iface2.set_log_callback(log2);
     iface2.monitor().enable_log();
 
-    iface1.create();
+    iface1.create({});
     iface1.set_ipv4("10.0.0.1");
     iface1.set_ipv4_netmask("255.255.255.0");
     iface1.set_mtu(6000);

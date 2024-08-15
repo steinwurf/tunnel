@@ -29,7 +29,7 @@ int main()
     iface.set_log_callback(log);
     iface.monitor().enable_log();
 
-    iface.create();
+    iface.create({});
     iface.set_ipv4("10.0.0.1");
     iface.set_ipv4_netmask("255.255.255.0");
     iface.set_persistent();

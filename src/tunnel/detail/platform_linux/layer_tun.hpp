@@ -34,6 +34,8 @@
 
 #include "../../log_level.hpp"
 
+#include "../../interface_config.hpp"
+
 namespace tunnel
 {
 namespace detail
@@ -45,8 +47,7 @@ template <class Super>
 struct layer_tun : public Super
 {
 
-    void create(const std::string& interface_name, std::error_code& error,
-                bool vnet_hdr)
+    void create(const config& config, std::error_code& error)
     {
         assert(!error);
 
@@ -54,7 +55,7 @@ struct layer_tun : public Super
         // Seems in this patch the name has to be zero-terminated so the actual
         // size we can use is IFNAMSIZ - 1:
         // https://www.spinics.net/lists/netdev/msg445126.html
-        if (interface_name.size() > IFNAMSIZ - 1)
+        if (config.interface_name.size() > IFNAMSIZ - 1)
         {
             error = make_error_code(linux_error::interface_name_too_long);
 
@@ -87,12 +88,15 @@ struct layer_tun : public Super
         // network packet.
         // Since the first two values are largely redundant, most applications
         // will probably want to set this flag, hence we do so here.
-        ifr.ifr_flags |= IFF_NO_PI;
+        if (config.iff_no_pi)
+        {
+            ifr.ifr_flags |= IFF_NO_PI;
+        }
 
         // If the vnet_hdr flag is set, we want to enable the virtio-net-header
         // feature. This feature is used to pass additional information about
         // GSO packets to and from the kernel.
-        if (vnet_hdr)
+        if (config.vnet_hdr)
         {
             ifr.ifr_flags |= IFF_VNET_HDR;
         }
@@ -100,9 +104,10 @@ struct layer_tun : public Super
         // If a device name was specified, put it in the structure;
         // otherwise, the kernel will try to allocate the "next" device of
         // the specified type
-        if (!interface_name.empty())
+        if (!config.interface_name.empty())
         {
-            interface_name.copy(ifr.ifr_name, interface_name.size());
+            config.interface_name.copy(ifr.ifr_name,
+                                       config.interface_name.size());
         }
 
         Super::ioctl(m_tun_fd, TUNSETIFF, (void*)&ifr, error);
@@ -111,7 +116,7 @@ struct layer_tun : public Super
             return;
         }
 
-        if (vnet_hdr)
+        if (config.vnet_hdr)
         {
             int offload_flags = TUN_F_CSUM | TUN_F_TSO4 | TUN_F_UFO;
             Super::ioctl(m_tun_fd, TUNSETOFFLOAD, offload_flags, error);
@@ -122,8 +127,8 @@ struct layer_tun : public Super
         }
 
         Super::do_log(log_level::debug, log_kind::interface_created,
-                      log::str{"name", interface_name.c_str()},
-                      log::boolean{"vnet_hdr", vnet_hdr});
+                      log::str{"name", config.interface_name.c_str()},
+                      log::boolean{"vnet_hdr", config.vnet_hdr});
     }
 
     auto owner(std::error_code& error) const -> std::string

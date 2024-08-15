@@ -19,9 +19,9 @@ TEST(test_tun_interface, create_no_su_expect_fail)
     if (getuid() != 0)
     {
         tunnel::tun_interface t;
-        EXPECT_THROW(t.create("dummy", false), std::system_error);
-        EXPECT_THROW(t.create("dummy", true), std::system_error);
-        EXPECT_THROW(t.create("too_long_name_way_over_20_chars", false),
+        EXPECT_THROW(t.create({"dummy", false}), std::system_error);
+        EXPECT_THROW(t.create({"dummy", true}), std::system_error);
+        EXPECT_THROW(t.create({"too_long_name_way_over_20_chars", false}),
                      std::system_error);
     }
 }

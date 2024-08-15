@@ -90,8 +90,8 @@ private:
     /// descriptor.
     scoped_file_descriptor(const scoped_file_descriptor&) = delete;
 
-    auto operator=(const scoped_file_descriptor&)
-        -> scoped_file_descriptor& = delete;
+    auto operator=(const scoped_file_descriptor&) -> scoped_file_descriptor& =
+                                                         delete;
 
 private:
     /// The owned file descriptor

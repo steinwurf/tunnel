@@ -54,41 +54,19 @@ tap_interface::~tap_interface()
 {
 }
 
-void tap_interface::create()
+void tap_interface::create(const config& config)
 {
     assert(m_impl);
 
     std::error_code error;
-    create(error);
-    throw_if_error(error);
-}
-void tap_interface::create(std::error_code& error)
-{
-    assert(m_impl);
-    create("", false, error);
-}
-
-void tap_interface::create(const std::string& device_name,
-                           std::error_code& error)
-{
-    assert(m_impl);
-    create(device_name, false, error);
-}
-
-void tap_interface::create(const std::string& device_name, bool vnet_hdr)
-{
-    assert(m_impl);
-
-    std::error_code error;
-    create(device_name, vnet_hdr, error);
+    create(config, error);
     throw_if_error(error);
 }
 
-void tap_interface::create(const std::string& device_name, bool vnet_hdr,
-                           std::error_code& error)
+void tap_interface::create(const config& config, std::error_code& error)
 {
     assert(m_impl);
-    m_impl->create(device_name, vnet_hdr, error);
+    m_impl->create(config, error);
 }
 
 void tap_interface::rename(const std::string& interface_name) const

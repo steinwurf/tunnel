@@ -74,8 +74,8 @@ inline auto parse_port(const std::string& address) -> uint16_t
         return 0;
     }
 }
-inline auto to_udp_endpoint(const std::string& address)
-    -> asio::ip::udp::endpoint
+inline auto
+to_udp_endpoint(const std::string& address) -> asio::ip::udp::endpoint
 {
     asio::ip::address addr = parse_ip(address);
     uint16_t port = parse_port(address);
@@ -147,9 +147,9 @@ int main(int argc, char** argv)
     if (mode == "tun")
     {
         tunnel::tun_interface iface1;
+        iface1.create({});
         iface1.set_log_callback(log1);
         iface1.monitor().enable_log();
-        iface1.create();
         iface1.set_ipv4(tunnel_address);
         iface1.set_ipv4_netmask("255.255.255.0");
         iface1.set_mtu(1500);
@@ -165,9 +165,9 @@ int main(int argc, char** argv)
     else if (mode == "tap")
     {
         tunnel::tap_interface iface1;
+        iface1.create({});
         iface1.set_log_callback(log1);
         iface1.monitor().enable_log();
-        iface1.create();
         iface1.set_ipv4(tunnel_address);
         iface1.set_ipv4_netmask("255.255.255.0");
         iface1.set_mtu(1500);

@@ -31,8 +31,8 @@ namespace platform_linux
 template <class Super>
 struct layer_linux : public Super
 {
-    auto open(const std::string& path, int flags, std::error_code& error) const
-        -> scoped_file_descriptor
+    auto open(const std::string& path, int flags,
+              std::error_code& error) const -> scoped_file_descriptor
     {
         assert(!error);
         assert(!path.empty());
@@ -208,8 +208,8 @@ struct layer_linux : public Super
         return res;
     }
 
-    auto size(const scoped_file_descriptor& fd, std::error_code& error) const
-        -> uint32_t
+    auto size(const scoped_file_descriptor& fd,
+              std::error_code& error) const -> uint32_t
     {
         assert(fd);
         assert(!error);
