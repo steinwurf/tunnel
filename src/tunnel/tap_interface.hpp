@@ -9,8 +9,8 @@
 #include <string>
 #include <system_error>
 
-#include "monitor.hpp"
 #include "interface_config.hpp"
+#include "monitor.hpp"
 
 namespace tunnel
 {

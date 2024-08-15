@@ -120,8 +120,7 @@ public:
     /// function object
     delegate(R (*invoke)(const void*, Args...),
              std::array<uint8_t, MaxBytes> storage) :
-        m_invoke(invoke),
-        m_storage(storage)
+        m_invoke(invoke), m_storage(storage)
     {
     }
 

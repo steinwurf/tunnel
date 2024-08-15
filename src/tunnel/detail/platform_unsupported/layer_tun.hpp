@@ -8,8 +8,8 @@
 #include <string>
 #include <system_error>
 
-#include "../../log_level.hpp"
 #include "../../interface_config.hpp"
+#include "../../log_level.hpp"
 #include "../log_kind.hpp"
 
 namespace tunnel
