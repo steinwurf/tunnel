@@ -20,6 +20,9 @@ struct config
 {
     /// The name of the interface
     std::string interface_name;
+
+    bool vnet_hdr = false;
+    bool iff_no_pi = true;
 };
 
 #endif
