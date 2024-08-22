@@ -6,7 +6,27 @@
 #include <gtest/gtest.h>
 #include <tunnel/tun_interface.hpp>
 #include <unistd.h>
+#include <platform/config.hpp>
 
+#if defined(PLATFORM_MAC)
+
+TEST(test_tun_interface, construct_no_su_fail)
+{
+    tunnel::tun_interface t;
+    (void)t;
+}
+
+TEST(test_tun_interface, create_no_su_expect_fail)
+{
+    // Check if we are root
+    if (getuid() != 0)
+    {
+        tunnel::tun_interface t;
+        EXPECT_THROW(t.create({}), std::system_error);
+    }
+}
+
+#elif defined(PLATFORM_LINUX)
 TEST(test_tun_interface, construct_no_su_fail)
 {
     tunnel::tun_interface t;
@@ -25,3 +45,5 @@ TEST(test_tun_interface, create_no_su_expect_fail)
                      std::system_error);
     }
 }
+
+#endif

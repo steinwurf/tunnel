@@ -6,7 +6,9 @@
 #include <gtest/gtest.h>
 #include <tunnel/tap_interface.hpp>
 #include <unistd.h>
+#include <platform/config.hpp>
 
+#if defined(PLATFORM_LINUX)
 TEST(test_tap_interface, construct_no_su_fail)
 {
     tunnel::tap_interface t;
@@ -25,3 +27,5 @@ TEST(test_tap_interface, create_no_su_expect_fail)
                      std::system_error);
     }
 }
+
+#endif
