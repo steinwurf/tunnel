@@ -4,8 +4,8 @@
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
 #include <gtest/gtest.h>
-#include <tunnel/tun_interface.hpp>
 #include <platform/config.hpp>
+#include <tunnel/tun_interface.hpp>
 
 #if defined(PLATFORM_MAC)
 
@@ -44,5 +44,24 @@ TEST(test_tun_interface, create_no_su_expect_fail)
                      std::system_error);
     }
 }
-
 #endif
+#if defined(PLATFORM_LINUX) || defined (PLATFORM_MAC)
+TEST(test_tun_interface, options)
+{
+    uid_t uid = getuid();
+    if (uid != 0)
+    {
+        GTEST_SKIP();
+    }
+    const auto ip_addr = "192.168.60.1";
+	const auto netmask = "255.255.0.0";
+    tunnel::tun_interface t;
+    t.create({});
+    t.up();
+    t.set_mtu(1500);
+    t.set_ipv4(ip_addr);
+    t.set_ipv4_netmask(netmask);
+	t.enable_default_route();
+}
+#endif
+
