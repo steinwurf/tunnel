@@ -5,7 +5,6 @@
 
 #include <gtest/gtest.h>
 #include <tunnel/tap_interface.hpp>
-#include <unistd.h>
 #include <platform/config.hpp>
 
 #if defined(PLATFORM_LINUX)

@@ -181,7 +181,7 @@ public:
         m_unit = -1;
     }
 
-    auto make_ifreq() -> struct ifreq
+    auto make_ifreq() const -> struct ifreq
     {
         assert(!m_name.empty() && "Device name is empty.");
         struct ifreq ifr;
@@ -350,6 +350,31 @@ public:
             return;
         }
     }
+    auto is_up(std::error_code& error) const -> bool
+    {
+        assert(!error);
+
+        struct ifreq ifr = make_ifreq();
+
+        if (error)
+        {
+            return false;
+        }
+
+        ioctl(m_control_fd, SIOCGIFFLAGS, &ifr, error);
+
+        if (error)
+        {
+            return false;
+        }
+
+        bool is_if_up = (ifr.ifr_flags & IFF_UP) != 0;
+
+        m_monitor.m_monitor.log(poke::log_level::debug, log_kind::is_up,
+                                log::boolean{"is_up", is_if_up});
+
+        return is_if_up;
+    }
 
     // Bring down the interface
     void down(std::error_code& error) const
@@ -378,6 +403,12 @@ public:
             error = std::make_error_code(std::errc::io_error);
             return;
         }
+    }
+    auto is_down(std::error_code& error) const -> bool
+    {
+        assert(!error);
+        m_monitor.m_monitor.log(poke::log_level::debug, log_kind::is_down);
+        return !is_up(error);
     }
 
     // Set the default route
@@ -507,22 +538,6 @@ public:
     }
 
     bool is_persistent(std::error_code& error) const
-    {
-        m_monitor.m_monitor.log(poke::log_level::error,
-                                log_kind::unsupported_platform);
-        error = std::make_error_code(std::errc::not_supported);
-        return false;
-    }
-
-    bool is_up(std::error_code& error) const
-    {
-        m_monitor.m_monitor.log(poke::log_level::error,
-                                log_kind::unsupported_platform);
-        error = std::make_error_code(std::errc::not_supported);
-        return false;
-    }
-
-    bool is_down(std::error_code& error) const
     {
         m_monitor.m_monitor.log(poke::log_level::error,
                                 log_kind::unsupported_platform);
