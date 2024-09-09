@@ -47,7 +47,7 @@ jobs:
           command: cd build && cmake ${{github.workspace}} -DSTEINWURF_RESOLVE_OPTIONS="--git_protocol=git@ $EXTRA_RESOLVE_OPTIONS"
       - name: CMake Build
         working-directory: ${{github.workspace}}/build
-        run: cmake --build . -j
+        run: cmake --build . -j$((`sysctl -n hw.physicalcpu` - 1))
       - name: CTest
         working-directory: ${{github.workspace}}/build
         run: ctest -V
