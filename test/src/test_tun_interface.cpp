@@ -3,11 +3,11 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
+#include <chrono>
 #include <gtest/gtest.h>
 #include <platform/config.hpp>
-#include <tunnel/tun_interface.hpp>
-#include <chrono>
 #include <thread>
+#include <tunnel/tun_interface.hpp>
 
 #if defined(PLATFORM_MAC)
 
@@ -57,18 +57,18 @@ TEST(test_tun_interface, options)
     }
     const auto ip_addr = "192.168.60.1";
     const auto netmask = "255.255.0.0";
-	cont auto mtu = 1500;
+    const auto mtu = 1500;
     tunnel::tun_interface t;
     t.create({});
     t.up();
     t.set_mtu(1500);
-	EXPECT_EQ(t.mtu(), mtu);
+    EXPECT_EQ(t.mtu(), mtu);
     t.set_ipv4(ip_addr);
-	EXPECT_EQ(t.ipv4(), ip_addr);
+    EXPECT_EQ(t.ipv4(), ip_addr);
     t.set_ipv4_netmask(netmask);
-	EXPECT_EQ(t.ipv4_netmask(), netmask);
+    EXPECT_EQ(t.ipv4_netmask(), netmask);
     t.enable_default_route();
-	t.disable_default_route();
-	t.down();
+    t.disable_default_route();
+    t.down();
 }
 #endif
