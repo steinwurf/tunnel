@@ -65,7 +65,16 @@ public:
             m_monitor.m_monitor.log(poke::log_level::error, log_kind::open,
                                     poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
-
+            cleanup();
+            return;
+        }
+        m_route_fd = socket(AF_ROUTE, SOCK_RAW, AF_INET);
+        if (m_route_fd < 0)
+        {
+            m_monitor.m_monitor.log(poke::log_level::error, log_kind::open,
+                                    poke::log::str{"error", strerror(errno)});
+            error = std::make_error_code(std::errc::io_error);
+            cleanup();
             return;
         }
 
@@ -78,6 +87,7 @@ public:
             m_monitor.m_monitor.log(poke::log_level::error, log_kind::open,
                                     poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
+            cleanup();
             return;
         }
 
@@ -178,6 +188,11 @@ public:
             ::close(m_interface_fd);
             m_interface_fd = -1;
         }
+        if (m_route_fd != -1)
+        {
+            ::close(m_route_fd);
+            m_route_fd = -1;
+        }
         m_unit = -1;
     }
 
@@ -214,15 +229,9 @@ public:
     void set_ipv4(const std::string& ipAddress, std::error_code& error)
     {
         assert(isOpen() && "Device is not open.");
+        assert(m_control_fd != -1 && "Control socket is not open.");
+        assert(!error);
 
-        int sock = socket(AF_INET, SOCK_DGRAM, 0);
-        if (sock < 0)
-        {
-            m_monitor.m_monitor.log(poke::log_level::error, log_kind::set_ipv4,
-                                    poke::log::str{"error", strerror(errno)});
-            error = std::make_error_code(std::errc::io_error);
-            return;
-        }
         auto ifr = make_ifreq();
 
         // Set IP address
@@ -233,36 +242,23 @@ public:
             m_monitor.m_monitor.log(poke::log_level::error, log_kind::set_ipv4,
                                     poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
-            close(sock);
             return;
         }
 
-        if (ioctl(sock, SIOCSIFADDR, &ifr) < 0)
+        if (ioctl(m_control_fd, SIOCSIFADDR, &ifr) < 0)
         {
             m_monitor.m_monitor.log(poke::log_level::error, log_kind::set_ipv4,
                                     poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
-            close(sock);
             return;
         }
-
-        // if everything is successful, save the IP address
-        m_ipAddress = ipAddress;
     }
 
     void set_ipv4_netmask(const std::string& mask, std::error_code& error)
     {
         assert(isOpen() && "Device is not open.");
-
-        int sock = socket(AF_INET, SOCK_DGRAM, 0);
-        if (sock < 0)
-        {
-            m_monitor.m_monitor.log(poke::log_level::error,
-                                    log_kind::set_ipv4_netmask,
-                                    poke::log::str{"error", strerror(errno)});
-            error = std::make_error_code(std::errc::io_error);
-            return;
-        }
+        assert(m_control_fd != -1 && "Control socket is not open.");
+        assert(!error);
 
         auto ifr = make_ifreq();
         // Set IP address
@@ -274,33 +270,71 @@ public:
                                     log_kind::set_ipv4_netmask,
                                     poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
-            close(sock);
             return;
         }
 
         ifr.ifr_addr.sa_family = AF_INET;
-        if (ioctl(sock, SIOCSIFNETMASK, &ifr) < 0)
+        if (ioctl(m_control_fd, SIOCSIFNETMASK, &ifr) < 0)
         {
             m_monitor.m_monitor.log(poke::log_level::error,
                                     log_kind::set_ipv4_netmask,
                                     poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
-            close(sock);
             return;
         }
         m_netmask = mask;
     }
-
-    std::string ipv4(std::error_code& error) const
+    auto ipv4(std::error_code& error) const -> std::string
     {
-        assert(m_ipAddress.empty() && "IP address is empty.");
-        return m_ipAddress;
+        assert(!error);
+
+        struct ifreq ifr = make_ifreq();
+
+        if (error)
+        {
+            return "";
+        }
+
+        ioctl(m_control_fd, SIOCGIFADDR, &ifr, error);
+
+        if (error)
+        {
+            return "";
+        }
+
+        struct sockaddr_in* addr_in = (struct sockaddr_in*)&ifr.ifr_addr;
+
+        m_monitor.m_monitor.log(
+            poke::log_level::debug, log_kind::interface_ipv4,
+            poke::log::str{"ip", ::inet_ntoa(addr_in->sin_addr)});
+
+        return ::inet_ntoa(addr_in->sin_addr);
     }
 
-    std::string ipv4_netmask(std::error_code& error) const
+    auto ipv4_netmask(std::error_code& error) const -> std::string
     {
-        assert(m_netmask.empty() && "Netmask is empty.");
-        return m_netmask;
+        assert(!error);
+
+        struct ifreq ifr = make_ifreq();
+
+        if (error)
+        {
+            return "";
+        }
+
+        ioctl(m_control_fd, SIOCGIFNETMASK, &ifr, error);
+
+        if (error)
+        {
+            return "";
+        }
+
+        struct sockaddr_in* addr_in = (struct sockaddr_in*)&ifr.ifr_addr;
+        m_monitor.m_monitor.log(
+            poke::log_level::debug, log_kind::interface_ipv4_netmask,
+            poke::log::str{"netmask", ::inet_ntoa(addr_in->sin_addr)});
+
+        return ::inet_ntoa(addr_in->sin_addr);
     }
 
     // Set MTU
@@ -414,16 +448,60 @@ public:
     // Set the default route
     void enable_default_route(std::error_code& error)
     {
-        std::stringstream ss;
-
-        ss << "route add default " << m_ipAddress << " -ifscope " << m_name;
-        std::string command = ss.str();
-
-        if (system(command.c_str()) == -1)
+        assert(!error);
+        assert(m_route_fd != -1 && "Route socket is not open.");
+        assert(!ipv4(error).empty() && "IP address is empty.");
+        assert(!m_name.empty() && "Interface name is empty.");
+        struct
         {
-            m_monitor.m_monitor.log(
-                poke::log_level::error, log_kind::enable_default_route,
-                poke::log::str{"error", "Failed to run command: " + command});
+            struct rt_msghdr hdr;
+            struct sockaddr_in dst;
+            struct sockaddr_in gw;
+            struct sockaddr_in netmask;
+        } rtmsg;
+
+        memset(&rtmsg, 0, sizeof(rtmsg));
+
+        rtmsg.hdr.rtm_msglen = sizeof(rtmsg);
+        rtmsg.hdr.rtm_version = RTM_VERSION;
+        rtmsg.hdr.rtm_type = RTM_ADD;
+        rtmsg.hdr.rtm_flags = RTF_UP | RTF_GATEWAY | RTF_STATIC | RTF_IFSCOPE;
+        rtmsg.hdr.rtm_addrs = RTA_DST | RTA_GATEWAY | RTA_NETMASK;
+        rtmsg.hdr.rtm_seq = 1;
+        rtmsg.hdr.rtm_pid = getpid();
+
+        // Destination is 0.0.0.0 (default route)
+        rtmsg.dst.sin_len = sizeof(struct sockaddr_in);
+        rtmsg.dst.sin_family = AF_INET;
+        rtmsg.dst.sin_addr.s_addr = 0;
+
+        // Gateway
+        rtmsg.gw.sin_len = sizeof(struct sockaddr_in);
+        rtmsg.gw.sin_family = AF_INET;
+        if (inet_pton(AF_INET, ipv4(error).c_str(), &rtmsg.gw.sin_addr) <= 0)
+        {
+            m_monitor.m_monitor.log(poke::log_level::error,
+                                    log_kind::enable_default_route,
+                                    poke::log::str{"error", strerror(errno)});
+            error = std::make_error_code(std::errc::io_error);
+            return;
+        }
+
+        // Netmask is 0.0.0.0
+        rtmsg.netmask.sin_len = sizeof(struct sockaddr_in);
+        rtmsg.netmask.sin_family = AF_INET;
+        rtmsg.netmask.sin_addr.s_addr = htonl(INADDR_ANY);
+
+        // set the interface to be the default route
+
+        rtmsg.hdr.rtm_index = if_nametoindex(m_name.c_str());
+
+        // Send the message to the routing socket
+        if (write(m_route_fd, &rtmsg, sizeof(rtmsg)) < 0)
+        {
+            m_monitor.m_monitor.log(poke::log_level::error,
+                                    log_kind::enable_default_route,
+                                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
         }
@@ -433,17 +511,56 @@ public:
     // remove the default route
     void disable_default_route(std::error_code& error)
     {
-        std::stringstream ss;
-
-        ss << "route delete default " << m_ipAddress << " -ifscope " << m_name;
-        std::string command = ss.str();
-
-        if (system(command.c_str()) == -1)
+        assert(!error);
+        assert(m_route_fd != -1 && "Route socket is not open.");
+        assert(!ipv4(error).empty() && "IP address is empty.");
+        assert(!m_name.empty() && "Interface name is empty.");
+        struct
         {
-            m_monitor.m_monitor.log(
-                poke::log_level::error, log_kind::enable_default_route,
-                poke::log::str{"error", "Failed to run command: " + command});
+            struct rt_msghdr hdr;
+            struct sockaddr_in dst;
+            struct sockaddr_in gw;
+            struct sockaddr_in netmask;
+        } rtmsg;
+
+        memset(&rtmsg, 0, sizeof(rtmsg));
+
+        rtmsg.hdr.rtm_msglen = sizeof(rtmsg);
+        rtmsg.hdr.rtm_version = RTM_VERSION;
+        rtmsg.hdr.rtm_type = RTM_DELETE;
+        rtmsg.hdr.rtm_flags =
+            RTF_GATEWAY | RTF_STATIC | RTF_IFSCOPE | RTF_CONDEMNED;
+        rtmsg.hdr.rtm_addrs = RTA_DST | RTA_GATEWAY | RTA_NETMASK;
+        rtmsg.hdr.rtm_seq = 1;
+        rtmsg.hdr.rtm_pid = getpid();
+
+        // Destination is 0.0.0.0 (default route)
+        rtmsg.dst.sin_len = sizeof(struct sockaddr_in);
+        rtmsg.dst.sin_family = AF_INET;
+        rtmsg.dst.sin_addr.s_addr = 0;
+
+        // Gateway
+        rtmsg.gw.sin_len = sizeof(struct sockaddr_in);
+        rtmsg.gw.sin_family = AF_INET;
+        rtmsg.gw.sin_addr.s_addr = htonl(INADDR_ANY);
+
+        // Netmask is 0.0.0.0
+        rtmsg.netmask.sin_len = sizeof(struct sockaddr_in);
+        rtmsg.netmask.sin_family = AF_INET;
+        rtmsg.netmask.sin_addr.s_addr = htonl(INADDR_ANY);
+
+        // set the interface to be the default route
+
+        rtmsg.hdr.rtm_index = if_nametoindex(m_name.c_str());
+
+        // Send the message to the routing socket
+        if (write(m_route_fd, &rtmsg, sizeof(rtmsg)) < 0)
+        {
+            m_monitor.m_monitor.log(poke::log_level::error,
+                                    log_kind::enable_default_route,
+                                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
+            return;
         }
         m_is_default_route = false;
     }
@@ -562,405 +679,14 @@ public:
 private:
     int m_interface_fd = -1;
     int m_control_fd = -1;
+    int m_route_fd = -1;
     int m_unit = -1; // unit number of the utun device
     std::string m_name;
     std::string m_ipAddress;
     std::string m_netmask;
     uint32_t m_mtu = -1;
     bool m_is_default_route = false;
-
     tunnel::detail::monitor m_monitor;
-};
-/// netdevice API:
-/// http://man7.org/linux/man-pages/man7/netdevice.7.html
-template <class Super>
-class layer_netdevice : public Super
-{
-public:
-    void create(const config& config, std::error_code& error)
-    {
-        assert(!error);
-
-        Super::create(config, error);
-
-        if (error)
-        {
-            return;
-        }
-
-        m_dev_fd = Super::socket(AF_INET, SOCK_STREAM, 0, error);
-    }
-
-    void rename(const std::string& interface_name, std::error_code& error) const
-    {
-        assert(!error);
-        assert(interface_name.size() > 0);
-
-        if (interface_name.size() > IFNAMSIZ - 1)
-        {
-            error = make_error_code(linux_error::interface_name_too_long);
-            Super::do_log(log_level::error, log_kind::interface_renamed,
-                          log::str{"interface_name", interface_name.c_str()},
-                          log::str{"error", error.message().c_str()});
-            return;
-        }
-
-        bool iface_up = is_up(error);
-
-        if (error)
-        {
-            return;
-        }
-
-        if (iface_up)
-        {
-            down(error);
-
-            if (error)
-            {
-                return;
-            }
-        }
-
-        struct ifreq ifr = make_ifreq(error);
-
-        if (error)
-        {
-            return;
-        }
-
-        interface_name.copy(ifr.ifr_newname, interface_name.size());
-
-        Super::ioctl(m_dev_fd, SIOCSIFNAME, &ifr, error);
-
-        if (error)
-        {
-            return;
-        }
-
-        Super::do_log(log_level::debug, log_kind::interface_renamed,
-                      log::str{"interface_name", interface_name.c_str()});
-
-        if (iface_up)
-        {
-            up(error);
-        }
-    }
-
-    auto is_up(std::error_code& error) const -> bool
-    {
-        assert(!error);
-
-        struct ifreq ifr = make_ifreq(error);
-
-        if (error)
-        {
-            return false;
-        }
-
-        Super::ioctl(m_dev_fd, SIOCGIFFLAGS, &ifr, error);
-
-        if (error)
-        {
-            return false;
-        }
-
-        bool is_if_up = (ifr.ifr_flags & IFF_UP) != 0;
-
-        Super::do_log(log_level::debug, log_kind::is_up,
-                      log::boolean{"is_up", is_if_up});
-
-        return is_if_up;
-    }
-
-    void up(std::error_code& error) const
-    {
-        assert(!error);
-
-        struct ifreq ifr = make_ifreq(error);
-
-        if (error)
-        {
-            return;
-        }
-
-        Super::ioctl(m_dev_fd, SIOCGIFFLAGS, &ifr, error);
-
-        if (error)
-        {
-            return;
-        }
-
-        ifr.ifr_flags |= IFF_UP;
-        Super::ioctl(m_dev_fd, SIOCSIFFLAGS, &ifr, error);
-
-        Super::do_log(log_level::debug, log_kind::interface_up);
-    }
-
-    auto is_down(std::error_code& error) const -> bool
-    {
-        assert(!error);
-        Super::do_log(log_level::debug, log_kind::is_down);
-        return !is_up(error);
-    }
-
-    void down(std::error_code& error) const
-    {
-        assert(!error);
-
-        struct ifreq ifr = make_ifreq(error);
-
-        if (error)
-        {
-            return;
-        }
-
-        Super::ioctl(m_dev_fd, SIOCGIFFLAGS, &ifr, error);
-
-        if (error)
-        {
-            return;
-        }
-
-        ifr.ifr_flags &= ~IFF_UP;
-        Super::ioctl(m_dev_fd, SIOCSIFFLAGS, &ifr, error);
-
-        Super::do_log(log_level::debug, log_kind::interface_down);
-    }
-
-    void enable_default_route(std::error_code& error) const
-    {
-        assert(!error);
-
-        struct rtentry route
-        {
-        };
-
-        std::string interface_name = Super::interface_name(error);
-
-        if (error)
-        {
-            return;
-        }
-
-        char ifname[IFNAMSIZ] = {0};
-        interface_name.copy(ifname, interface_name.size());
-
-        route.rt_dev = ifname;
-        route.rt_flags = RTF_UP;
-
-        struct sockaddr_in* gateway = (struct sockaddr_in*)&route.rt_gateway;
-        gateway->sin_family = AF_INET;
-        gateway->sin_addr.s_addr = INADDR_ANY;
-
-        struct sockaddr_in* dest = (struct sockaddr_in*)&route.rt_dst;
-        dest->sin_family = AF_INET;
-        dest->sin_addr.s_addr = INADDR_ANY;
-
-        struct sockaddr_in* mask = (struct sockaddr_in*)&route.rt_genmask;
-        mask->sin_family = AF_INET;
-        mask->sin_addr.s_addr = INADDR_ANY;
-
-        Super::ioctl(m_dev_fd, SIOCADDRT, &route, error);
-
-        Super::do_log(log_level::debug, log_kind::enable_default_route);
-    }
-
-    void disable_default_route(std::error_code& error) const
-    {
-        assert(!error);
-
-        struct rtentry route
-        {
-        };
-
-        std::string interface_name = Super::interface_name(error);
-
-        if (error)
-        {
-            return;
-        }
-
-        char ifname[IFNAMSIZ] = {0};
-        interface_name.copy(ifname, interface_name.size());
-
-        route.rt_dev = ifname;
-        route.rt_flags = RTF_UP;
-
-        struct sockaddr_in* gateway = (struct sockaddr_in*)&route.rt_gateway;
-        gateway->sin_family = AF_INET;
-        gateway->sin_addr.s_addr = INADDR_ANY;
-
-        struct sockaddr_in* dest = (struct sockaddr_in*)&route.rt_dst;
-        dest->sin_family = AF_INET;
-        dest->sin_addr.s_addr = INADDR_ANY;
-
-        struct sockaddr_in* mask = (struct sockaddr_in*)&route.rt_genmask;
-        mask->sin_family = AF_INET;
-        mask->sin_addr.s_addr = INADDR_ANY;
-
-        Super::ioctl(m_dev_fd, SIOCDELRT, &route, error);
-
-        Super::do_log(log_level::debug, log_kind::disable_default_route);
-    }
-
-    auto ipv4(std::error_code& error) const -> std::string
-    {
-        assert(!error);
-
-        struct ifreq ifr = make_ifreq(error);
-
-        if (error)
-        {
-            return "";
-        }
-
-        Super::ioctl(m_dev_fd, SIOCGIFADDR, &ifr, error);
-
-        if (error)
-        {
-            return "";
-        }
-
-        struct sockaddr_in* addr_in = (struct sockaddr_in*)&ifr.ifr_addr;
-
-        Super::do_log(log_level::debug, log_kind::interface_ipv4,
-                      log::str{"ip", ::inet_ntoa(addr_in->sin_addr)});
-
-        return ::inet_ntoa(addr_in->sin_addr);
-    }
-
-    auto ipv4_netmask(std::error_code& error) const -> std::string
-    {
-        assert(!error);
-
-        struct ifreq ifr = make_ifreq(error);
-
-        if (error)
-        {
-            return "";
-        }
-
-        Super::ioctl(m_dev_fd, SIOCGIFNETMASK, &ifr, error);
-
-        if (error)
-        {
-            return "";
-        }
-
-        struct sockaddr_in* addr_in = (struct sockaddr_in*)&ifr.ifr_addr;
-
-        Super::do_log(log_level::debug, log_kind::interface_ipv4_netmask,
-                      log::str{"netmask", ::inet_ntoa(addr_in->sin_addr)});
-
-        return ::inet_ntoa(addr_in->sin_addr);
-    }
-
-    void set_ipv4(const std::string& address, std::error_code& error) const
-    {
-        assert(!error);
-
-        struct ifreq ifr = make_ifreq(error);
-
-        if (error)
-        {
-            return;
-        }
-
-        // Set the IP
-
-        struct sockaddr addr = make_sockaddr(address, error);
-
-        if (error)
-        {
-            return;
-        }
-
-        ifr.ifr_addr = addr;
-
-        Super::ioctl(m_dev_fd, SIOCSIFADDR, &ifr, error);
-
-        Super::do_log(log_level::debug, log_kind::set_ipv4,
-                      log::str{"ip", address.c_str()});
-    }
-
-    void set_ipv4_netmask(const std::string& netmask,
-                          std::error_code& error) const
-    {
-        assert(!error);
-
-        struct ifreq ifr = make_ifreq(error);
-
-        if (error)
-        {
-            return;
-        }
-
-        struct sockaddr mask = make_sockaddr(netmask, error);
-
-        if (error)
-        {
-            return;
-        }
-
-        ifr.ifr_netmask = mask;
-
-        Super::ioctl(m_dev_fd, SIOCSIFNETMASK, &ifr, error);
-
-        Super::do_log(log_level::debug, log_kind::set_ipv4_netmask,
-                      log::str{"netmask", netmask.c_str()});
-    }
-
-private:
-    auto make_sockaddr(const std::string& ip, std::error_code& error) const
-        -> struct sockaddr
-    {
-        struct sockaddr addr
-        {
-        };
-        struct sockaddr_in* addr_in = (struct sockaddr_in*)&addr;
-
-        if (::inet_aton(ip.c_str(), &addr_in->sin_addr) < 0)
-        {
-            error = std::error_code(errno, std::generic_category());
-
-            Super::do_log(log_level::error, log_kind::make_sockaddr,
-                          log::str{"ip", ip.c_str()},
-                          log::str{"error", error.message().c_str()});
-
-            return {};
-        }
-
-        addr_in->sin_family = AF_INET;
-
-        Super::do_log(log_level::debug, log_kind::make_sockaddr,
-                      log::str{"ip", ip.c_str()});
-
-        return addr;
-    }
-
-    auto
-    make_ifreq(std::error_code& error) const -> struct ifreq
-    {
-        struct ifreq ifr
-        {
-        };
-
-        const std::string& interface_name = Super::interface_name(error);
-
-        if (error)
-        {
-            return {};
-        }
-
-        interface_name.copy(ifr.ifr_name, interface_name.size());
-
-        return ifr;
-    }
-
-    private :
-
-        scoped_file_descriptor m_dev_fd;
 };
 
 }

@@ -50,7 +50,6 @@ def build(bld):
             sources += bld.path.ant_glob("test/src/**/platform_linux/**/*.cpp")
         elif platform.system() == "Darwin":
             sources += bld.path.ant_glob("test/src/**/platform_macos/**/*.cpp")
-        print(sources)
         bld.program(
             features='cxx test',
             source=['test/tunnel_tests.cpp'] + sources,
