@@ -543,6 +543,14 @@ public:
         rtmsg.gw.sin_len = sizeof(struct sockaddr_in);
         rtmsg.gw.sin_family = AF_INET;
         rtmsg.gw.sin_addr.s_addr = htonl(INADDR_ANY);
+        if (inet_pton(AF_INET, ipv4(error).c_str(), &rtmsg.gw.sin_addr) <= 0)
+        {
+            m_monitor.m_monitor.log(poke::log_level::error,
+                                    log_kind::enable_default_route,
+                                    poke::log::str{"error", strerror(errno)});
+            error = std::make_error_code(std::errc::io_error);
+            return;
+        }
 
         // Netmask is 0.0.0.0
         rtmsg.netmask.sin_len = sizeof(struct sockaddr_in);
