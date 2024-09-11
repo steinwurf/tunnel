@@ -3,10 +3,8 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
-#include <chrono>
 #include <gtest/gtest.h>
 #include <platform/config.hpp>
-#include <thread>
 #include <tunnel/tun_interface.hpp>
 
 #if defined(PLATFORM_MAC)

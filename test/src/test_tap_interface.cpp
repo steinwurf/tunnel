@@ -4,8 +4,8 @@
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
 #include <gtest/gtest.h>
-#include <tunnel/tap_interface.hpp>
 #include <platform/config.hpp>
+#include <tunnel/tap_interface.hpp>
 
 #if defined(PLATFORM_LINUX)
 TEST(test_tap_interface, construct_no_su_fail)
