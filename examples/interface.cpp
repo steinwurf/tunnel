@@ -7,6 +7,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <platform/config.hpp>
 
 int main()
 {
@@ -16,7 +17,12 @@ int main()
     tunnel::tun_interface iface;
     iface.set_log_callback(log);
     iface.monitor().enable_log();
+
+#if defined(PLATFORM_LINUX)
     iface.create({"tuniface"});
+#elif defined(PLATFORM_MAC)
+    iface.create({});
+#endif
 
     if (iface.is_up())
     {
@@ -24,7 +30,15 @@ int main()
         return 0;
     }
 
+#if defined(PLATFORM_LINUX)
     assert(iface.interface_name() == "tuniface");
+#elif defined(PLATFORM_MAC)
+    const std::string expected_interface_name =
+        "utun"; // on macOS the interface name is not known in advance and must
+                // contain "utun" as a substring
+    assert(iface.interface_name().find(expected_interface_name) !=
+           std::string::npos);
+#endif
 
     assert(iface.is_persistent() == false);
     iface.set_persistent();

@@ -56,9 +56,6 @@ def build(bld):
             target='tunnel_tests',
             use=['tunnel', 'gtest'])
         
-    if bld.is_toplevel() and bld.is_mkspec_platform("linux"):
-        # Only build tests when executed from the top-level wscript,
-        # i.e. not when included as a dependency
         bld.recurse("examples")
         bld.recurse("apps/app/")
     
