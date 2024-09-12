@@ -50,7 +50,7 @@ jobs:
         run: cmake --build . -j$((`sysctl -n hw.physicalcpu` - 1))
       - name: CTest
         working-directory: ${{github.workspace}}/build
-        run: echo ${{ secrets.MACOS_RUNNER_PASS }} | sudo -S ctest -V
+        run: echo ${{ secrets.MACOS_RUNNER_PASS }} | sudo -S ./build/tunnel_tests
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
