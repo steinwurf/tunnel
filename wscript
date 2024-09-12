@@ -40,12 +40,27 @@ def build(bld):
         export_includes=["src"],
     )
 
-    if bld.is_toplevel() and bld.is_mkspec_platform("linux"):
-        # Only build tests when executed from the top-level wscript,
-        # i.e. not when included as a dependency
-        bld.recurse("test")
+    if bld.is_toplevel():
+        # Collect the source files but exclude the platform specific ones
+        sources = bld.path.ant_glob(
+            "test/src/**/*.cpp", excl=["test/**/platform_*/**/*.cpp"]
+        ) + bld.path.ant_glob("test/src/**/*.cc")
+
+        if platform.system() == "Linux":
+            sources += bld.path.ant_glob("test/src/**/platform_linux/**/*.cpp")
+        elif platform.system() == "Darwin":
+            sources += bld.path.ant_glob("test/src/**/platform_macos/**/*.cpp")
+        bld.program(
+            features='cxx test',
+            source=['test/tunnel_tests.cpp'] + sources,
+            target='tunnel_tests',
+            use=['tunnel', 'gtest'])
+        
         bld.recurse("examples")
         bld.recurse("apps/app/")
+    
+    
+
 
 
 class IntegrationContext(BuildContext):

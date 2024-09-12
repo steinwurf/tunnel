@@ -1,7 +1,0 @@
-# encoding: utf-8
-
-bld.program(
-    features='cxx test',
-    source=['tunnel_tests.cpp'] + bld.path.ant_glob('src/**/*.cpp'),
-    target='tunnel_tests',
-    use=['tunnel', 'gtest'])

@@ -6,6 +6,7 @@ every change, see the Git log.
 
 Latest
 ------
+* Minor: Add initial  macos/Darwin support.
 * Major: change interface  from seperate args to a struct
 
 14.1.1

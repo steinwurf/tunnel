@@ -15,6 +15,13 @@ struct config
     /// If true the interface will be created with IFF_NO_PI enabled.
     bool iff_no_pi = true;
 };
+#elif defined(PLATFORM_MAC)
+struct config
+{
+    // On MacOS we don't have any specific configuration (setting the name on
+    // macos is not possible)
+};
+
 #else
 struct config
 {

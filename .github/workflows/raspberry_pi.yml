@@ -1,5 +1,5 @@
 name: Raspberry Pi
-'on':
+on:
   workflow_dispatch:
     inputs:
       extra_resolve_options:
@@ -12,16 +12,65 @@ name: Raspberry Pi
     - master
   pull_request:
 jobs:
-  RaspberryPi:
-    uses: steinwurf/cross-compile-action/.github/workflows/action.yml@6.0.0
-    with:
-      cxx_mkspec: cxx_raspberry_gxx83_armv7
-      extra_resolve_options: ${{ github.event.inputs.extra_resolve_options }}
-      image: ghcr.io/steinwurf/gcc-8.3.0-raspberrypi-armv7:1.0.0
-      name: Raspberry Pi
-      test_binary_directory: build/cxx_raspberry_gxx83_armv7/test
-      test_binary_name: tunnel_tests
-      test_runner: raspberry_pi
+  cross-compile:
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+    runs-on: [self-hosted, docker, builder]
+    name: Raspberry Pi Cross-compile
+    container:
+      image: ghcr.io/steinwurf/gcc-8.3.0-raspberrypi-aarch64:1.0.0
+      options: --user 0:0
+      volumes:
+        - /home/buildbot/.ssh:/root/.ssh
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Waf Configure
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 3
+          timeout_minutes: 15
+          command: python3 waf configure --git_protocol=git@ --cxx_debug ${{ inputs.extra_resolve_options}}
+      - name: Waf Build
+        run: |
+          echo "::add-matcher::.github/gcc-problem-matcher.json"
+          python3 waf
+      - name: Gather Test Binary and Input files
+        run: |
+          mkdir artifact
+          mv build_current/tunnel_tests ./artifact
+      - name: Upload Test Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tunnel_tests
+          path: artifact
+          retention-days: 1
+  tests:
+    needs: cross-compile
+    strategy:
+      fail-fast: false
+    runs-on: [self-hosted, raspberry_pi_4]
+    name: Run Tests
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Download Test Binary Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tunnel_tests
+      - name: List files
+        run: ls -l
+      - name: Run all tests
+        run: chmod +x tunnel_tests
+      - name: Get backtrace on failure if available
+        run: |
+          if ! ./tunnel_tests; then
+            echo "Test failed, getting backtrace"
+            gdb -batch -ex "r" -ex "thread apply all backtrace full" -ex "quit" ./tunnel_tests
+            exit 1
+          fi
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true

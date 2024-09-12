@@ -164,6 +164,10 @@ int main(int argc, char** argv)
     }
     else if (mode == "tap")
     {
+#if defined(PLATFORM_MAC)
+        std::cerr << "Tap mode is not supported on MacOS" << std::endl;
+        exit(-1);
+#endif
         tunnel::tap_interface iface1;
         iface1.create({});
         iface1.set_log_callback(log1);

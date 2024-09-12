@@ -87,7 +87,13 @@ install(
 
 # Is top level project?
 if (${PROJECT_NAME} STREQUAL ${STEINWURF_TOP_NAME})
-    if (UNIX AND NOT APPLE)
+    if (UNIX)
+	  if(UNIX AND NOT APPLE)
+		set(LINUX TRUE)
+	  else()
+		set(MACOS TRUE)
+	  endif()
+
 	  # This is not a lib dependency but only for the app and should not be included onless build is toplevel
     add_subdirectory("${STEINWURF_RESOLVE}/cli11-source" CLI11 EXCLUDE_FROM_ALL)
 
@@ -111,8 +117,16 @@ if (${PROJECT_NAME} STREQUAL ${STEINWURF_TOP_NAME})
     list(FILTER tunnel_test_sources EXCLUDE REGEX "[.]*\/platform[.]*")
 
 	# Linux-specific code
-	file(GLOB_RECURSE linux_sources test/src/detail/platform_linux/*.cpp)
-	list(APPEND tunnel_test_sources ${linux_sources})
+	if (LINUX)
+		file(GLOB_RECURSE linux_sources test/src/detail/platform_linux/*.cpp)
+		list(APPEND tunnel_test_sources ${linux_sources})
+	endif ()
+	# MacOS-specific code
+	if (MACOS)
+		file(GLOB_RECURSE darwin_sources test/src/detail/platform_macos/*.cpp)
+		list(APPEND tunnel_test_sources ${darwin_sources})
+	endif ()
+
 
 
     # Build test executable

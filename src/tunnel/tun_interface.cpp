@@ -18,6 +18,11 @@
 using platform_tun_interface =
     tunnel::detail::platform_linux::stack_tun_interface;
 
+#elif defined(PLATFORM_MAC)
+
+#include "detail/platform_macos/tun_interface.hpp"
+using platform_tun_interface = tunnel::detail::platform_macos::tun_interface;
+
 #else
 
 #include "detail/platform_unsupported/stack_tun_interface.hpp"
