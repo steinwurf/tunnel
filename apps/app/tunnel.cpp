@@ -74,8 +74,8 @@ inline auto parse_port(const std::string& address) -> uint16_t
         return 0;
     }
 }
-inline auto to_udp_endpoint(const std::string& address)
-    -> asio::ip::udp::endpoint
+inline auto
+to_udp_endpoint(const std::string& address) -> asio::ip::udp::endpoint
 {
     asio::ip::address addr = parse_ip(address);
     uint16_t port = parse_port(address);
