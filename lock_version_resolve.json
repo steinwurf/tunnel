@@ -60,13 +60,13 @@
         "sha1": "f6bc772cf920c024726ebd12a5a38f123d057adb"
     },
     "poke": {
-        "commit_id": "17efddfa40a5d8a7ad2e7912f385c2ace5bfcb71",
-        "resolver_info": "13.0.0",
+        "commit_id": "90f724319a2a48b48ec2227428ebee5187b9b6c8",
+        "resolver_info": "13.0.3",
         "sha1": "792e4aecebe15ef24e9aa66a000b2751c485c340"
     },
     "protobuf": {
-        "commit_id": "8c097d481bb76bafafea87d56c8627c9b82014cd",
-        "resolver_info": "2.0.9",
+        "commit_id": "8a3e2cca411db1dc5b4717bd7f75fc9bc15498a0",
+        "resolver_info": "2.0.10",
         "sha1": "1cbce41d76e6829eb713e60eb7c3f46a1a350a32"
     },
     "protobuf-source": {
