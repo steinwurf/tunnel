@@ -18,7 +18,7 @@
 #include "../log.hpp"
 #include "../log_kind.hpp"
 
-#include "scoped_file_descriptor.hpp"
+#include "../scoped_file_descriptor.hpp"
 
 namespace tunnel
 {

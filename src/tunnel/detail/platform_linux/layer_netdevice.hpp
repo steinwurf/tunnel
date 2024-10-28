@@ -17,8 +17,8 @@
 #include "../log.hpp"
 #include "../log_kind.hpp"
 
+#include "../scoped_file_descriptor.hpp"
 #include "error.hpp"
-#include "scoped_file_descriptor.hpp"
 
 #include "../../interface_config.hpp"
 #include "../../log_level.hpp"

@@ -24,10 +24,10 @@
 #include "error.hpp"
 #include "layer_linux.hpp"
 
+#include "../scoped_file_descriptor.hpp"
 #include "layer_netdevice.hpp"
 #include "layer_netlink_v4.hpp"
 #include "layer_tap.hpp"
-#include "scoped_file_descriptor.hpp"
 
 #include "../layer_final.hpp"
 #include "../layer_monitor.hpp"

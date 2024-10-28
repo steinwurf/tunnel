@@ -27,8 +27,8 @@
 #include <pwd.h>
 #include <sys/ioctl.h>
 
+#include "../scoped_file_descriptor.hpp"
 #include "error.hpp"
-#include "scoped_file_descriptor.hpp"
 
 #include "../log.hpp"
 #include "../log_kind.hpp"

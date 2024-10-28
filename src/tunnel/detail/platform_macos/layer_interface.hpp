@@ -33,6 +33,7 @@
 #include "../../log_level.hpp"
 #include "../log_kind.hpp"
 #include "../monitor.hpp"
+#include "../scoped_file_descriptor.hpp"
 #include "../to_json_property.hpp"
 
 namespace tunnel
@@ -54,8 +55,7 @@ public:
     // create the utun device
     void create(const config& config, std::error_code& error)
     {
-        assert(m_interface_fd == -1 &&
-               "Cannot create an already created device.");
+        assert(m_interface_fd && "Cannot create an already created device.");
 
         m_control_fd = socket(AF_INET, SOCK_DGRAM, 0);
         if (m_control_fd < 0)
@@ -80,7 +80,7 @@ public:
         strlcpy(ctlInfo.ctl_name, UTUN_CONTROL_NAME, sizeof(ctlInfo.ctl_name));
 
         m_interface_fd = socket(PF_SYSTEM, SOCK_DGRAM, SYSPROTO_CONTROL);
-        if (m_interface_fd < 0)
+        if (!m_interface_fd)
         {
             Super::do_log(log_level::error, log_kind::open,
                           poke::log::str{"error", strerror(errno)});
@@ -91,7 +91,7 @@ public:
 
         struct sockaddr_ctl sc;
         memset(&sc, 0, sizeof(sc));
-        if (ioctl(m_interface_fd, CTLIOCGINFO, &ctlInfo) == -1)
+        if (ioctl(m_interface_fd.native_handle(), CTLIOCGINFO, &ctlInfo) == -1)
         {
             Super::do_log(log_level::error, log_kind::open,
                           poke::log::str{"error", strerror(errno)});
@@ -149,7 +149,8 @@ public:
         sc.ss_sysaddr = AF_SYS_CONTROL;
         sc.sc_unit = m_unit;
 
-        if (connect(m_interface_fd, (struct sockaddr*)&sc, sizeof(sc)) < 0)
+        if (connect(m_interface_fd.native_handle(), (struct sockaddr*)&sc,
+                    sizeof(sc)) < 0)
         {
             Super::do_log(log_level::error, log_kind::open,
                           poke::log::str{"error", strerror(errno)});
@@ -159,7 +160,7 @@ public:
         }
 
         // Set non-blocking mode
-        if (fcntl(m_interface_fd, F_SETFL, O_NONBLOCK) < 0)
+        if (fcntl(m_interface_fd.native_handle(), F_SETFL, O_NONBLOCK) < 0)
         {
             Super::do_log(log_level::error, log_kind::open,
                           poke::log::str{"error", strerror(errno)});
@@ -178,11 +179,6 @@ public:
         if (m_control_fd != -1)
         {
             ::close(m_control_fd);
-        }
-        if (m_interface_fd != -1)
-        {
-            ::close(m_interface_fd);
-            m_interface_fd = -1;
         }
         if (m_route_fd != -1)
         {
@@ -205,13 +201,13 @@ public:
     bool
     is_open() const
     {
-        return m_interface_fd != -1;
+        return m_interface_fd;
     }
 
     // Get the file descriptor
     int native_handle() const
     {
-        return m_interface_fd;
+        return m_interface_fd.native_handle();
     }
 
     // Set IP address and netmask
@@ -556,7 +552,7 @@ public:
     }
 
     // Unsupported methods for MacOS
-    void rename(const std::string& new_name, std::error_code& error) const
+    void rename(const std::string&, std::error_code& error) const
     {
         Super::do_log(log_level::error, log_kind::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
@@ -576,13 +572,13 @@ public:
         return "";
     }
 
-    void set_owner(const std::string& owner, std::error_code& error) const
+    void set_owner(const std::string&, std::error_code& error) const
     {
         Super::do_log(log_level::error, log_kind::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
     }
 
-    void set_group(const std::string& group, std::error_code& error) const
+    void set_group(const std::string&, std::error_code& error) const
     {
         Super::do_log(log_level::error, log_kind::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
@@ -608,7 +604,7 @@ public:
     }
 
 private:
-    int m_interface_fd = -1;
+    scoped_file_descriptor m_interface_fd;
     int m_control_fd = -1;
     int m_route_fd = -1;
     int m_unit = -1; // unit number of the utun device
