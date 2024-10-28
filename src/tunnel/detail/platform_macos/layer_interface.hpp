@@ -45,7 +45,7 @@ template <class Super>
 class layer_interface : public Super
 {
 public:
-    ~tun_interface()
+    ~layer_interface()
     {
         cleanup();
     }
