@@ -42,7 +42,7 @@ TEST(test_tun_interface, options)
 #if defined(PLATFORM_MAC)
 TEST(test_tun_interface, create_no_su_expect_fail)
 {
-    if (getuid() != 0)
+    if (getuid() == 0)
     {
         GTEST_SKIP();
     }
@@ -52,7 +52,7 @@ TEST(test_tun_interface, create_no_su_expect_fail)
 #elif defined(PLATFORM_LINUX)
 TEST(test_tun_interface, create_no_su_expect_fail)
 {
-    if (getuid() != 0)
+    if (getuid() == 0)
     {
         GTEST_SKIP();
     }

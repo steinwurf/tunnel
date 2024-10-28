@@ -13,7 +13,7 @@
 
 #if defined(PLATFORM_LINUX)
 #include <sys/resource.h>
-inline void enable_core_dumps()
+void enable_core_dumps()
 {
     // core dumps may be disallowed by the parent of this process; change that
     struct rlimit core_limits;
@@ -21,69 +21,36 @@ inline void enable_core_dumps()
     setrlimit(RLIMIT_CORE, &core_limits);
 }
 #else
-inline void enable_core_dumps()
+void enable_core_dumps()
 {
     // do nothing
 }
 #endif
 
-inline auto parse_ip(const std::string& address) -> asio::ip::address
+auto to_endpoint(const std::string& endpoint_str) -> asio::ip::udp::endpoint
 {
-    // If there is a port
-    std::size_t found = address.rfind(':');
+    std::size_t found = endpoint_str.rfind(':');
+    if (found == std::string::npos)
+    {
+        throw std::runtime_error("Invalid endpoint: " + endpoint_str);
+    }
 
-    if (found != std::string::npos)
+    asio::error_code ec;
+    asio::ip::address addr =
+        asio::ip::make_address(endpoint_str.substr(0, found), ec);
+    if (ec)
     {
+        throw std::runtime_error("Invalid address: " + endpoint_str);
+    }
 
-        // Make address and check if it is valid
-        asio::error_code ec;
-        asio::ip::address addr =
-            asio::ip::make_address(address.substr(0, found), ec);
-        if (ec)
-        {
-            throw std::runtime_error("Invalid address: " + address);
-        }
-        return addr;
-    }
-    else
-    {
-        asio::error_code ec;
-        asio::ip::address addr = asio::ip::make_address(address, ec);
-        if (ec)
-        {
-            throw std::runtime_error("Invalid address: " + address);
-        }
-        return addr;
-    }
-}
+    uint16_t port = std::atoi(endpoint_str.substr(found + 1).c_str());
 
-/// Parse port from string, while ignoring the ip.
-/// 10.0.0.1      -> error::invalid_argument
-/// 10.0.0.1:9900 -> 9900
-inline auto parse_port(const std::string& address) -> uint16_t
-{
-    // If there is a port
-    std::size_t found = address.rfind(':');
-    if (found != std::string::npos)
-    {
-        auto port = address.substr(found + 1, std::string::npos);
-        return std::atoi(port.c_str());
-    }
-    else
-    {
-        return 0;
-    }
-}
-inline auto
-to_udp_endpoint(const std::string& address) -> asio::ip::udp::endpoint
-{
-    asio::ip::address addr = parse_ip(address);
-    uint16_t port = parse_port(address);
     return {addr, port};
 }
-asio::ip::udp::endpoint peer;
+
 auto rx_udp_tx_tun(asio::ip::udp::socket& rx,
-                   asio::posix::stream_descriptor& tx) -> void
+                   asio::posix::stream_descriptor& tx,
+                   asio::ip::udp::endpoint& peer) -> void
 {
     static uint8_t buffer[2000];
     rx.async_receive_from(asio::buffer(buffer, sizeof(buffer)), peer,
@@ -91,11 +58,12 @@ auto rx_udp_tx_tun(asio::ip::udp::socket& rx,
                           {
                               assert(!err);
                               tx.write_some(asio::buffer(buffer, len));
-                              rx_udp_tx_tun(rx, tx);
+                              rx_udp_tx_tun(rx, tx, peer);
                           });
 }
 auto rx_tun_tx_udp(asio::posix::stream_descriptor& rx,
-                   asio::ip::udp::socket& tx) -> void
+                   asio::ip::udp::socket& tx,
+                   const asio::ip::udp::endpoint& peer) -> void
 {
     static uint8_t buffer[2000];
     rx.async_read_some(asio::buffer(buffer, sizeof(buffer)),
@@ -105,45 +73,90 @@ auto rx_tun_tx_udp(asio::posix::stream_descriptor& rx,
                            {
                                tx.send_to(asio::buffer(buffer, len), peer);
                            }
-                           rx_tun_tx_udp(rx, tx);
+                           rx_tun_tx_udp(rx, tx, peer);
                        });
 }
+
+struct EndpointValidator : public CLI::Validator
+{
+    EndpointValidator()
+    {
+        name_ = "ENDPOINT";
+        func_ = [](const std::string& str) -> std::string
+        {
+            try
+            {
+                to_endpoint(str);
+            }
+            catch (const std::exception& e)
+            {
+                return e.what();
+            }
+            return std::string();
+        };
+    }
+};
 
 int main(int argc, char** argv)
 {
     enable_core_dumps();
-
-    CLI::App app{"Tunnel back-to-back test app"};
 
     std::string mode = "";
     std::string tunnel_address = "";
     std::string local_address = "";
     std::string remote_address = "";
 
-    app.add_option("-m", mode, "Tunnel mode tun/tap")->required();
-    app.add_option("-a", tunnel_address, "Tunnel address")->required();
-    app.add_option("-l", local_address, "UDP local address");
-    app.add_option("-r", remote_address, "UDP remote address");
-    auto log1 = [](auto, const std::string& message, auto)
-    { std::cout << "tunnel_iface: " << message << std::endl; };
+    CLI::App app{"Tunnel back-to-back test app"};
+
+    app.add_option("-m,--mode", mode, "Tunnel mode tun/tap")
+        ->check(CLI::IsMember({"tun",
+#if defined(PLATFORM_LINUX) // Tap is only supported on Linux
+                               "tap"
+#endif
+        }))
+        ->required();
+    app.add_option("-a,--tunnel", tunnel_address,
+                   "Tunnel address, e.g. 11.11.11.11")
+        ->check(CLI::ValidIPV4)
+        ->required();
+
+    auto local_option =
+        app.add_option("-l,--local", local_address, "UDP local endpoint")
+            ->check(EndpointValidator());
+    auto remote_option =
+        app.add_option("-r,--remote", remote_address, "UDP remote endpoint")
+            ->check(EndpointValidator());
+
+    // Make sure that local and remote address are mutually exclusive
+    local_option->excludes(remote_option);
+    remote_option->excludes(local_option);
+
+    // Add a validation callback to enforce that either local or remote address
+    // is specified
+    app.final_callback(
+        [&]()
+        {
+            if (local_address.empty() && remote_address.empty())
+            {
+                throw CLI::RequiredError("Either --local or --remote");
+            }
+        });
 
     CLI11_PARSE(app, argc, argv);
-    assert((!local_address.empty() || !remote_address.empty()) &&
-           "Either remote or local address must be specified");
-    assert(!tunnel_address.empty() && "Empty tunnel address");
     asio::io_context io;
     asio::ip::udp::socket udp_socket(io, asio::ip::udp::v4());
+    asio::ip::udp::endpoint peer;
     if (!local_address.empty())
     {
-        auto ep = to_udp_endpoint(local_address);
-        udp_socket.bind(ep);
+        udp_socket.bind(to_endpoint(local_address));
     }
     else if (!remote_address.empty())
     {
-        auto ep = to_udp_endpoint(remote_address);
-        peer = ep;
+        peer = to_endpoint(remote_address);
     }
 
+    auto log1 = [](auto, const std::string& message, auto)
+    { std::cout << "tunnel_iface: " << message << std::endl; };
     if (mode == "tun")
     {
         tunnel::tun_interface iface1;
@@ -158,16 +171,12 @@ int main(int argc, char** argv)
         assert(in_fd > 0 && "Invalid file descriptor");
         auto rx = asio::posix::stream_descriptor(io);
         rx.assign(in_fd);
-        rx_tun_tx_udp(rx, udp_socket);
-        rx_udp_tx_tun(udp_socket, rx);
+        rx_tun_tx_udp(rx, udp_socket, peer);
+        rx_udp_tx_tun(udp_socket, rx, peer);
         io.run();
     }
     else if (mode == "tap")
     {
-#if defined(PLATFORM_MAC)
-        std::cerr << "Tap mode is not supported on MacOS" << std::endl;
-        exit(-1);
-#endif
         tunnel::tap_interface iface1;
         iface1.create({});
         iface1.set_log_callback(log1);
@@ -180,8 +189,8 @@ int main(int argc, char** argv)
         assert(in_fd > 0 && "Invalid file descriptor");
         auto rx = asio::posix::stream_descriptor(io);
         rx.assign(in_fd);
-        rx_tun_tx_udp(rx, udp_socket);
-        rx_udp_tx_tun(udp_socket, rx);
+        rx_tun_tx_udp(rx, udp_socket, peer);
+        rx_udp_tx_tun(udp_socket, rx, peer);
         io.run();
     }
 
