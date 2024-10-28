@@ -25,9 +25,9 @@ using platform_tun_interface = tunnel::detail::platform_macos::tun_interface;
 
 #else
 
-#include "detail/platform_unsupported/stack_tun_interface.hpp"
+#include "detail/platform_unsupported/unsupported.hpp"
 using platform_tun_interface =
-    tunnel::detail::platform_unsupported::stack_tun_interface;
+    tunnel::detail::platform_unsupported::unsupported;
 
 #endif
 

@@ -55,7 +55,7 @@ TEST(test_tun_interface, options)
     }
     const auto ip_addr = "192.168.60.1";
     const auto netmask = "255.255.0.0";
-    const auto mtu = 1500;
+    const uint32_t mtu = 1500;
     tunnel::tun_interface t;
     t.create({});
     t.up();
