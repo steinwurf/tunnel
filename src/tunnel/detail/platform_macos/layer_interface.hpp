@@ -30,8 +30,8 @@
 #include <sys/kern_control.h> // struct socketaddr_ctl
 
 #include "../../interface_config.hpp"
+#include "../../log_level.hpp"
 #include "../log_kind.hpp"
-#include "../log_level.hpp"
 #include "../monitor.hpp"
 #include "../to_json_property.hpp"
 
