@@ -20,9 +20,9 @@ using platform_tun_interface =
 
 #elif defined(PLATFORM_MAC)
 
-#include "detail/platform_macos/tun_interface.hpp"
-using platform_tun_interface = tunnel::detail::platform_macos::tun_interface;
-
+#include "detail/platform_macos/stack_tun_interface.hpp"
+using platform_tun_interface =
+    tunnel::detail::platform_macos::stack_tun_interface;
 #else
 
 #include "detail/platform_unsupported/unsupported.hpp"

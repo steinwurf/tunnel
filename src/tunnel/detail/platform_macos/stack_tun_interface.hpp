@@ -13,7 +13,7 @@ namespace tunnel
 {
 namespace detail
 {
-namespace platform_linux
+namespace platform_mac
 {
 /// In Linux you can find the documentation for TUN/TAP devices
 /// here: https://www.kernel.org/doc/Documentation/networking/tuntap.txt

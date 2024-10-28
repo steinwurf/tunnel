@@ -1,3 +1,8 @@
+// Copyright (c) 2017 Steinwurf ApS
+// All Rights Reserved
+//
+// Distributed under the "BSD License". See the accompanying LICENSE.rst file.
+
 #pragma once
 #include <platform/config.hpp>
 #include <string>
@@ -8,8 +13,8 @@ struct config
     /// The name of the interface
     std::string interface_name;
 
-    /// If true the interface will be created with Virtual Network
-    /// Device Header enabled.
+    /// If true the interface will be created with
+    /// Virtual Network Device Header enabled.
     bool vnet_hdr = false;
 
     /// If true the interface will be created with IFF_NO_PI enabled.
