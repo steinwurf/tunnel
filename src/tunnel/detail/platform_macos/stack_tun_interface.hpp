@@ -22,7 +22,7 @@ namespace platform_macos
 struct stack_tun_interface : public
     layer_interface<
     layer_monitor<
-    layer_final<stack_tun_interface>>>>>>
+    layer_final<stack_tun_interface>>>
 {
     static auto is_platform_supported() -> bool
     {
