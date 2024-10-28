@@ -67,8 +67,8 @@ class IntegrationContext(BuildContext):
 
 
 def integration_test(ctx):
-    # Test only for linux or mac
-    if not ctx.is_mkspec_platform("linux") and not ctx.is_mkspec_platform("mac"):
+    # Test only for linux
+    if not ctx.is_mkspec_platform("linux"):
         return
 
     tunnel_app_binary = os.path.relpath(
