@@ -22,7 +22,7 @@ using platform_tap_interface =
 #else
 
 #include "detail/platform_unsupported/unsupported.hpp"
-using platform_tun_interface =
+using platform_tap_interface =
     tunnel::detail::platform_unsupported::unsupported;
 
 #endif
