@@ -21,9 +21,9 @@ using platform_tap_interface =
 
 #else
 
-#include "detail/platform_unsupported/stack_tap_interface.hpp"
-using platform_tap_interface =
-    tunnel::detail::platform_unsupported::stack_tap_interface;
+#include "detail/platform_unsupported/unsupported.hpp"
+using platform_tun_interface =
+    tunnel::detail::platform_unsupported::unsupported;
 
 #endif
 
