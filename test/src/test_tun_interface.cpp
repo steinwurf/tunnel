@@ -7,49 +7,17 @@
 #include <platform/config.hpp>
 #include <tunnel/tun_interface.hpp>
 
-#if defined(PLATFORM_MAC)
-
-TEST(test_tun_interface, construct_no_su_fail)
-{
-    tunnel::tun_interface t;
-    (void)t;
-}
-
-TEST(test_tun_interface, create_no_su_expect_fail)
-{
-    // Check if we are root
-    if (getuid() != 0)
-    {
-        tunnel::tun_interface t;
-        EXPECT_THROW(t.create({}), std::system_error);
-    }
-}
-
-#elif defined(PLATFORM_LINUX)
-TEST(test_tun_interface, construct_no_su_fail)
-{
-    tunnel::tun_interface t;
-    (void)t;
-}
-
-TEST(test_tun_interface, create_no_su_expect_fail)
-{
-    // Check if we are root
-    if (getuid() != 0)
-    {
-        tunnel::tun_interface t;
-        EXPECT_THROW(t.create({"dummy", false}), std::system_error);
-        EXPECT_THROW(t.create({"dummy", true}), std::system_error);
-        EXPECT_THROW(t.create({"too_long_name_way_over_20_chars", false}),
-                     std::system_error);
-    }
-}
-#endif
 #if defined(PLATFORM_LINUX) || defined(PLATFORM_MAC)
+
+TEST(test_tun_interface, construct_no_su_fail)
+{
+    tunnel::tun_interface t;
+    (void)t;
+}
+
 TEST(test_tun_interface, options)
 {
-    uid_t uid = getuid();
-    if (uid != 0)
+    if (getuid() != 0)
     {
         GTEST_SKIP();
     }
@@ -68,5 +36,30 @@ TEST(test_tun_interface, options)
     t.enable_default_route();
     t.disable_default_route();
     t.down();
+}
+#endif
+
+#if defined(PLATFORM_MAC)
+TEST(test_tun_interface, create_no_su_expect_fail)
+{
+    if (getuid() != 0)
+    {
+        GTEST_SKIP();
+    }
+    tunnel::tun_interface t;
+    EXPECT_THROW(t.create({}), std::system_error);
+}
+#elif defined(PLATFORM_LINUX)
+TEST(test_tun_interface, create_no_su_expect_fail)
+{
+    if (getuid() != 0)
+    {
+        GTEST_SKIP();
+    }
+    tunnel::tun_interface t;
+    EXPECT_THROW(t.create({"dummy", false}), std::system_error);
+    EXPECT_THROW(t.create({"dummy", true}), std::system_error);
+    EXPECT_THROW(t.create({"too_long_name_way_over_20_chars", false}),
+                 std::system_error);
 }
 #endif
