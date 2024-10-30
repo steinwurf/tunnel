@@ -31,6 +31,7 @@
 
 #include "../../interface_config.hpp"
 #include "../../log_level.hpp"
+#include "../base_interface.hpp"
 #include "../log_kind.hpp"
 #include "../monitor.hpp"
 #include "../scoped_file_descriptor.hpp"
@@ -43,11 +44,14 @@ namespace detail
 namespace platform_macos
 {
 
-template <class Super>
-class layer_interface : public Super
+class interface : public base_interface
 {
 public:
-    ~layer_interface()
+    interface() : base_interface("platform_macos::interface")
+    {
+    }
+
+    ~interface()
     {
         cleanup();
     }

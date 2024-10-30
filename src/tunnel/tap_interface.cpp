@@ -18,13 +18,13 @@
 #include "detail/platform_linux/stack_tap_interface.hpp"
 using platform_tap_interface =
     tunnel::detail::platform_linux::stack_tap_interface;
-
+static constexpr bool platform_supported = true;
 #else
 
 #include "detail/platform_unsupported/unsupported.hpp"
 using platform_tap_interface =
     tunnel::detail::platform_unsupported::unsupported;
-
+static constexpr bool platform_supported = false;
 #endif
 
 namespace tunnel
@@ -428,7 +428,7 @@ auto tap_interface::set_log_callback(const log_callback& callback) -> void
 
 auto tap_interface::is_platform_supported() -> bool
 {
-    return platform_tap_interface::is_platform_supported();
+    return platform_supported;
 }
 
 }

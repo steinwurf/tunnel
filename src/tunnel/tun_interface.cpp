@@ -18,16 +18,20 @@
 using platform_tun_interface =
     tunnel::detail::platform_linux::stack_tun_interface;
 
+static constexpr bool platform_supported = true;
 #elif defined(PLATFORM_MAC)
 
-#include "detail/platform_macos/stack_tun_interface.hpp"
-using platform_tun_interface =
-    tunnel::detail::platform_macos::stack_tun_interface;
+#include "detail/platform_macos/interface.hpp"
+using platform_tun_interface = tunnel::detail::platform_macos::interface;
+
+static constexpr bool platform_supported = true;
 #else
 
 #include "detail/platform_unsupported/unsupported.hpp"
 using platform_tun_interface =
     tunnel::detail::platform_unsupported::unsupported;
+
+static constexpr bool platform_supported = false;
 
 #endif
 
@@ -432,7 +436,7 @@ auto tun_interface::set_log_callback(const log_callback& callback) -> void
 
 auto tun_interface::is_platform_supported() -> bool
 {
-    return platform_tun_interface::is_platform_supported();
+    return platform_supported;
 }
 
 }

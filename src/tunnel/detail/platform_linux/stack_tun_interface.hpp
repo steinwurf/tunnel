@@ -49,11 +49,6 @@ struct stack_tun_interface : public
     layer_monitor<
     layer_final<stack_tun_interface>>>>>>
 {
-    static auto is_platform_supported() -> bool
-    {
-        return true;
-    }
-
     static auto type() -> std::string
     {
         return "tunnel::detail::platform_linux::stack_tun_interface";
