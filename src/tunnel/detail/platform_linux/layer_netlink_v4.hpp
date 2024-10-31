@@ -122,7 +122,7 @@ public:
             return false;
         }
 
-        std::string tun_interface = Super::interface_name(error);
+        std::string interface_name = Super::interface_name(error);
 
         if (error)
         {
@@ -131,9 +131,9 @@ public:
 
         Super::do_log(log_level::debug, log_kind::is_default_route,
                       log::boolean{"is_default_route",
-                                   default_interface == tun_interface});
+                                   default_interface == interface_name});
 
-        return default_interface == tun_interface;
+        return default_interface == interface_name;
     }
 
 private:
