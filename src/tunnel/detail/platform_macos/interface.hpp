@@ -68,7 +68,7 @@ public:
         if (control_fd)
         {
             do_log(log_level::error, log_kind::open,
-                   poke::log::str{"error", strerror(errno)});
+                   poke::log::str{"control_fd", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
         }
@@ -76,30 +76,30 @@ public:
         if (route_fd)
         {
             do_log(log_level::error, log_kind::open,
-                   poke::log::str{"error", strerror(errno)});
+                   poke::log::str{"route_fd", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
         }
-
-        struct ctl_info ctlInfo;
-        strlcpy(ctlInfo.ctl_name, UTUN_CONTROL_NAME, sizeof(ctlInfo.ctl_name));
 
         scoped_file_descriptor interface_fd =
             socket(PF_SYSTEM, SOCK_DGRAM, SYSPROTO_CONTROL);
         if (!interface_fd)
         {
             do_log(log_level::error, log_kind::open,
-                   poke::log::str{"error", strerror(errno)});
+                   poke::log::str{"interface_fd", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
         }
 
+        // Get the control ID
+        struct ctl_info ctlInfo;
+        strlcpy(ctlInfo.ctl_name, UTUN_CONTROL_NAME, sizeof(ctlInfo.ctl_name));
         struct sockaddr_ctl sc;
         memset(&sc, 0, sizeof(sc));
         if (ioctl(interface_fd.native_handle(), CTLIOCGINFO, &ctlInfo) == -1)
         {
             do_log(log_level::error, log_kind::open,
-                   poke::log::str{"error", strerror(errno)});
+                   poke::log::str{"get_control_id", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
         }
@@ -111,7 +111,7 @@ public:
             if (sock < 0)
             {
                 do_log(log_level::error, log_kind::open,
-                       poke::log::str{"error", strerror(errno)});
+                       poke::log::str{"find_unit", strerror(errno)});
                 error = std::make_error_code(std::errc::io_error);
                 return -1;
             }
@@ -156,7 +156,7 @@ public:
                     sizeof(sc)) < 0)
         {
             do_log(log_level::error, log_kind::open,
-                   poke::log::str{"error", strerror(errno)});
+                   poke::log::str{"connect", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
         }
@@ -165,7 +165,7 @@ public:
         if (fcntl(interface_fd.native_handle(), F_SETFL, O_NONBLOCK) < 0)
         {
             do_log(log_level::error, log_kind::open,
-                   poke::log::str{"error", strerror(errno)});
+                   poke::log::str{"set_non_blocking", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
         }
