@@ -33,7 +33,6 @@
 #include "../../log_level.hpp"
 #include "../base_interface.hpp"
 #include "../log_kind.hpp"
-#include "../monitor.hpp"
 #include "../scoped_file_descriptor.hpp"
 #include "../to_json_property.hpp"
 
