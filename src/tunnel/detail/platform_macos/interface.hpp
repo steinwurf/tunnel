@@ -65,7 +65,7 @@ public:
         }
 
         scoped_file_descriptor control_fd = socket(AF_INET, SOCK_DGRAM, 0);
-        if (control_fd)
+        if (!control_fd)
         {
             do_log(log_level::error, log_kind::open,
                    poke::log::str{"control_fd", strerror(errno)});
@@ -73,7 +73,7 @@ public:
             return;
         }
         scoped_file_descriptor route_fd = socket(AF_ROUTE, SOCK_RAW, AF_INET);
-        if (route_fd)
+        if (!route_fd)
         {
             do_log(log_level::error, log_kind::open,
                    poke::log::str{"route_fd", strerror(errno)});
