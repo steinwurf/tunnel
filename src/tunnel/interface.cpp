@@ -63,7 +63,7 @@ void interface::create(const interface::config& config)
 void interface::create(const interface::config& config, std::error_code& error)
 {
     assert(m_impl);
-    // m_impl->create(config, error);
+    m_impl->create(config, error);
 }
 
 void interface::rename(const std::string& interface_name) const

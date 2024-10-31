@@ -6,7 +6,6 @@
 #pragma once
 
 #include "../../interface.hpp"
-#include "../base_interface.hpp"
 #include "../monitor.hpp"
 namespace tunnel
 {
