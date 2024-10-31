@@ -20,7 +20,7 @@
 #include "../scoped_file_descriptor.hpp"
 #include "error.hpp"
 
-#include "../../interface_config.hpp"
+#include "../../interface.hpp"
 #include "../../log_level.hpp"
 
 namespace tunnel
@@ -35,7 +35,7 @@ template <class Super>
 class layer_netdevice : public Super
 {
 public:
-    void create(const config& config, std::error_code& error)
+    void create(const tunnel::interface::config& config, std::error_code& error)
     {
         assert(!error);
 

@@ -3,7 +3,7 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
-#include <tunnel/tun_interface.hpp>
+#include <tunnel/interface.hpp>
 
 #include <cassert>
 #include <iostream>
@@ -25,7 +25,7 @@ int main()
     auto log = [](auto, const std::string& message, auto)
     { std::cout << message << std::endl; };
 
-    tunnel::tun_interface iface;
+    tunnel::interface iface;
     iface.set_log_callback(log);
     iface.monitor().enable_log();
 

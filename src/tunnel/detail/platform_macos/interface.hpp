@@ -15,23 +15,18 @@
 #include <netinet/in.h>
 #include <sstream>
 #include <stdio.h>
+#include <string.h>
 #include <string>
 #include <sys/ioctl.h>
+#include <sys/kern_control.h>
 #include <sys/socket.h>
 #include <sys/sys_domain.h>
 #include <sys/sysctl.h>
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <string.h> // strlcpy
-
-#include <net/if_utun.h>      // UTUN_CONTROL_NAME
-#include <sys/ioctl.h>        // ioctl
-#include <sys/kern_control.h> // struct socketaddr_ctl
-
-#include "../../interface_config.hpp"
+#include "../../interface.hpp"
 #include "../../log_level.hpp"
-#include "../base_interface.hpp"
 #include "../log_kind.hpp"
 #include "../scoped_file_descriptor.hpp"
 #include "../to_json_property.hpp"
@@ -43,10 +38,10 @@ namespace detail
 namespace platform_macos
 {
 
-class interface : public base_interface
+class interface
 {
 public:
-    interface() : base_interface("platform_macos::interface")
+    interface() : m_monitor("platform_macos::interface", {})
     {
     }
 
@@ -59,6 +54,14 @@ public:
     void create(const config& config, std::error_code& error)
     {
         assert(m_interface_fd && "Cannot create an already created device.");
+
+        if (config.interface_type != tunnel::interface::type::tun)
+        {
+            do_log(log_level::error, log_kind::create,
+                   poke::log::str{"error", "Only TUN is supported on MacOS"});
+            error = std::make_error_code(std::errc::not_supported);
+            return;
+        }
 
         scoped_file_descriptor control_fd = socket(AF_INET, SOCK_DGRAM, 0);
         if (control_fd)
@@ -167,6 +170,7 @@ public:
         }
 
         // Construct the interface name
+        // on macOS the interface name must contain "utun" as a substring
         m_name = "utun" + std::to_string(m_unit - 1);
 
         // Set the interface file descriptors
@@ -605,7 +609,38 @@ public:
         error = std::make_error_code(std::errc::not_supported);
     }
 
+    auto monitor() -> tunnel::monitor&
+    {
+        return m_monitor;
+    }
+
+    auto monitor() const -> const tunnel::monitor&
+    {
+        return m_monitor;
+    }
+
+    void set_log_callback(const tunnel::log_callback& callback)
+    {
+        m_monitor.set_log_callback(callback);
+    }
+
+    void enable_log(log_level level = log_level::state,
+                    std::string path_filter = "", std::string type_filter = "",
+                    std::any user_data = {})
+    {
+        m_monitor.enable_log(level, path_filter, type_filter, user_data);
+    }
+
+protected:
+    template <class Kind, class... Args>
+    void do_log(log_level level, const Kind& kind, Args&&... args) const
+    {
+        m_monitor.m_monitor.log(static_cast<poke::log_level>(level), kind,
+                                std::forward<const Args>(args)...);
+    }
+
 private:
+    tunnel::detail::monitor m_monitor;
     scoped_file_descriptor m_interface_fd;
     scoped_file_descriptor m_control_fd;
     scoped_file_descriptor m_route_fd;

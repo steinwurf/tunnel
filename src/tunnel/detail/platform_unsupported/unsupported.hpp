@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "../../interface_config.hpp"
+#include "../../interface.hpp"
 #include "../base_interface.hpp"
 #include "../monitor.hpp"
 namespace tunnel
@@ -14,13 +14,13 @@ namespace detail
 {
 namespace platform_unsupported
 {
-struct unsupported : base_interface
+struct unsupported
 {
-    unsupported() : base_interface("unsupported")
+    unsupported() : m_impl("unsupported", {})
     {
     }
 
-    void create(const config&, std::error_code& error)
+    void create(const tunnel::interface::config&, std::error_code& error)
     {
         error = std::make_error_code(std::errc::not_supported);
     }
@@ -150,6 +150,32 @@ struct unsupported : base_interface
         throw std::runtime_error("not supported");
         return -1;
     }
+
+    auto monitor() -> tunnel::monitor&
+    {
+        throw std::runtime_error("not supported");
+        return m_impl;
+    }
+
+    auto monitor() const -> const tunnel::monitor&
+    {
+        throw std::runtime_error("not supported");
+        return m_impl;
+    }
+
+    void set_log_callback(const tunnel::log_callback&)
+    {
+        throw std::runtime_error("not supported");
+    }
+
+    void enable_log(log_level = log_level::state, std::string = "",
+                    std::string = "", std::any = {})
+    {
+        throw std::runtime_error("not supported");
+    }
+
+private:
+    tunnel::detail::monitor m_impl;
 };
 
 }

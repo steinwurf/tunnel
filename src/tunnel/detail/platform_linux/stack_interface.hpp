@@ -24,9 +24,9 @@
 #include "layer_linux.hpp"
 
 #include "../scoped_file_descriptor.hpp"
+#include "layer_interface.hpp"
 #include "layer_netdevice.hpp"
 #include "layer_netlink_v4.hpp"
-#include "layer_tun.hpp"
 
 #include "../layer_final.hpp"
 #include "../layer_monitor.hpp"
@@ -41,17 +41,17 @@ namespace platform_linux
 /// here: https://www.kernel.org/doc/Documentation/networking/tuntap.txt
 
 // clang-format off
-struct stack_tun_interface : public
+struct stack_interface : public
     layer_netlink_v4<
     layer_netdevice<
-    layer_tun<
+    layer_interface<
     layer_linux<
     layer_monitor<
-    layer_final<stack_tun_interface>>>>>>
+    layer_final<stack_interface>>>>>>
 {
     static auto type() -> std::string
     {
-        return "tunnel::detail::platform_linux::stack_tun_interface";
+        return "tunnel::detail::platform_linux::stack_interface";
     }
 };
 // clang-format on

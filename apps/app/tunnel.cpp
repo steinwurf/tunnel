@@ -8,8 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <system_error>
-#include <tunnel/tap_interface.hpp>
-#include <tunnel/tun_interface.hpp>
+#include <tunnel/interface.hpp>
 
 #if defined(PLATFORM_LINUX)
 #include <sys/resource.h>
@@ -157,42 +156,24 @@ int main(int argc, char** argv)
 
     auto log1 = [](auto, const std::string& message, auto)
     { std::cout << "tunnel_iface: " << message << std::endl; };
-    if (mode == "tun")
-    {
-        tunnel::tun_interface iface1;
-        iface1.create({});
-        iface1.set_log_callback(log1);
-        iface1.monitor().enable_log();
-        iface1.set_ipv4(tunnel_address);
-        iface1.set_ipv4_netmask("255.255.255.0");
-        iface1.set_mtu(1500);
-        iface1.up();
-        auto in_fd = iface1.native_handle();
-        assert(in_fd > 0 && "Invalid file descriptor");
-        auto rx = asio::posix::stream_descriptor(io);
-        rx.assign(in_fd);
-        rx_tun_tx_udp(rx, udp_socket, peer);
-        rx_udp_tx_tun(udp_socket, rx, peer);
-        io.run();
-    }
-    else if (mode == "tap")
-    {
-        tunnel::tap_interface iface1;
-        iface1.create({});
-        iface1.set_log_callback(log1);
-        iface1.monitor().enable_log();
-        iface1.set_ipv4(tunnel_address);
-        iface1.set_ipv4_netmask("255.255.255.0");
-        iface1.set_mtu(1500);
-        iface1.up();
-        auto in_fd = iface1.native_handle();
-        assert(in_fd > 0 && "Invalid file descriptor");
-        auto rx = asio::posix::stream_descriptor(io);
-        rx.assign(in_fd);
-        rx_tun_tx_udp(rx, udp_socket, peer);
-        rx_udp_tx_tun(udp_socket, rx, peer);
-        io.run();
-    }
+    tunnel::interface::config config;
+    config.interface_type = mode == "tun" ? tunnel::interface::type::tun
+                                          : tunnel::interface::type::tap;
+    tunnel::interface iface1;
+    iface1.create(config);
+    iface1.set_log_callback(log1);
+    iface1.monitor().enable_log();
+    iface1.set_ipv4(tunnel_address);
+    iface1.set_ipv4_netmask("255.255.255.0");
+    iface1.set_mtu(1500);
+    iface1.up();
+    auto in_fd = iface1.native_handle();
+    assert(in_fd > 0 && "Invalid file descriptor");
+    auto rx = asio::posix::stream_descriptor(io);
+    rx.assign(in_fd);
+    rx_tun_tx_udp(rx, udp_socket, peer);
+    rx_udp_tx_tun(udp_socket, rx, peer);
+    io.run();
 
     return 0;
 }
