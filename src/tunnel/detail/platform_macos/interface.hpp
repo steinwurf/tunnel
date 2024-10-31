@@ -81,6 +81,9 @@ public:
             return;
         }
 
+        struct ctl_info ctlInfo;
+        strlcpy(ctlInfo.ctl_name, UTUN_CONTROL_NAME, sizeof(ctlInfo.ctl_name));
+
         scoped_file_descriptor interface_fd =
             socket(PF_SYSTEM, SOCK_DGRAM, SYSPROTO_CONTROL);
         if (!interface_fd)
@@ -92,8 +95,6 @@ public:
         }
 
         // Get the control ID
-        struct ctl_info ctlInfo;
-        strlcpy(ctlInfo.ctl_name, UTUN_CONTROL_NAME, sizeof(ctlInfo.ctl_name));
         struct sockaddr_ctl sc;
         memset(&sc, 0, sizeof(sc));
         if (ioctl(interface_fd.native_handle(), CTLIOCGINFO, &ctlInfo) == -1)
