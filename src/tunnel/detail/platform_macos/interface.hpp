@@ -61,46 +61,43 @@ public:
     {
         assert(m_interface_fd && "Cannot create an already created device.");
 
-        m_control_fd = socket(AF_INET, SOCK_DGRAM, 0);
-        if (m_control_fd)
+        scoped_file_descriptor control_fd = socket(AF_INET, SOCK_DGRAM, 0);
+        if (control_fd)
         {
             do_log(log_level::error, log_kind::open,
                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
-            cleanup();
             return;
         }
-        m_route_fd = socket(AF_ROUTE, SOCK_RAW, AF_INET);
-        if (m_route_fd)
+        scoped_file_descriptor route_fd = socket(AF_ROUTE, SOCK_RAW, AF_INET);
+        if (route_fd)
         {
             do_log(log_level::error, log_kind::open,
                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
-            cleanup();
             return;
         }
 
         struct ctl_info ctlInfo;
         strlcpy(ctlInfo.ctl_name, UTUN_CONTROL_NAME, sizeof(ctlInfo.ctl_name));
 
-        m_interface_fd = socket(PF_SYSTEM, SOCK_DGRAM, SYSPROTO_CONTROL);
-        if (!m_interface_fd)
+        scoped_file_descriptor interface_fd =
+            socket(PF_SYSTEM, SOCK_DGRAM, SYSPROTO_CONTROL);
+        if (!interface_fd)
         {
             do_log(log_level::error, log_kind::open,
                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
-            cleanup();
             return;
         }
 
         struct sockaddr_ctl sc;
         memset(&sc, 0, sizeof(sc));
-        if (ioctl(m_interface_fd.native_handle(), CTLIOCGINFO, &ctlInfo) == -1)
+        if (ioctl(interface_fd.native_handle(), CTLIOCGINFO, &ctlInfo) == -1)
         {
             do_log(log_level::error, log_kind::open,
                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
-            cleanup();
             return;
         }
 
@@ -140,10 +137,9 @@ public:
         };
 
         // Scan for a free unit number
-        m_unit = find_free_unit();
-        if (m_unit == -1)
+        int unit = find_free_unit();
+        if (unit == -1)
         {
-            cleanup();
             return;
         }
 
@@ -153,28 +149,32 @@ public:
         sc.ss_sysaddr = AF_SYS_CONTROL;
         sc.sc_unit = m_unit;
 
-        if (connect(m_interface_fd.native_handle(), (struct sockaddr*)&sc,
+        if (connect(interface_fd.native_handle(), (struct sockaddr*)&sc,
                     sizeof(sc)) < 0)
         {
             do_log(log_level::error, log_kind::open,
                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
-            cleanup();
             return;
         }
 
         // Set non-blocking mode
-        if (fcntl(m_interface_fd.native_handle(), F_SETFL, O_NONBLOCK) < 0)
+        if (fcntl(interface_fd.native_handle(), F_SETFL, O_NONBLOCK) < 0)
         {
             do_log(log_level::error, log_kind::open,
                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
-            cleanup();
             return;
         }
 
         // Construct the interface name
         m_name = "utun" + std::to_string(m_unit - 1);
+
+        // Set the interface file descriptors
+        m_interface_fd = interface_fd;
+        m_control_fd = control_fd;
+        m_route_fd = route_fd;
+        m_unit = unit;
     }
 
     // Close the utun device
