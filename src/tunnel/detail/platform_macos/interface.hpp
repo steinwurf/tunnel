@@ -54,7 +54,7 @@ public:
     // create the utun device
     void create(const tunnel::interface::config& config, std::error_code& error)
     {
-        assert(m_interface_fd && "Cannot create an already created device.");
+        assert(!m_interface_fd && "Cannot create an already created device.");
 
         if (config.interface_type != tunnel::interface::type::tun)
         {
