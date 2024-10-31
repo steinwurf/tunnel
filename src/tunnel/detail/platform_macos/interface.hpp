@@ -196,7 +196,7 @@ public:
     bool
     is_open() const
     {
-        return m_interface_fd;
+        return static_cast<bool>(m_interface_fd);
     }
 
     // Get the file descriptor
