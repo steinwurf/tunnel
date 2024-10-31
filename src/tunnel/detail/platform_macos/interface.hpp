@@ -58,7 +58,7 @@ public:
 
         if (config.interface_type != tunnel::interface::type::tun)
         {
-            do_log(log_level::error, log_kind::create,
+            do_log(log_level::error, log_kind::open,
                    poke::log::str{"error", "Only TUN is supported on MacOS"});
             error = std::make_error_code(std::errc::not_supported);
             return;
