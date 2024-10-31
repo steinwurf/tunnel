@@ -174,9 +174,9 @@ public:
         m_name = "utun" + std::to_string(m_unit - 1);
 
         // Set the interface file descriptors
-        m_interface_fd = interface_fd;
-        m_control_fd = control_fd;
-        m_route_fd = route_fd;
+        m_interface_fd = std::move(interface_fd);
+        m_control_fd = std::move(control_fd);
+        m_route_fd = std::move(route_fd);
         m_unit = unit;
     }
 
