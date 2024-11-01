@@ -327,7 +327,7 @@ public:
 
         struct sockaddr_in* addr_in = (struct sockaddr_in*)&ifr.ifr_addr;
 
-        Super::do_log(log_level::debug, log_kind::interface_ipv4,
+        Super::do_log(log_level::debug, log_kind::ipv4,
                       log::str{"ip", ::inet_ntoa(addr_in->sin_addr)});
 
         return ::inet_ntoa(addr_in->sin_addr);
@@ -353,7 +353,7 @@ public:
 
         struct sockaddr_in* addr_in = (struct sockaddr_in*)&ifr.ifr_addr;
 
-        Super::do_log(log_level::debug, log_kind::interface_ipv4_netmask,
+        Super::do_log(log_level::debug, log_kind::ipv4_netmask,
                       log::str{"netmask", ::inet_ntoa(addr_in->sin_addr)});
 
         return ::inet_ntoa(addr_in->sin_addr);

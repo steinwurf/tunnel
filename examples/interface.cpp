@@ -20,18 +20,27 @@ int main()
 
 #if defined(PLATFORM_LINUX)
     iface.create({tunnel::interface::type::tun, "tuniface"});
-#elif defined(PLATFORM_MAC)
-    iface.create({});
-#endif
-
     if (iface.is_up())
     {
         iface.set_non_persistent();
         return 0;
     }
+#elif defined(PLATFORM_MAC)
+    iface.create({});
+    if (iface.is_up())
+    {
+        iface.down();
+    }
+#endif
+
 
 #if defined(PLATFORM_LINUX)
     assert(iface.interface_name() == "tuniface");
+
+    assert(iface.is_persistent() == false);
+    iface.set_persistent();
+    assert(iface.is_persistent() == true);
+    iface.set_non_persistent();
 #elif defined(PLATFORM_MAC)
     const std::string expected_interface_name =
         "utun"; // on macOS the interface name is not known in advance and must
@@ -40,9 +49,6 @@ int main()
            std::string::npos);
 #endif
 
-    assert(iface.is_persistent() == false);
-    iface.set_persistent();
-    assert(iface.is_persistent() == true);
 
     iface.set_mtu(1000);
     assert(iface.mtu() == 1000);

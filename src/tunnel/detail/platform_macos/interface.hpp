@@ -279,7 +279,7 @@ public:
         }
 
         struct sockaddr_in* addr_in = (struct sockaddr_in*)&ifr.ifr_addr;
-        do_log(log_level::debug, log_kind::interface_ipv4,
+        do_log(log_level::debug, log_kind::ipv4,
                poke::log::str{"ip", ::inet_ntoa(addr_in->sin_addr)});
 
         return ::inet_ntoa(addr_in->sin_addr);
@@ -297,7 +297,7 @@ public:
         }
 
         struct sockaddr_in* addr_in = (struct sockaddr_in*)&ifr.ifr_addr;
-        do_log(log_level::debug, log_kind::interface_ipv4_netmask,
+        do_log(log_level::debug, log_kind::ipv4_netmask,
                poke::log::str{"netmask", ::inet_ntoa(addr_in->sin_addr)});
 
         return ::inet_ntoa(addr_in->sin_addr);
