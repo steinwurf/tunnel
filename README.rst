@@ -22,8 +22,9 @@ tunnel
 .. |Cppcheck| image:: https://github.com/steinwurf/tunnel/actions/workflows/cppcheck.yml/badge.svg
       :target: https://github.com/steinwurf/tunnel/actions/workflows/cppcheck.yml
 
-The tunnel lib allows you to create and manipulate TUN interfaces on Linux.
+The tunnel lib allows you to create and manipulate TUN and TAP interfaces on Linux and MacOS.
 A tun interface is essentially a virtual network interface on the IP (layer 3).
+A tap interface is essentially a virtual network interface on the Ethernet (layer 2).
 
 
 .. contents:: Table of Contents:
