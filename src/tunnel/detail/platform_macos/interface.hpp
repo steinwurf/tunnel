@@ -151,7 +151,7 @@ public:
         sc.sc_len = sizeof(sc);
         sc.sc_family = AF_SYSTEM;
         sc.ss_sysaddr = AF_SYS_CONTROL;
-        sc.sc_unit = m_unit;
+        sc.sc_unit = unit;
 
         if (connect(interface_fd.native_handle(), (struct sockaddr*)&sc,
                     sizeof(sc)) < 0)
@@ -173,7 +173,7 @@ public:
 
         // Construct the interface name
         // on macOS the interface name must contain "utun" as a substring
-        m_name = "utun" + std::to_string(m_unit - 1);
+        m_name = "utun" + std::to_string(unit - 1);
 
         // Set the interface file descriptors
         m_interface_fd = std::move(interface_fd);
