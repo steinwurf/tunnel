@@ -3,7 +3,7 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
-#include <tunnel/tun_interface.hpp>
+#include <tunnel/interface.hpp>
 
 #include <cassert>
 #include <iostream>
@@ -14,24 +14,32 @@ int main()
     auto log = [](auto, const std::string& message, auto)
     { std::cout << message << std::endl; };
 
-    tunnel::tun_interface iface;
+    tunnel::interface iface;
     iface.set_log_callback(log);
     iface.monitor().enable_log();
 
 #if defined(PLATFORM_LINUX)
-    iface.create({"tuniface"});
-#elif defined(PLATFORM_MAC)
-    iface.create({});
-#endif
-
+    iface.create({tunnel::interface::type::tun, "tuniface"});
     if (iface.is_up())
     {
         iface.set_non_persistent();
         return 0;
     }
+#elif defined(PLATFORM_MAC)
+    iface.create({});
+    if (iface.is_up())
+    {
+        iface.down();
+    }
+#endif
 
 #if defined(PLATFORM_LINUX)
     assert(iface.interface_name() == "tuniface");
+
+    assert(iface.is_persistent() == false);
+    iface.set_persistent();
+    assert(iface.is_persistent() == true);
+    iface.set_non_persistent();
 #elif defined(PLATFORM_MAC)
     const std::string expected_interface_name =
         "utun"; // on macOS the interface name is not known in advance and must
@@ -39,10 +47,6 @@ int main()
     assert(iface.interface_name().find(expected_interface_name) !=
            std::string::npos);
 #endif
-
-    assert(iface.is_persistent() == false);
-    iface.set_persistent();
-    assert(iface.is_persistent() == true);
 
     iface.set_mtu(1000);
     assert(iface.mtu() == 1000);

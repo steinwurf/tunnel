@@ -9,6 +9,8 @@ namespace tunnel
 {
 namespace detail
 {
+namespace platform_linux
+{
 template <class Stack>
 class layer_final
 {
@@ -23,5 +25,6 @@ public:
         return static_cast<const Stack&>(*this);
     }
 };
+}
 }
 }

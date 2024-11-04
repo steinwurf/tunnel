@@ -51,12 +51,18 @@ auto to_string(log_kind kind) -> std::string
         return "interface_mtu";
     case log_kind::set_mtu:
         return "set_mtu";
-    case log_kind::interface_ipv4:
-        return "interface_ipv4_address";
+    case log_kind::is_default_route:
+        return "is_default_route";
+    case log_kind::enable_default_route:
+        return "enable_default_route";
+    case log_kind::disable_default_route:
+        return "disable_default_route";
+    case log_kind::ipv4:
+        return "ipv4";
+    case log_kind::ipv4_netmask:
+        return "ipv4_netmask";
     case log_kind::set_ipv4:
-        return "set_ipv4_address";
-    case log_kind::interface_ipv4_netmask:
-        return "interface_ipv4_netmask";
+        return "set_ipv4";
     case log_kind::set_ipv4_netmask:
         return "set_ipv4_netmask";
     case log_kind::make_sockaddr:

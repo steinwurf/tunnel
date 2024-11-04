@@ -75,10 +75,10 @@ enum class log_kind
     disable_default_route,
 
     /// Getting the interface ipv4 address
-    interface_ipv4,
+    ipv4,
 
     /// Getting the interface ipv4 netmask
-    interface_ipv4_netmask,
+    ipv4_netmask,
 
     /// Setting the interface ipv4 address
     set_ipv4,

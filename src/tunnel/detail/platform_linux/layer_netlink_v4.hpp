@@ -5,19 +5,16 @@
 
 #pragma once
 
-#include <asm/types.h>
 #include <cstdint>
+#include <cstring>
 #include <iostream>
+#include <system_error>
+#include <vector>
 
-#include <sys/socket.h>
-#include <sys/types.h>
-
+#include <asm/types.h>
 #include <linux/if.h>
-
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
-
-#include <cstring>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,18 +22,15 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <system_error>
 #include <unistd.h>
-#include <vector>
 
-#include "../../interface_config.hpp"
+#include "../../interface.hpp"
+#include "../../log_level.hpp"
 #include "../log.hpp"
 #include "../log_kind.hpp"
+#include "../scoped_file_descriptor.hpp"
 #include "error.hpp"
 #include "if_nametoindex.hpp"
-#include "scoped_file_descriptor.hpp"
-
-#include "../../log_level.hpp"
 
 namespace tunnel
 {
@@ -75,7 +69,7 @@ template <class Super>
 class layer_netlink_v4 : public Super
 {
 public:
-    void create(const config& config, std::error_code& error)
+    void create(const tunnel::interface::config& config, std::error_code& error)
     {
         assert(!error);
 
@@ -128,7 +122,7 @@ public:
             return false;
         }
 
-        std::string tun_interface = Super::interface_name(error);
+        std::string interface_name = Super::interface_name(error);
 
         if (error)
         {
@@ -137,9 +131,9 @@ public:
 
         Super::do_log(log_level::debug, log_kind::is_default_route,
                       log::boolean{"is_default_route",
-                                   default_interface == tun_interface});
+                                   default_interface == interface_name});
 
-        return default_interface == tun_interface;
+        return default_interface == interface_name;
     }
 
 private:

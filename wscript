@@ -50,17 +50,17 @@ def build(bld):
             sources += bld.path.ant_glob("test/src/**/platform_linux/**/*.cpp")
         elif platform.system() == "Darwin":
             sources += bld.path.ant_glob("test/src/**/platform_macos/**/*.cpp")
+        sources += bld.path.ant_glob("test/src/**/platform_unsupported/**/*.cpp")
         bld.program(
-            features='cxx test',
-            source=['test/tunnel_tests.cpp'] + sources,
-            target='tunnel_tests',
-            use=['tunnel', 'gtest'])
-        
-        bld.recurse("examples")
-        bld.recurse("apps/app/")
-    
-    
+            features="cxx test",
+            source=["test/tunnel_tests.cpp"] + sources,
+            target="tunnel_tests",
+            use=["tunnel", "gtest"],
+        )
 
+        if platform.system() == "Linux" or platform.system() == "Darwin":
+            bld.recurse("examples")
+            bld.recurse("apps/app/")
 
 
 class IntegrationContext(BuildContext):
@@ -69,7 +69,7 @@ class IntegrationContext(BuildContext):
 
 
 def integration_test(ctx):
-    # Test only for linux platforms
+    # Test only for linux
     if not ctx.is_mkspec_platform("linux"):
         return
 

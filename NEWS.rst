@@ -6,12 +6,15 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Major: Merged the tun_interface and tap_interface classes into a single
+  class called interface. The interface class can now create both TUN and TAP
+  interfaces based on the interface_type parameter provided to the create methods
+  config argument.
 
 15.0.0
 ------
-* Minor: Add initial  macos/Darwin support.
-* Major: change interface  from seperate args to a struct
+* Minor: Add initial macos/Darwin support.
+* Major: Change interface from seperate args to a struct
 
 14.1.1
 ------

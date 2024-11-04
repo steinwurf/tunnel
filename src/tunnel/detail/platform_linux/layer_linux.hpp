@@ -18,7 +18,7 @@
 #include "../log.hpp"
 #include "../log_kind.hpp"
 
-#include "scoped_file_descriptor.hpp"
+#include "../scoped_file_descriptor.hpp"
 
 namespace tunnel
 {
@@ -97,6 +97,7 @@ struct layer_linux : public Super
             Super::do_log(log_level::error, log_kind::ioctl,
                           log::uinteger{"request", request},
                           log::str{"error", error.message().c_str()});
+            return;
         }
 
         Super::do_log(log_level::debug, log_kind::ioctl,
@@ -119,6 +120,7 @@ struct layer_linux : public Super
             Super::do_log(log_level::error, log_kind::ioctl,
                           log::uinteger{"request", request},
                           log::str{"error", error.message().c_str()});
+            return;
         }
 
         Super::do_log(log_level::debug, log_kind::ioctl,

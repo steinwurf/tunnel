@@ -1,5 +1,4 @@
-
-// Copyright (c) 2024 Steinwurf ApS
+// Copyright (c) 2016 Steinwurf ApS
 // All Rights Reserved
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
@@ -13,28 +12,19 @@
 
 #include <fcntl.h>
 #include <grp.h>
-
-#include <sys/socket.h>
-#include <sys/types.h>
-
-// clang-format off
-#include <sys/socket.h>
-#include <sys/types.h>
 #include <linux/if.h>
-// clang-format on
-
 #include <linux/if_tun.h>
 #include <pwd.h>
 #include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
-#include "error.hpp"
-#include "scoped_file_descriptor.hpp"
-
+#include "../../interface.hpp"
+#include "../../log_level.hpp"
 #include "../log.hpp"
 #include "../log_kind.hpp"
-
-#include "../../interface_config.hpp"
-#include "../../log_level.hpp"
+#include "../scoped_file_descriptor.hpp"
+#include "error.hpp"
 
 namespace tunnel
 {
@@ -44,10 +34,10 @@ namespace platform_linux
 {
 
 template <class Super>
-struct layer_tap : public Super
+struct layer_interface : public Super
 {
 
-    void create(const config& config, std::error_code& error)
+    void create(const tunnel::interface::config& config, std::error_code& error)
     {
         assert(!error);
 
@@ -66,8 +56,7 @@ struct layer_tap : public Super
         }
 
         // Open the TUN driver
-        const char* tun_device = "/dev/net/tun";
-        m_tun_fd = Super::open(tun_device, O_RDWR, error);
+        m_interface_fd = Super::open("/dev/net/tun", O_RDWR, error);
 
         if (error)
         {
@@ -78,8 +67,24 @@ struct layer_tap : public Super
         struct ifreq ifr
         {
         };
-
-        ifr.ifr_flags = IFF_TAP;
+        switch (config.interface_type)
+        {
+        case tunnel::interface::type::tun:
+        {
+            ifr.ifr_flags = IFF_TUN;
+            break;
+        }
+        case tunnel::interface::type::tap:
+        {
+            ifr.ifr_flags = IFF_TAP;
+            break;
+        }
+        default:
+        {
+            error = make_error_code(linux_error::invalid_interface_type);
+            return;
+        }
+        }
 
         // Do not prepend a protocol information header.
         //
@@ -110,14 +115,30 @@ struct layer_tap : public Super
                                        config.interface_name.size());
         }
 
-        Super::ioctl(m_tun_fd, TUNSETIFF, (void*)&ifr, error);
+        Super::ioctl(m_interface_fd, TUNSETIFF, (void*)&ifr, error);
         if (error)
         {
             return;
         }
 
-        // there are some support for offloading but it is not clear how and if
-        // they work
+        if (config.vnet_hdr)
+        {
+            if (config.interface_type == tunnel::interface::type::tun)
+            {
+                int offload_flags = TUN_F_CSUM | TUN_F_TSO4 | TUN_F_UFO;
+                Super::ioctl(m_interface_fd, TUNSETOFFLOAD, offload_flags,
+                             error);
+                if (error)
+                {
+                    return;
+                }
+            }
+            else if (config.interface_type == tunnel::interface::type::tap)
+            {
+                // there are some support for offloading but it is not clear how
+                // and if they work
+            }
+        }
 
         Super::do_log(log_level::debug, log_kind::interface_created,
                       log::str{"name", config.interface_name.c_str()},
@@ -173,7 +194,7 @@ struct layer_tap : public Super
             return;
         }
 
-        Super::ioctl(m_tun_fd, TUNSETOWNER, (void*)(intptr_t)pwd->pw_uid,
+        Super::ioctl(m_interface_fd, TUNSETOWNER, (void*)(intptr_t)pwd->pw_uid,
                      error);
     }
 
@@ -212,7 +233,7 @@ struct layer_tap : public Super
     {
         assert(!error);
         assert(!group.empty());
-        assert(m_tun_fd);
+        assert(m_interface_fd);
 
         Super::do_log(log_level::debug, log_kind::set_group,
                       log::str{"group", group.c_str()});
@@ -225,19 +246,19 @@ struct layer_tap : public Super
             return;
         }
 
-        Super::ioctl(m_tun_fd, TUNSETGROUP, (void*)(intptr_t)grp->gr_gid,
+        Super::ioctl(m_interface_fd, TUNSETGROUP, (void*)(intptr_t)grp->gr_gid,
                      error);
     }
 
     auto is_persistent(std::error_code& error) const -> bool
     {
-        assert(m_tun_fd);
+        assert(m_interface_fd);
         assert(!error);
 
         struct ifreq ifr
         {
         };
-        Super::ioctl(m_tun_fd, TUNGETIFF, (void*)&ifr, error);
+        Super::ioctl(m_interface_fd, TUNGETIFF, (void*)&ifr, error);
 
         bool persistent = ifr.ifr_flags & IFF_PERSIST;
 
@@ -248,35 +269,35 @@ struct layer_tap : public Super
 
     void set_persistent(std::error_code& error) const
     {
-        assert(m_tun_fd);
+        assert(m_interface_fd);
         assert(!error);
 
         Super::do_log(log_level::debug, log_kind::set_persistent,
                       log::str{"", ""});
 
-        Super::ioctl(m_tun_fd, TUNSETPERSIST, (void*)1, error);
+        Super::ioctl(m_interface_fd, TUNSETPERSIST, (void*)1, error);
     }
 
     void set_non_persistent(std::error_code& error) const
     {
-        assert(m_tun_fd);
+        assert(m_interface_fd);
         assert(!error);
 
         Super::do_log(log_level::debug, log_kind::set_non_persistent,
                       log::str{"", ""});
 
-        Super::ioctl(m_tun_fd, TUNSETPERSIST, (void*)0, error);
+        Super::ioctl(m_interface_fd, TUNSETPERSIST, (void*)0, error);
     }
 
     auto interface_name(std::error_code& error) const -> std::string
     {
-        assert(m_tun_fd);
+        assert(m_interface_fd);
         assert(!error);
 
         struct ifreq ifr
         {
         };
-        Super::ioctl(m_tun_fd, TUNGETIFF, (void*)&ifr, error);
+        Super::ioctl(m_interface_fd, TUNGETIFF, (void*)&ifr, error);
 
         Super::do_log(log_level::debug, log_kind::interface_name,
                       log::str{"name", ifr.ifr_name});
@@ -286,12 +307,12 @@ struct layer_tap : public Super
 
     auto native_handle() const -> int
     {
-        assert(m_tun_fd);
+        assert(m_interface_fd);
 
         Super::do_log(log_level::debug, log_kind::native_handle,
-                      log::integer{"handle", m_tun_fd.native_handle()});
+                      log::integer{"handle", m_interface_fd.native_handle()});
 
-        return m_tun_fd.native_handle();
+        return m_interface_fd.native_handle();
     }
 
 private:
@@ -338,7 +359,7 @@ private:
     }
 
 private:
-    scoped_file_descriptor m_tun_fd;
+    scoped_file_descriptor m_interface_fd;
 };
 }
 }

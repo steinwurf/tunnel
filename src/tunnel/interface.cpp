@@ -1,60 +1,57 @@
-
 // Copyright (c) 2017 Steinwurf ApS
 // All Rights Reserved
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
-// clang-format off
-#include "throw_if_error.hpp"
-#include "tap_interface.hpp"
-// clang-format on
-
 #include <cassert>
+
+#include "interface.hpp"
+#include "throw_if_error.hpp"
 
 #include <platform/config.hpp>
 
 #if defined(PLATFORM_LINUX)
-
-#include "detail/platform_linux/stack_tap_interface.hpp"
-using platform_tap_interface =
-    tunnel::detail::platform_linux::stack_tap_interface;
-
+#include "detail/platform_linux/stack_interface.hpp"
+using platform_interface = tunnel::detail::platform_linux::stack_interface;
+static constexpr bool platform_supported = true;
+#elif defined(PLATFORM_MAC)
+#include "detail/platform_macos/interface.hpp"
+using platform_interface = tunnel::detail::platform_macos::interface;
+static constexpr bool platform_supported = true;
 #else
-
-#include "detail/platform_unsupported/stack_tap_interface.hpp"
-using platform_tap_interface =
-    tunnel::detail::platform_unsupported::stack_tap_interface;
-
+#include "detail/platform_unsupported/unsupported.hpp"
+using platform_interface = tunnel::detail::platform_unsupported::unsupported;
+static constexpr bool platform_supported = false;
 #endif
 
 namespace tunnel
 {
 
-struct tap_interface::impl : platform_tap_interface
+struct interface::impl : platform_interface
 {
 };
 
-tap_interface::tap_interface()
+interface::interface()
 {
-    m_impl = std::make_unique<tap_interface::impl>();
+    m_impl = std::make_unique<interface::impl>();
 }
 
-tap_interface::tap_interface(tap_interface&& iface)
+interface::interface(interface&& iface)
 {
     m_impl = std::move(iface.m_impl);
 }
 
-tap_interface& tap_interface::operator=(tap_interface&& iface)
+interface& interface::operator=(interface&& iface)
 {
     m_impl = std::move(iface.m_impl);
     return *this;
 }
 
-tap_interface::~tap_interface()
+interface::~interface()
 {
 }
 
-void tap_interface::create(const config& config)
+void interface::create(const interface::config& config)
 {
     assert(m_impl);
 
@@ -63,13 +60,13 @@ void tap_interface::create(const config& config)
     throw_if_error(error);
 }
 
-void tap_interface::create(const config& config, std::error_code& error)
+void interface::create(const interface::config& config, std::error_code& error)
 {
     assert(m_impl);
     m_impl->create(config, error);
 }
 
-void tap_interface::rename(const std::string& interface_name) const
+void interface::rename(const std::string& interface_name) const
 {
     assert(m_impl);
 
@@ -78,14 +75,14 @@ void tap_interface::rename(const std::string& interface_name) const
     throw_if_error(error);
 }
 
-void tap_interface::rename(const std::string& interface_name,
-                           std::error_code& error) const
+void interface::rename(const std::string& interface_name,
+                       std::error_code& error) const
 {
     assert(m_impl);
     m_impl->rename(interface_name, error);
 }
 
-auto tap_interface::owner() const -> std::string
+auto interface::owner() const -> std::string
 {
     assert(m_impl);
 
@@ -94,13 +91,13 @@ auto tap_interface::owner() const -> std::string
     throw_if_error(error);
     return own;
 }
-auto tap_interface::owner(std::error_code& error) const -> std::string
+auto interface::owner(std::error_code& error) const -> std::string
 {
     assert(m_impl);
     return m_impl->owner(error);
 }
 
-auto tap_interface::group() const -> std::string
+auto interface::group() const -> std::string
 {
     assert(m_impl);
 
@@ -109,13 +106,13 @@ auto tap_interface::group() const -> std::string
     throw_if_error(error);
     return grp;
 }
-auto tap_interface::group(std::error_code& error) const -> std::string
+auto interface::group(std::error_code& error) const -> std::string
 {
     assert(m_impl);
     return m_impl->group(error);
 }
 
-void tap_interface::set_owner(const std::string& owner) const
+void interface::set_owner(const std::string& owner) const
 {
     assert(m_impl);
 
@@ -123,14 +120,14 @@ void tap_interface::set_owner(const std::string& owner) const
     set_owner(owner, error);
     throw_if_error(error);
 }
-void tap_interface::set_owner(const std::string& owner,
-                              std::error_code& error) const
+void interface::set_owner(const std::string& owner,
+                          std::error_code& error) const
 {
     assert(m_impl);
     m_impl->set_owner(owner, error);
 }
 
-void tap_interface::set_group(const std::string& group) const
+void interface::set_group(const std::string& group) const
 {
     assert(m_impl);
 
@@ -138,14 +135,14 @@ void tap_interface::set_group(const std::string& group) const
     set_group(group, error);
     throw_if_error(error);
 }
-void tap_interface::set_group(const std::string& group,
-                              std::error_code& error) const
+void interface::set_group(const std::string& group,
+                          std::error_code& error) const
 {
     assert(m_impl);
     m_impl->set_group(group, error);
 }
 
-auto tap_interface::interface_name() const -> std::string
+auto interface::interface_name() const -> std::string
 {
     assert(m_impl);
 
@@ -155,19 +152,19 @@ auto tap_interface::interface_name() const -> std::string
     return name;
 }
 
-auto tap_interface::interface_name(std::error_code& error) const -> std::string
+auto interface::interface_name(std::error_code& error) const -> std::string
 {
     assert(m_impl);
     return m_impl->interface_name(error);
 }
 
-auto tap_interface::is_persistent(std::error_code& error) const -> bool
+auto interface::is_persistent(std::error_code& error) const -> bool
 {
     assert(m_impl);
     return m_impl->is_persistent(error);
 }
 
-auto tap_interface::is_persistent() const -> bool
+auto interface::is_persistent() const -> bool
 {
     assert(m_impl);
 
@@ -177,13 +174,13 @@ auto tap_interface::is_persistent() const -> bool
     return persistent;
 }
 
-auto tap_interface::is_up(std::error_code& error) const -> bool
+auto interface::is_up(std::error_code& error) const -> bool
 {
     assert(m_impl);
     return m_impl->is_up(error);
 }
 
-auto tap_interface::is_up() const -> bool
+auto interface::is_up() const -> bool
 {
     assert(m_impl);
 
@@ -193,13 +190,13 @@ auto tap_interface::is_up() const -> bool
     return up;
 }
 
-auto tap_interface::is_down(std::error_code& error) const -> bool
+auto interface::is_down(std::error_code& error) const -> bool
 {
     assert(m_impl);
     return m_impl->is_down(error);
 }
 
-auto tap_interface::is_down() const -> bool
+auto interface::is_down() const -> bool
 {
     assert(m_impl);
 
@@ -209,7 +206,7 @@ auto tap_interface::is_down() const -> bool
     return down;
 }
 
-void tap_interface::up() const
+void interface::up() const
 {
     assert(m_impl);
 
@@ -217,13 +214,13 @@ void tap_interface::up() const
     up(error);
     throw_if_error(error);
 }
-void tap_interface::up(std::error_code& error) const
+void interface::up(std::error_code& error) const
 {
     assert(m_impl);
     return m_impl->up(error);
 }
 
-void tap_interface::down() const
+void interface::down() const
 {
     assert(m_impl);
 
@@ -231,24 +228,24 @@ void tap_interface::down() const
     down(error);
     throw_if_error(error);
 }
-void tap_interface::down(std::error_code& error) const
+void interface::down(std::error_code& error) const
 {
     assert(m_impl);
     return m_impl->down(error);
 }
 
-void tap_interface::set_persistent(std::error_code& error)
+void interface::set_persistent(std::error_code& error)
 {
     assert(m_impl);
     m_impl->set_persistent(error);
 }
-void tap_interface::set_non_persistent(std::error_code& error)
+void interface::set_non_persistent(std::error_code& error)
 {
     assert(m_impl);
     m_impl->set_non_persistent(error);
 }
 
-void tap_interface::set_persistent()
+void interface::set_persistent()
 {
     assert(m_impl);
 
@@ -256,7 +253,7 @@ void tap_interface::set_persistent()
     m_impl->set_persistent(error);
     throw_if_error(error);
 }
-void tap_interface::set_non_persistent()
+void interface::set_non_persistent()
 {
     assert(m_impl);
 
@@ -265,7 +262,7 @@ void tap_interface::set_non_persistent()
     throw_if_error(error);
 }
 
-auto tap_interface::mtu() const -> uint32_t
+auto interface::mtu() const -> uint32_t
 {
     assert(m_impl);
 
@@ -275,13 +272,13 @@ auto tap_interface::mtu() const -> uint32_t
     return mtu;
 }
 
-auto tap_interface::mtu(std::error_code& error) const -> uint32_t
+auto interface::mtu(std::error_code& error) const -> uint32_t
 {
     assert(m_impl);
     return m_impl->mtu(error);
 }
 
-void tap_interface::set_mtu(uint32_t mtu) const
+void interface::set_mtu(uint32_t mtu) const
 {
     assert(m_impl);
 
@@ -289,13 +286,13 @@ void tap_interface::set_mtu(uint32_t mtu) const
     set_mtu(mtu, error);
     throw_if_error(error);
 }
-void tap_interface::set_mtu(uint32_t mtu, std::error_code& error) const
+void interface::set_mtu(uint32_t mtu, std::error_code& error) const
 {
     assert(m_impl);
     m_impl->set_mtu(mtu, error);
 }
 
-void tap_interface::enable_default_route() const
+void interface::enable_default_route() const
 {
     assert(m_impl);
 
@@ -303,13 +300,13 @@ void tap_interface::enable_default_route() const
     enable_default_route(error);
     throw_if_error(error);
 }
-void tap_interface::enable_default_route(std::error_code& error) const
+void interface::enable_default_route(std::error_code& error) const
 {
     assert(m_impl);
     m_impl->enable_default_route(error);
 }
 
-void tap_interface::disable_default_route() const
+void interface::disable_default_route() const
 {
     assert(m_impl);
 
@@ -317,13 +314,13 @@ void tap_interface::disable_default_route() const
     disable_default_route(error);
     throw_if_error(error);
 }
-void tap_interface::disable_default_route(std::error_code& error) const
+void interface::disable_default_route(std::error_code& error) const
 {
     assert(m_impl);
     m_impl->disable_default_route(error);
 }
 
-auto tap_interface::is_default_route() const -> bool
+auto interface::is_default_route() const -> bool
 {
     assert(m_impl);
 
@@ -333,13 +330,13 @@ auto tap_interface::is_default_route() const -> bool
     return is_default;
 }
 
-auto tap_interface::is_default_route(std::error_code& error) const -> bool
+auto interface::is_default_route(std::error_code& error) const -> bool
 {
     assert(m_impl);
     return m_impl->is_default_route(error);
 }
 
-auto tap_interface::ipv4() const -> std::string
+auto interface::ipv4() const -> std::string
 {
     assert(m_impl);
 
@@ -349,13 +346,13 @@ auto tap_interface::ipv4() const -> std::string
     return ip;
 }
 
-auto tap_interface::ipv4(std::error_code& error) const -> std::string
+auto interface::ipv4(std::error_code& error) const -> std::string
 {
     assert(m_impl);
     return m_impl->ipv4(error);
 }
 
-auto tap_interface::ipv4_netmask() const -> std::string
+auto interface::ipv4_netmask() const -> std::string
 {
     assert(m_impl);
 
@@ -365,13 +362,13 @@ auto tap_interface::ipv4_netmask() const -> std::string
     return ip;
 }
 
-auto tap_interface::ipv4_netmask(std::error_code& error) const -> std::string
+auto interface::ipv4_netmask(std::error_code& error) const -> std::string
 {
     assert(m_impl);
     return m_impl->ipv4_netmask(error);
 }
 
-void tap_interface::set_ipv4(const std::string& ip) const
+void interface::set_ipv4(const std::string& ip) const
 {
     assert(m_impl);
 
@@ -379,14 +376,13 @@ void tap_interface::set_ipv4(const std::string& ip) const
     set_ipv4(ip, error);
     throw_if_error(error);
 }
-void tap_interface::set_ipv4(const std::string& ip,
-                             std::error_code& error) const
+void interface::set_ipv4(const std::string& ip, std::error_code& error) const
 {
     assert(m_impl);
     m_impl->set_ipv4(ip, error);
 }
 
-void tap_interface::set_ipv4_netmask(const std::string& mask) const
+void interface::set_ipv4_netmask(const std::string& mask) const
 {
     assert(m_impl);
 
@@ -395,40 +391,40 @@ void tap_interface::set_ipv4_netmask(const std::string& mask) const
     throw_if_error(error);
 }
 
-void tap_interface::set_ipv4_netmask(const std::string& mask,
-                                     std::error_code& error) const
+void interface::set_ipv4_netmask(const std::string& mask,
+                                 std::error_code& error) const
 {
     assert(m_impl);
     m_impl->set_ipv4_netmask(mask, error);
 }
 
-auto tap_interface::native_handle() const -> int
+auto interface::native_handle() const -> int
 {
     assert(m_impl);
     return m_impl->native_handle();
 }
 
-auto tap_interface::monitor() const -> const tunnel::monitor&
+auto interface::monitor() const -> const tunnel::monitor&
 {
     assert(m_impl);
     return m_impl->monitor();
 }
 
-auto tap_interface::monitor() -> tunnel::monitor&
+auto interface::monitor() -> tunnel::monitor&
 {
     assert(m_impl);
     return m_impl->monitor();
 }
 
-auto tap_interface::set_log_callback(const log_callback& callback) -> void
+auto interface::set_log_callback(const log_callback& callback) -> void
 {
     assert(m_impl);
     m_impl->set_log_callback(callback);
 }
 
-auto tap_interface::is_platform_supported() -> bool
+auto interface::is_platform_supported() -> bool
 {
-    return platform_tap_interface::is_platform_supported();
+    return platform_supported;
 }
 
 }

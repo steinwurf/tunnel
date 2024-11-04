@@ -17,10 +17,10 @@
 #include "../log.hpp"
 #include "../log_kind.hpp"
 
+#include "../scoped_file_descriptor.hpp"
 #include "error.hpp"
-#include "scoped_file_descriptor.hpp"
 
-#include "../../interface_config.hpp"
+#include "../../interface.hpp"
 #include "../../log_level.hpp"
 
 namespace tunnel
@@ -35,7 +35,7 @@ template <class Super>
 class layer_netdevice : public Super
 {
 public:
-    void create(const config& config, std::error_code& error)
+    void create(const tunnel::interface::config& config, std::error_code& error)
     {
         assert(!error);
 
@@ -327,7 +327,7 @@ public:
 
         struct sockaddr_in* addr_in = (struct sockaddr_in*)&ifr.ifr_addr;
 
-        Super::do_log(log_level::debug, log_kind::interface_ipv4,
+        Super::do_log(log_level::debug, log_kind::ipv4,
                       log::str{"ip", ::inet_ntoa(addr_in->sin_addr)});
 
         return ::inet_ntoa(addr_in->sin_addr);
@@ -353,7 +353,7 @@ public:
 
         struct sockaddr_in* addr_in = (struct sockaddr_in*)&ifr.ifr_addr;
 
-        Super::do_log(log_level::debug, log_kind::interface_ipv4_netmask,
+        Super::do_log(log_level::debug, log_kind::ipv4_netmask,
                       log::str{"netmask", ::inet_ntoa(addr_in->sin_addr)});
 
         return ::inet_ntoa(addr_in->sin_addr);

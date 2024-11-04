@@ -10,17 +10,17 @@
 #include <string>
 #include <vector>
 
-#include "monitor.hpp"
-
-#include "log.hpp"
-#include "log_kind.hpp"
-#include "to_json_property.hpp"
-
-#include "../log_level.hpp"
+#include "../../log_level.hpp"
+#include "../log.hpp"
+#include "../log_kind.hpp"
+#include "../monitor.hpp"
+#include "../to_json_property.hpp"
 
 namespace tunnel
 {
 namespace detail
+{
+namespace platform_linux
 {
 
 template <class Super>
@@ -73,5 +73,6 @@ protected:
 private:
     tunnel::detail::monitor m_impl;
 };
+}
 }
 }
