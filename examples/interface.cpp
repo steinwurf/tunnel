@@ -33,7 +33,6 @@ int main()
     }
 #endif
 
-
 #if defined(PLATFORM_LINUX)
     assert(iface.interface_name() == "tuniface");
 
@@ -48,7 +47,6 @@ int main()
     assert(iface.interface_name().find(expected_interface_name) !=
            std::string::npos);
 #endif
-
 
     iface.set_mtu(1000);
     assert(iface.mtu() == 1000);
