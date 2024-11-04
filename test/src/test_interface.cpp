@@ -13,6 +13,7 @@ TEST(test_interface, construct_no_su_fail)
     (void)t;
 }
 
+#if defined(PLATFORM_LINUX)
 TEST(test_interface, create_no_su_expect_fail)
 {
     // Check if we are root
@@ -21,7 +22,6 @@ TEST(test_interface, create_no_su_expect_fail)
         GTEST_SKIP();
     }
     tunnel::interface t;
-#if defined(PLATFORM_LINUX)
     EXPECT_THROW(t.create({tunnel::interface::type::tap, "dummy", false}),
                  std::system_error);
     EXPECT_THROW(t.create({tunnel::interface::type::tap, "dummy", true}),
@@ -37,10 +37,19 @@ TEST(test_interface, create_no_su_expect_fail)
     EXPECT_THROW(t.create({tunnel::interface::type::tun,
                            "too_long_name_way_over_20_chars", false}),
                  std::system_error);
-#elif defined(PLATFORM_MAC)
-    EXPECT_THROW(t.create({}), std::system_error);
-#endif
 }
+#elif defined(PLATFORM_MAC)
+TEST(test_interface, create_no_su_expect_fail)
+{
+    // Check if we are root
+    if (getuid() == 0)
+    {
+        GTEST_SKIP();
+    }
+    tunnel::interface t;
+    EXPECT_THROW(t.create({}), std::system_error);
+}
+#endif
 
 #if defined(PLATFORM_LINUX) || defined(PLATFORM_MAC)
 TEST(test_interface, options)
