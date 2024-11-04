@@ -6,6 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+16.0.0
+------
 * Major: Merged the tun_interface and tap_interface classes into a single
   class called interface. The interface class can now create both TUN and TAP
   interfaces based on the interface_type parameter provided to the create methods
