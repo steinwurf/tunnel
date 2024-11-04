@@ -58,8 +58,9 @@ def build(bld):
             use=["tunnel", "gtest"],
         )
 
-        bld.recurse("examples")
-        bld.recurse("apps/app/")
+        if platform.system() == "Linux" or platform.system() == "Darwin":
+            bld.recurse("examples")
+            bld.recurse("apps/app/")
 
 
 class IntegrationContext(BuildContext):
