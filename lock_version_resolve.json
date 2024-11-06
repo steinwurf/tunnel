@@ -35,14 +35,14 @@
         "sha1": "de39fa280dabb242134e095a1473495341165b70"
     },
     "fmt": {
-        "commit_id": "611bb73e40e4bde04ea4c2c38496c331382d4d99",
-        "resolver_info": "3.0.0",
-        "sha1": "29bf833d7f478d70151626083c1883bb54ac904f"
+        "commit_id": "c979a433b8ec677d75bd0745f1b5e295bd958b6b",
+        "resolver_info": "4.0.0",
+        "sha1": "91da6d979ff2e86c5b94d0711d71d001a7c66923"
     },
     "fmt-source": {
-        "commit_id": "a33701196adfad74917046096bf5a2aa0ab0bb50",
-        "resolver_info": "9.1.0",
-        "sha1": "a48413cb8a278a21559b4b145d5c5d5d8efdc3ca"
+        "commit_id": "0c9fce2ffefecfdce794e1859584e25877b7b592",
+        "resolver_info": "11.0.2",
+        "sha1": "f39ff778b3283f543cdfc9b1662ec101c453efce"
     },
     "gtest": {
         "commit_id": "da24468d2c5deb601d0f67196abe83d78a00f972",
@@ -60,9 +60,9 @@
         "sha1": "f6bc772cf920c024726ebd12a5a38f123d057adb"
     },
     "poke": {
-        "commit_id": "90f724319a2a48b48ec2227428ebee5187b9b6c8",
-        "resolver_info": "13.0.3",
-        "sha1": "792e4aecebe15ef24e9aa66a000b2751c485c340"
+        "commit_id": "d1e1238c41b8385d291a8de81ac713300d38ebb7",
+        "resolver_info": "14.0.0",
+        "sha1": "14161830e38c9456c87ab2bb811e8c5c214fa7d6"
     },
     "protobuf": {
         "commit_id": "1e7b3114dd9ed4fcfe5f0969033235d7295004c7",
