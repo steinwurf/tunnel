@@ -6,7 +6,7 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Major: Update poke to version 14.
 
 16.0.0
 ------
@@ -26,7 +26,7 @@ Latest
 
 14.1.0
 ------
-* Minor: Add tap support and proper in repository testing 
+* Minor: Add tap support and proper in repository testing
 
 14.0.0
 ------
