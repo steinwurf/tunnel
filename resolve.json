@@ -20,19 +20,10 @@
     {
         "name": "poke",
         "resolver": "git",
-        "method": "semver",
-        "major": 14,
+        "method": "checkout",
+        "checkout": "v15",
         "sources": [
             "github.com/steinwurf/poke.git"
-        ]
-    },
-    {
-        "name": "abacus",
-        "resolver": "git",
-        "method": "semver",
-        "major": 6,
-        "sources": [
-            "github.com/steinwurf/abacus.git"
         ]
     },
     {
