@@ -27,7 +27,7 @@
 
 #include "../../interface.hpp"
 #include "../../log_level.hpp"
-#include "../log_kind.hpp"
+#include "../action.hpp"
 #include "../monitor.hpp"
 #include "../scoped_file_descriptor.hpp"
 #include "../to_json_property.hpp"
@@ -58,7 +58,7 @@ public:
 
         if (config.interface_type != tunnel::interface::type::tun)
         {
-            do_log(log_level::error, log_kind::open,
+            do_log(log_level::error, action::open,
                    poke::log::str{"error", "Only TUN is supported on MacOS"});
             error = std::make_error_code(std::errc::not_supported);
             return;
@@ -67,7 +67,7 @@ public:
         scoped_file_descriptor control_fd = socket(AF_INET, SOCK_DGRAM, 0);
         if (!control_fd)
         {
-            do_log(log_level::error, log_kind::open,
+            do_log(log_level::error, action::open,
                    poke::log::str{"control_fd", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
@@ -75,7 +75,7 @@ public:
         scoped_file_descriptor route_fd = socket(AF_ROUTE, SOCK_RAW, AF_INET);
         if (!route_fd)
         {
-            do_log(log_level::error, log_kind::open,
+            do_log(log_level::error, action::open,
                    poke::log::str{"route_fd", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
@@ -88,7 +88,7 @@ public:
             socket(PF_SYSTEM, SOCK_DGRAM, SYSPROTO_CONTROL);
         if (!interface_fd)
         {
-            do_log(log_level::error, log_kind::open,
+            do_log(log_level::error, action::open,
                    poke::log::str{"interface_fd", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
@@ -99,7 +99,7 @@ public:
         memset(&sc, 0, sizeof(sc));
         if (ioctl(interface_fd.native_handle(), CTLIOCGINFO, &ctlInfo) == -1)
         {
-            do_log(log_level::error, log_kind::open,
+            do_log(log_level::error, action::open,
                    poke::log::str{"get_control_id", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
@@ -111,7 +111,7 @@ public:
             int sock = socket(PF_SYSTEM, SOCK_DGRAM, SYSPROTO_CONTROL);
             if (sock < 0)
             {
-                do_log(log_level::error, log_kind::open,
+                do_log(log_level::error, action::open,
                        poke::log::str{"find_unit", strerror(errno)});
                 error = std::make_error_code(std::errc::io_error);
                 return -1;
@@ -134,7 +134,7 @@ public:
                 }
                 close(sock);
             }
-            do_log(log_level::error, log_kind::open,
+            do_log(log_level::error, action::open,
                    poke::log::str{"error", "No free unit found"});
             error = std::make_error_code(std::errc::io_error);
             return -1;
@@ -156,7 +156,7 @@ public:
         if (connect(interface_fd.native_handle(), (struct sockaddr*)&sc,
                     sizeof(sc)) < 0)
         {
-            do_log(log_level::error, log_kind::open,
+            do_log(log_level::error, action::open,
                    poke::log::str{"connect", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
@@ -165,7 +165,7 @@ public:
         // Set non-blocking mode
         if (fcntl(interface_fd.native_handle(), F_SETFL, O_NONBLOCK) < 0)
         {
-            do_log(log_level::error, log_kind::open,
+            do_log(log_level::error, action::open,
                    poke::log::str{"set_non_blocking", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
@@ -224,7 +224,7 @@ public:
         addr->sin_family = AF_INET;
         if (inet_pton(AF_INET, ipAddress.c_str(), &addr->sin_addr) <= 0)
         {
-            do_log(log_level::error, log_kind::set_ipv4,
+            do_log(log_level::error, action::set_ipv4,
                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
@@ -232,7 +232,7 @@ public:
 
         if (ioctl(m_control_fd.native_handle(), SIOCSIFADDR, &ifr) < 0)
         {
-            do_log(log_level::error, log_kind::set_ipv4,
+            do_log(log_level::error, action::set_ipv4,
                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
@@ -251,7 +251,7 @@ public:
         addr->sin_family = AF_INET;
         if (inet_pton(AF_INET, mask.c_str(), &addr->sin_addr) <= 0)
         {
-            do_log(log_level::error, log_kind::set_ipv4_netmask,
+            do_log(log_level::error, action::set_ipv4_netmask,
                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
@@ -260,7 +260,7 @@ public:
         ifr.ifr_addr.sa_family = AF_INET;
         if (ioctl(m_control_fd.native_handle(), SIOCSIFNETMASK, &ifr) < 0)
         {
-            do_log(log_level::error, log_kind::set_ipv4_netmask,
+            do_log(log_level::error, action::set_ipv4_netmask,
                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
@@ -279,7 +279,7 @@ public:
         }
 
         struct sockaddr_in* addr_in = (struct sockaddr_in*)&ifr.ifr_addr;
-        do_log(log_level::debug, log_kind::ipv4,
+        do_log(log_level::debug, action::ipv4,
                poke::log::str{"ip", ::inet_ntoa(addr_in->sin_addr)});
 
         return ::inet_ntoa(addr_in->sin_addr);
@@ -297,7 +297,7 @@ public:
         }
 
         struct sockaddr_in* addr_in = (struct sockaddr_in*)&ifr.ifr_addr;
-        do_log(log_level::debug, log_kind::ipv4_netmask,
+        do_log(log_level::debug, action::ipv4_netmask,
                poke::log::str{"netmask", ::inet_ntoa(addr_in->sin_addr)});
 
         return ::inet_ntoa(addr_in->sin_addr);
@@ -314,7 +314,7 @@ public:
         ifr.ifr_mtu = mtu;
         if (ioctl(m_control_fd.native_handle(), SIOCSIFMTU, &ifr) < 0)
         {
-            do_log(log_level::error, log_kind::set_mtu,
+            do_log(log_level::error, action::set_mtu,
                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
@@ -332,7 +332,7 @@ public:
         // Get current flags
         if (ioctl(m_control_fd.native_handle(), SIOCGIFFLAGS, &ifr) < 0)
         {
-            do_log(log_level::error, log_kind::interface_up,
+            do_log(log_level::error, action::interface_up,
                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
@@ -342,7 +342,7 @@ public:
         ifr.ifr_flags |= IFF_UP;
         if (ioctl(m_control_fd.native_handle(), SIOCSIFFLAGS, &ifr) < 0)
         {
-            do_log(log_level::error, log_kind::interface_up,
+            do_log(log_level::error, action::interface_up,
                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
@@ -362,7 +362,7 @@ public:
 
         bool is_if_up = (ifr.ifr_flags & IFF_UP) != 0;
 
-        do_log(log_level::debug, log_kind::is_up,
+        do_log(log_level::debug, action::is_up,
                log::boolean{"is_up", is_if_up});
 
         return is_if_up;
@@ -378,7 +378,7 @@ public:
         // Get current flags
         if (ioctl(m_control_fd.native_handle(), SIOCGIFFLAGS, &ifr) < 0)
         {
-            do_log(log_level::error, log_kind::interface_down,
+            do_log(log_level::error, action::interface_down,
                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
@@ -388,7 +388,7 @@ public:
         ifr.ifr_flags &= ~IFF_UP;
         if (ioctl(m_control_fd.native_handle(), SIOCSIFFLAGS, &ifr) < 0)
         {
-            do_log(log_level::error, log_kind::interface_down,
+            do_log(log_level::error, action::interface_down,
                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
@@ -397,7 +397,7 @@ public:
     auto is_down(std::error_code& error) const -> bool
     {
         assert(!error);
-        do_log(log_level::debug, log_kind::is_down);
+        do_log(log_level::debug, action::is_down);
         return !is_up(error);
     }
 
@@ -436,7 +436,7 @@ public:
         rtmsg.gw.sin_family = AF_INET;
         if (inet_pton(AF_INET, ipv4(error).c_str(), &rtmsg.gw.sin_addr) <= 0)
         {
-            do_log(log_level::error, log_kind::enable_default_route,
+            do_log(log_level::error, action::enable_default_route,
                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
@@ -454,7 +454,7 @@ public:
         // Send the message to the routing socket
         if (write(m_route_fd.native_handle(), &rtmsg, sizeof(rtmsg)) < 0)
         {
-            do_log(log_level::error, log_kind::enable_default_route,
+            do_log(log_level::error, action::enable_default_route,
                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
@@ -499,7 +499,7 @@ public:
         rtmsg.gw.sin_addr.s_addr = htonl(INADDR_ANY);
         if (inet_pton(AF_INET, ipv4(error).c_str(), &rtmsg.gw.sin_addr) <= 0)
         {
-            do_log(log_level::error, log_kind::enable_default_route,
+            do_log(log_level::error, action::enable_default_route,
                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
@@ -517,7 +517,7 @@ public:
         // Send the message to the routing socket
         if (write(m_route_fd.native_handle(), &rtmsg, sizeof(rtmsg)) < 0)
         {
-            do_log(log_level::error, log_kind::enable_default_route,
+            do_log(log_level::error, action::enable_default_route,
                    poke::log::str{"error", strerror(errno)});
             error = std::make_error_code(std::errc::io_error);
             return;
@@ -540,7 +540,7 @@ public:
         {
             return 0;
         }
-        do_log(log_level::debug, log_kind::interface_mtu,
+        do_log(log_level::debug, action::interface_mtu,
                poke::log::integer{"mtu", ifr.ifr_mtu});
 
         return ifr.ifr_mtu;
@@ -555,14 +555,14 @@ public:
     void rename(const std::string&, std::error_code& error) const
     {
         assert(!error);
-        do_log(log_level::error, log_kind::unsupported_platform);
+        do_log(log_level::error, action::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
     }
 
     std::string owner(std::error_code& error) const
     {
         assert(!error);
-        do_log(log_level::error, log_kind::unsupported_platform);
+        do_log(log_level::error, action::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
         return "";
     }
@@ -570,7 +570,7 @@ public:
     std::string group(std::error_code& error) const
     {
         assert(!error);
-        do_log(log_level::error, log_kind::unsupported_platform);
+        do_log(log_level::error, action::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
         return "";
     }
@@ -578,21 +578,21 @@ public:
     void set_owner(const std::string&, std::error_code& error) const
     {
         assert(!error);
-        do_log(log_level::error, log_kind::unsupported_platform);
+        do_log(log_level::error, action::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
     }
 
     void set_group(const std::string&, std::error_code& error) const
     {
         assert(!error);
-        do_log(log_level::error, log_kind::unsupported_platform);
+        do_log(log_level::error, action::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
     }
 
     bool is_persistent(std::error_code& error) const
     {
         assert(!error);
-        do_log(log_level::error, log_kind::unsupported_platform);
+        do_log(log_level::error, action::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
         return false;
     }
@@ -600,14 +600,14 @@ public:
     void set_persistent(std::error_code& error) const
     {
         assert(!error);
-        do_log(log_level::error, log_kind::unsupported_platform);
+        do_log(log_level::error, action::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
     }
 
     void set_non_persistent(std::error_code& error) const
     {
         assert(!error);
-        do_log(log_level::error, log_kind::unsupported_platform);
+        do_log(log_level::error, action::unsupported_platform);
         error = std::make_error_code(std::errc::not_supported);
     }
 
