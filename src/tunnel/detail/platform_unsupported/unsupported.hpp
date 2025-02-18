@@ -15,7 +15,7 @@ namespace platform_unsupported
 {
 struct unsupported
 {
-    unsupported() : m_impl("unsupported", {})
+    unsupported() : m_impl("unsupported", {}, {})
     {
     }
 
