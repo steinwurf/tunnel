@@ -623,18 +623,6 @@ public:
         return m_monitor;
     }
 
-    void set_log_callback(const tunnel::log_callback& callback)
-    {
-        m_monitor.set_log_callback(callback);
-    }
-
-    void enable_log(log_level level = log_level::state,
-                    std::string path_filter = "", std::string type_filter = "",
-                    std::any user_data = {})
-    {
-        m_monitor.enable_log(level, path_filter, type_filter, user_data);
-    }
-
 protected:
     template <class Kind, class... Args>
     void do_log(log_level level, const Kind& kind, Args&&... args) const
