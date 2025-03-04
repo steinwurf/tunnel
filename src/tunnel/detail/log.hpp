@@ -5,8 +5,7 @@
 
 #pragma once
 
-#include <cassert>
-#include <string>
+#include <poke/log.hpp>
 
 namespace tunnel
 {
@@ -14,43 +13,12 @@ namespace detail
 {
 struct log
 {
-    struct boolean
-    {
-        const char* name;
-        bool value;
-    };
-
-    struct integer
-    {
-        const char* name;
-        int64_t value;
-    };
-
-    struct uinteger
-    {
-        const char* name;
-        uint64_t value;
-    };
-
-    struct float64
-    {
-        static_assert(sizeof(double) == 8, "double not 8 bytes");
-
-        const char* name;
-        double value;
-    };
-
-    struct str
-    {
-        const char* name;
-        const char* value;
-    };
-
-    struct ptr
-    {
-        const char* name;
-        const uint8_t* value;
-    };
+    using boolean = poke::log::boolean;
+    using integer = poke::log::integer;
+    using uinteger = poke::log::uinteger;
+    using float64 = poke::log::float64;
+    using str = poke::log::str;
+    using ptr = poke::log::ptr;
 };
 }
 }

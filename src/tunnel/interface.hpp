@@ -258,10 +258,6 @@ public:
     /// @return The monitor for the interface
     auto monitor() -> tunnel::monitor&;
 
-    /// Set the log callback
-    /// @param callback The log callback
-    void set_log_callback(const tunnel::log_callback& callback);
-
     /// Return true if the platform is supported, otherwise false
     static auto is_platform_supported() -> bool;
 

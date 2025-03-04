@@ -11,12 +11,11 @@
 
 int main()
 {
-    auto log = [](auto, const std::string& message, auto)
+    auto log = [](auto, const std::string_view& message)
     { std::cout << message << std::endl; };
 
     tunnel::interface iface;
-    iface.set_log_callback(log);
-    iface.monitor().enable_log();
+    iface.monitor().enable_log(log);
 
 #if defined(PLATFORM_LINUX)
     iface.create({tunnel::interface::type::tun, "tuniface"});

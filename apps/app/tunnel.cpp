@@ -154,15 +154,14 @@ int main(int argc, char** argv)
         peer = to_endpoint(remote_address);
     }
 
-    auto log1 = [](auto, const std::string& message, auto)
+    auto log1 = [](auto, const std::string_view& message)
     { std::cout << "tunnel_iface: " << message << std::endl; };
     tunnel::interface::config config;
     config.interface_type = mode == "tun" ? tunnel::interface::type::tun
                                           : tunnel::interface::type::tap;
     tunnel::interface iface1;
     iface1.create(config);
-    iface1.set_log_callback(log1);
-    iface1.monitor().enable_log();
+    iface1.monitor().enable_log(log1);
     iface1.set_ipv4(tunnel_address);
     iface1.set_ipv4_netmask("255.255.255.0");
     iface1.set_mtu(1500);

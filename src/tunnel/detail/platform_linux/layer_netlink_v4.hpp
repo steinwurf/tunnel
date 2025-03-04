@@ -26,8 +26,8 @@
 
 #include "../../interface.hpp"
 #include "../../log_level.hpp"
+#include "../action.hpp"
 #include "../log.hpp"
-#include "../log_kind.hpp"
 #include "../scoped_file_descriptor.hpp"
 #include "error.hpp"
 #include "if_nametoindex.hpp"
@@ -129,7 +129,7 @@ public:
             return false;
         }
 
-        Super::do_log(log_level::debug, log_kind::is_default_route,
+        Super::do_log(log_level::debug, action::is_default_route,
                       log::boolean{"is_default_route",
                                    default_interface == interface_name});
 
@@ -161,7 +161,7 @@ private:
 
         Super::send(m_dev_fd, message.data(), message.size(), 0, error);
 
-        Super::do_log(log_level::debug, log_kind::send_netlink,
+        Super::do_log(log_level::debug, action::send_netlink,
                       log::uinteger{"nlmsg_pid", header->nlmsg_pid},
                       log::uinteger{"nlmsg_seq", header->nlmsg_seq},
                       log::str{"error", error.message().c_str()});
@@ -249,7 +249,7 @@ private:
                 return {};
             }
 
-            Super::do_log(log_level::debug, log_kind::recv_netlink_message,
+            Super::do_log(log_level::debug, action::recv_netlink_message,
                           log::uinteger{"size", size});
 
             message.resize(size, 0);
@@ -270,7 +270,7 @@ private:
                 return {};
             }
 
-            Super::do_log(log_level::debug, log_kind::recv_netlink_message,
+            Super::do_log(log_level::debug, action::recv_netlink_message,
                           log::uinteger{"nlmsg_pid", header->nlmsg_pid},
                           log::uinteger{"nlmsg_seq", header->nlmsg_seq},
                           log::integer{"m_netlink_port", m_netlink_port},

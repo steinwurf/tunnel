@@ -28,6 +28,7 @@
 #include "layer_netdevice.hpp"
 #include "layer_netlink_v4.hpp"
 
+#include "../action.hpp"
 #include "layer_final.hpp"
 #include "layer_monitor.hpp"
 
@@ -49,9 +50,14 @@ struct stack_interface : public
     layer_monitor<
     layer_final<stack_interface>>>>>>
 {
-    static auto type() -> std::string
+    static auto name() -> std::string
     {
-        return "tunnel::detail::platform_linux::stack_interface";
+        return "linux_tunnel_interface";
+    }
+
+    static auto actions() -> std::vector<poke::action>
+    {
+        return action::poke_registry;
     }
 };
 // clang-format on

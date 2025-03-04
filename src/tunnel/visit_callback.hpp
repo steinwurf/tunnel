@@ -5,12 +5,11 @@
 
 #pragma once
 
+#include <functional>
 #include <string>
-
-#include "delegate.hpp"
 
 namespace tunnel
 {
 /// The callback is used when calling monitor::visit.
-using visit_callback = delegate<void(const std::string&, const std::string&)>;
+using visit_callback = std::function<void(const std::string& path)>;
 }

@@ -5,10 +5,9 @@
 
 #pragma once
 
-#include <any>
+#include <functional>
 #include <string>
 
-#include "delegate.hpp"
 #include "log_level.hpp"
 
 namespace tunnel
@@ -16,6 +15,6 @@ namespace tunnel
 
 /// The logging callback
 using log_callback =
-    delegate<void(tunnel::log_level, const std::string&, const std::any&)>;
+    std::function<void(tunnel::log_level, const std::string_view& message)>;
 
 }

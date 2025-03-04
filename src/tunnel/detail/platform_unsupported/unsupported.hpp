@@ -15,7 +15,7 @@ namespace platform_unsupported
 {
 struct unsupported
 {
-    unsupported() : m_impl("unsupported", {})
+    unsupported() : m_impl("unsupported", {}, {})
     {
     }
 
@@ -160,17 +160,6 @@ struct unsupported
     {
         throw std::runtime_error("not supported");
         return m_impl;
-    }
-
-    void set_log_callback(const tunnel::log_callback&)
-    {
-        throw std::runtime_error("not supported");
-    }
-
-    void enable_log(log_level = log_level::state, std::string = "",
-                    std::string = "", std::any = {})
-    {
-        throw std::runtime_error("not supported");
     }
 
 private:

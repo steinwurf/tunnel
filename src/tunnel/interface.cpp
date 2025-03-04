@@ -416,12 +416,6 @@ auto interface::monitor() -> tunnel::monitor&
     return m_impl->monitor();
 }
 
-auto interface::set_log_callback(const log_callback& callback) -> void
-{
-    assert(m_impl);
-    m_impl->set_log_callback(callback);
-}
-
 auto interface::is_platform_supported() -> bool
 {
     return platform_supported;
