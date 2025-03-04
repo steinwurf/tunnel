@@ -5,9 +5,9 @@
         "sha1": "ab7745dea45fcc70fbc0177dcf7d9fc65089fffa"
     },
     "abacus": {
-        "commit_id": "a4433cbeb10a70ceca0f6b48aea7f79b9a5a3b4e",
-        "resolver_info": "metadata-memory-layout-refactor",
-        "sha1": "c819ab4586bf0ccf9b0e54f829e31a74a59fc9ba"
+        "commit_id": "3fa7876b5f859ce0f5edabef90c97ed6196f4766",
+        "resolver_info": "7.0.0",
+        "sha1": "d1447e30e2da0697d0ff07a6513a93734691dbdc"
     },
     "asio": {
         "commit_id": "e17f46a631fac2c9181553ec6b7971b6c9987d0d",
@@ -60,9 +60,9 @@
         "sha1": "f6bc772cf920c024726ebd12a5a38f123d057adb"
     },
     "poke": {
-        "commit_id": "5cf2a7decc2d4ed7b93d8897c63b6153bf6d8df3",
-        "resolver_info": "v15",
-        "sha1": "bd663ee7cd739cef00382f0aaa4b4a1a316bcae6"
+        "commit_id": "1a4aa1ad78a2c3ecbb6055197807485b0c277da1",
+        "resolver_info": "15.0.0",
+        "sha1": "55f4dfad5db131a8a2e1fe392d43d1ae4cdaf0a5"
     },
     "protobuf": {
         "commit_id": "1e7b3114dd9ed4fcfe5f0969033235d7295004c7",

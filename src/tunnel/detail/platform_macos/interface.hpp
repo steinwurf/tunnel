@@ -42,9 +42,7 @@ namespace platform_macos
 class interface
 {
 public:
-    interface() :
-        m_monitor("tunnel::detail::platform_macos::interface", {},
-                  action::poke_registry)
+    interface() : m_monitor("macos_tunnel_interface", {}, action::poke_registry)
     {
     }
 

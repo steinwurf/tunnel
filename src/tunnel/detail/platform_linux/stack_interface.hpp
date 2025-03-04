@@ -52,7 +52,7 @@ struct stack_interface : public
 {
     static auto name() -> std::string
     {
-        return "tunnel::detail::platform_linux::stack_interface";
+        return "linux_tunnel_interface";
     }
 
     static auto actions() -> std::vector<poke::action>
