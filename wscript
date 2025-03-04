@@ -10,7 +10,7 @@ import os.path
 from waflib.Build import BuildContext
 
 APPNAME = "tunnel"
-VERSION = "17.0.0"
+VERSION = "18.0.0"
 
 
 def options(opt):
