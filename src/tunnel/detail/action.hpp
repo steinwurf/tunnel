@@ -21,13 +21,13 @@ namespace detail
 struct action
 {
 /// Create the action tags
-#define ACTION_TYPE_TAG(id, desc)                                             \
-    struct _##id                                                              \
-    {                                                                         \
-        static constexpr std::string_view description = desc;                 \
-        static constexpr std::string_view name = #id;                         \
-        static constexpr auto poke_hash = poke::hash_function("tunnel_" #id); \
-    };                                                                        \
+#define ACTION_TYPE_TAG(id, desc)                                    \
+    struct _##id                                                     \
+    {                                                                \
+        static constexpr std::string_view description = desc;        \
+        static constexpr std::string_view name = "tunnel::" #id;     \
+        static constexpr auto poke_hash = poke::hash_function(name); \
+    };                                                               \
     constexpr static inline _##id id{};
 
 #include "action_tags.hpp"
@@ -51,7 +51,7 @@ struct action
 #define ACTION_TYPE_TAG(id, desc)                                           \
     inline void to_json_property(fmt::memory_buffer& buffer, action::_##id) \
     {                                                                       \
-        buffer.append(std::string_view("\"action\": \"" #id "\""));         \
+        buffer.append(std::string_view("\"action\": \"tunnel::" #id "\"")); \
     }
 
 #include "action_tags.hpp"
