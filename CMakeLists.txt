@@ -60,7 +60,6 @@ else()
     set_property(GLOBAL APPEND PROPERTY steinwurf::object_libraries
         steinwurf::tunnel)
 endif()̈́
-
 find_package(Threads REQUIRED)
 
 target_link_libraries(tunnel PRIVATE Threads::Threads)
