@@ -1,4 +1,4 @@
-name: Linux C++ make-specs
+name: Integration Tests
 "on":
   workflow_dispatch:
     inputs:
@@ -12,49 +12,29 @@ name: Linux C++ make-specs
       - master
   pull_request:
 jobs:
-  docker_builds:
+  integration_tests:
     timeout-minutes: 45
     strategy:
       fail-fast: false
-      matrix:
-        config:
-          - CXX: g++
-            name: GCC Latest
-            cxxflags:
-            env:
-            runner: ubuntu-current
-          - name: Clang Latest
-            CXX: clang++
-            cxxflags:
-            env:
-            runner: ubuntu-current
-          - name: GCC Old
-            CXX: g++
-            cxxflags:
-            env:
-            runner: ubuntu-old
-          - name: Clang Old
-            CXX: clang++
-            cxxflags:
-            env:
-            runner: ubuntu-old
     runs-on:
       - self-hosted
       - vm
-      - ${{ matrix.config.runner }}
-    name: ${{ matrix.config.name }}
+      - ubuntu-current
+    name: Integration Tests
+    container:
+      image: ghcr.io/steinwurf/integration-test:1.0.0
+      options: --user 0:0 --privileged
+      volumes:
+        - /root/.ssh:/root/.ssh
     steps:
       - name: Ensure correct owner of repository
-        run: sudo chown -R actions-runner:actions-runner .
+        run: chown -R actions-runner:actions-runner .
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
       - name: Waf Configure
         env:
-          GIT_SSH_COMMAND: "${{ 'ssh -i /opt/actions-runner/.ssh/id_25519 -o IdentitiesOnly=yes' }}"
           EXTRA_RESOLVE_OPTIONS: ${{ inputs.extra_resolve_options }}
-          CXX: ${{ matrix.config.CXX }}
-          CXXFLAGS: ${{ matrix.config.cxxflags }}
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v2
         with:
           max_attempts: 3
           timeout_minutes: 15
@@ -63,8 +43,15 @@ jobs:
         run: |
           echo "::add-matcher::.github/gcc-problem-matcher.json"
           python3 waf
-      - name: Waf Test
-        run: ${{ matrix.config.env }} python3 waf --run_tests
+      - name: Waf Integration Test
+        run: python3 waf integration_test
+      - name: Get backtrace on failure if available
+        if: failure()
+        run: bash get_backtraces.sh
+      - name: Change owner of local files so cleanup is possible for other workflows
+        if: always() || ${{ job.status == 'cancelled' }}
+        run: chown -R actions-runner:actions-runner .
+
 
   workflow-keepalive:
     if: github.event_name == 'schedule'

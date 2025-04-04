@@ -21,10 +21,9 @@ jobs:
       matrix:
         config:
           - arch: ARM64
-            os: big_sur
-            name: Apple Big Sur (ARM)
+            name: Apple (ARM)
 
-    runs-on: [self-hosted, macOS, "${{ matrix.config.os }}", "${{ matrix.config.arch }}", cmake, builder]
+    runs-on: [self-hosted, macOS, "${{ matrix.config.arch }}", cmake, builder]
     name: ${{ matrix.config.name }}
     steps:
       - name: Checkout
@@ -44,13 +43,21 @@ jobs:
         with:
           max_attempts: 3
           timeout_minutes: 15
-          command: cd build && cmake ${{github.workspace}} -DSTEINWURF_RESOLVE_OPTIONS="--git_protocol=git@ $EXTRA_RESOLVE_OPTIONS"
+          command: cd build && cmake ${{github.workspace}} -DSTEINWURF_RESOLVE_OPTIONS="--git_protocol=git@ $EXTRA_RESOLVE_OPTIONS" -DCMAKE_BUILD_TYPE=Debug
       - name: CMake Build
         working-directory: ${{github.workspace}}/build
-        run: cmake --build . -j$((`sysctl -n hw.physicalcpu` - 1))
+        run: cmake --build . -j$(( (`sysctl -n hw.physicalcpu` - 1) / 2 ))
       - name: CTest
         working-directory: ${{github.workspace}}/build
-        run: echo ${{ secrets.MACOS_RUNNER_PASS }} | sudo -S ctest -V
+        run: ctest -V
+
+  workflow-keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: [self-hosted, vm, ubuntu-current]
+    permissions:
+      actions: write
+    steps:
+      - uses: liskin/gh-workflow-keepalive@v1
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true

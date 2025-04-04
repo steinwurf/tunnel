@@ -25,25 +25,42 @@ jobs:
       fail-fast: false
       matrix:
         config:
-        - container: ghcr.io/steinwurf/ubuntu-lts-2404:1.0.0
-          name: Cmake (GCC) Latest
+        - name: Cmake (GCC) Latest
           cxx: g++
           cc: gcc
-        - container: ghcr.io/steinwurf/ubuntu-lts-2404:1.0.0
-          name: Cmake (Clang) Latest
+          cxxflags: ''
+          env:
+        - name: Cmake (Clang) Latest
           cxx: clang++
           cc: clang
+          cxxflags: ''
+          env:
+        - name: Clang Address Sanitizer Latest
+          cxx: clang++
+          cc: clang
+          cxxflags: '-fsanitize=address -fno-omit-frame-pointer -g'
+          env:
+          runner: ubuntu-current
+        - name: Clang Thread Sanitizer Latest
+          CXX: clang++
+          cc: clang
+          cxxflags: '-fsanitize=thread -fPIE -g'
+          env:
+          runner: ubuntu-current
+        - name: Clang Undefined Sanitizer Latest
+          CXX: clang++
+          cc: clang
+          cxxflags: '-fsanitize=undefined -g'
+          env: UBSAN_OPTIONS="abort_on_error=1:print_stacktrace=1"
+          runner: ubuntu-current
     runs-on:
     - self-hosted
-    - docker
-    - builder
+    - vm
+    - ubuntu-current
     name: ${{ matrix.config.name }}
-    container:
-      image: ${{ matrix.config.container }}
-      options: --user 0:0 --privileged --ulimit core=-1
-      volumes:
-      - /home/buildbot/.ssh:/root/.ssh
     steps:
+    - name: Ensure correct owner of repository
+      run: sudo chown -R actions-runner:actions-runner .
     - name: Checkout
       uses: actions/checkout@v4
     - name: Preparation Commands
@@ -55,16 +72,26 @@ jobs:
       run: cmake -E make_directory build
     - name: CMake Configure
       uses: nick-fields/retry@v3
+      env:
+        GIT_SSH_COMMAND: "${{ 'ssh -i /opt/actions-runner/.ssh/id_25519 -o IdentitiesOnly=yes' }}"
       with:
         max_attempts: 3
         timeout_minutes: 15
-        command: cd build && cmake ../ -DSTEINWURF_RESOLVE_OPTIONS="--git_protocol=git@ $EXTRA_RESOLVE_OPTIONS" -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -DCMAKE_C_COMPILER=${{ matrix.config.cc }}
+        command: cd build && cmake ../ -DCMAKE_BUILD_TYPE=Debug -DSTEINWURF_RESOLVE_OPTIONS="--git_protocol=git@ $EXTRA_RESOLVE_OPTIONS" -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -DCMAKE_C_COMPILER=${{ matrix.config.cc }} -DCMAKE_CXX_FLAGS="${{ matrix.config.cxxflags }}" -GNinja
     - name: CMake Build
       working-directory: ${{github.workspace}}/build
-      run: cmake --build . -j$(((`nproc` + 1) / 2))
-    - name: CTest
+      run: cmake --build . -j
+    - name: Run Tests
       working-directory: ${{github.workspace}}/build
-      run: ctest -V
+      run: ${{ matrix.config.env }} ctest -V
+
+  workflow-keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: [self-hosted, vm, ubuntu-current]
+    permissions:
+      actions: write
+    steps:
+      - uses: liskin/gh-workflow-keepalive@v1
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true

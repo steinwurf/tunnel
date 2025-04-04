@@ -59,7 +59,11 @@ else()
     # Add this library to a global list of steinwurf object libraries
     set_property(GLOBAL APPEND PROPERTY steinwurf::object_libraries
         steinwurf::tunnel)
-endif()
+endif()̈́
+
+find_package(Threads REQUIRED)
+
+target_link_libraries(tunnel PRIVATE Threads::Threads)
 
 # Link header only dependencies
 target_link_libraries(tunnel PRIVATE platform)
