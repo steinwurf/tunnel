@@ -5,7 +5,7 @@
 
 #include <CLI/CLI.hpp>
 #include <asio.hpp>
-#include <tunnel/tun_interface.hpp>
+#include <tunnel/interface.hpp>
 
 #include <cassert>
 #include <deque>
@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
                  "udp tunnel."
               << std::endl;
 
-    tunnel::tun_interface iface;
+    tunnel::interface iface;
 
     iface.create({});
     iface.up();

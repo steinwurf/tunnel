@@ -5,9 +5,9 @@
         "sha1": "ab7745dea45fcc70fbc0177dcf7d9fc65089fffa"
     },
     "abacus": {
-        "commit_id": "4c174d9383bdf0c61ef6cbc8b43d7bed4af73127",
-        "resolver_info": "6.0.1",
-        "sha1": "672c4c4d312b34f23e0461486087863d132c042c"
+        "commit_id": "3fa7876b5f859ce0f5edabef90c97ed6196f4766",
+        "resolver_info": "7.0.0",
+        "sha1": "d1447e30e2da0697d0ff07a6513a93734691dbdc"
     },
     "asio": {
         "commit_id": "e17f46a631fac2c9181553ec6b7971b6c9987d0d",
@@ -20,8 +20,8 @@
         "sha1": "bb0e4dc8f3c4f60822b15c54003556ef448c22e8"
     },
     "bourne": {
-        "commit_id": "97a913859ef89817f97ab5fb59d82989319cd33f",
-        "resolver_info": "10.0.1",
+        "commit_id": "1288fa220b92e6910d9e09643b92ccf8f7f99b4e",
+        "resolver_info": "10.1.0",
         "sha1": "9c4ea9c707dda31fbd3e0c7b326ab97263e06ca3"
     },
     "cli11-source": {
@@ -35,14 +35,14 @@
         "sha1": "de39fa280dabb242134e095a1473495341165b70"
     },
     "fmt": {
-        "commit_id": "611bb73e40e4bde04ea4c2c38496c331382d4d99",
-        "resolver_info": "3.0.0",
-        "sha1": "29bf833d7f478d70151626083c1883bb54ac904f"
+        "commit_id": "c979a433b8ec677d75bd0745f1b5e295bd958b6b",
+        "resolver_info": "4.0.0",
+        "sha1": "91da6d979ff2e86c5b94d0711d71d001a7c66923"
     },
     "fmt-source": {
-        "commit_id": "a33701196adfad74917046096bf5a2aa0ab0bb50",
-        "resolver_info": "9.1.0",
-        "sha1": "a48413cb8a278a21559b4b145d5c5d5d8efdc3ca"
+        "commit_id": "0c9fce2ffefecfdce794e1859584e25877b7b592",
+        "resolver_info": "11.0.2",
+        "sha1": "f39ff778b3283f543cdfc9b1662ec101c453efce"
     },
     "gtest": {
         "commit_id": "da24468d2c5deb601d0f67196abe83d78a00f972",
@@ -55,18 +55,18 @@
         "sha1": "ca969a1500e88a09de1cbfb8d8d3307a7773abfd"
     },
     "platform": {
-        "commit_id": "576ad99a67d4a3a6566509485de1de6b28ef21af",
-        "resolver_info": "5.0.0",
+        "commit_id": "c2543dd5e613fb86d8dee530c0f1c142a310e1f0",
+        "resolver_info": "5.1.1",
         "sha1": "f6bc772cf920c024726ebd12a5a38f123d057adb"
     },
     "poke": {
-        "commit_id": "17efddfa40a5d8a7ad2e7912f385c2ace5bfcb71",
-        "resolver_info": "13.0.0",
-        "sha1": "792e4aecebe15ef24e9aa66a000b2751c485c340"
+        "commit_id": "1a4aa1ad78a2c3ecbb6055197807485b0c277da1",
+        "resolver_info": "15.0.0",
+        "sha1": "55f4dfad5db131a8a2e1fe392d43d1ae4cdaf0a5"
     },
     "protobuf": {
-        "commit_id": "8c097d481bb76bafafea87d56c8627c9b82014cd",
-        "resolver_info": "2.0.9",
+        "commit_id": "1e7b3114dd9ed4fcfe5f0969033235d7295004c7",
+        "resolver_info": "2.0.12",
         "sha1": "1cbce41d76e6829eb713e60eb7c3f46a1a350a32"
     },
     "protobuf-source": {
@@ -85,8 +85,8 @@
         "sha1": "67edfd49ad879868b7d6a48b4e72d7f0cd969b46"
     },
     "waf-tools": {
-        "commit_id": "6379b83992885dcb148e2c8bf3677f315d623e8f",
-        "resolver_info": "5.4.0",
+        "commit_id": "807915941436a61f45e89aefb385392f628b8a29",
+        "resolver_info": "5.4.1",
         "sha1": "9dd4ab1d52c916572f45237d4e7450abc7c19a14"
     }
 }

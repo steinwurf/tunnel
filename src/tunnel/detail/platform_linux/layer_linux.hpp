@@ -15,10 +15,10 @@
 
 #include "../../log_level.hpp"
 
+#include "../action.hpp"
 #include "../log.hpp"
-#include "../log_kind.hpp"
 
-#include "scoped_file_descriptor.hpp"
+#include "../scoped_file_descriptor.hpp"
 
 namespace tunnel
 {
@@ -42,14 +42,14 @@ struct layer_linux : public Super
         if (fd < 0)
         {
             error = std::error_code(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::open,
+            Super::do_log(log_level::error, action::open,
                           log::str{"path", path.c_str()},
                           log::integer{"flags", flags},
                           log::str{"error", error.message().c_str()});
             return scoped_file_descriptor{};
         }
 
-        Super::do_log(log_level::debug, log_kind::open,
+        Super::do_log(log_level::debug, action::open,
                       log::str{"path", path.c_str()},
                       log::integer{"flags", flags}, log::integer{"fd", fd});
 
@@ -66,7 +66,7 @@ struct layer_linux : public Super
         if (fd < 0)
         {
             error = std::error_code(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::socket,
+            Super::do_log(log_level::error, action::socket,
                           log::integer{"domain", domain},
                           log::integer{"type", type},
                           log::integer{"protocol", protocol},
@@ -76,7 +76,7 @@ struct layer_linux : public Super
         }
 
         Super::do_log(
-            log_level::debug, log_kind::socket, log::integer{"domain", domain},
+            log_level::debug, action::socket, log::integer{"domain", domain},
             log::integer{"type", type}, log::integer{"protocol", protocol},
             log::integer{"fd", fd});
 
@@ -94,12 +94,13 @@ struct layer_linux : public Super
         if (::ioctl(fd.native_handle(), request, arg) == -1)
         {
             error.assign(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::ioctl,
+            Super::do_log(log_level::error, action::ioctl,
                           log::uinteger{"request", request},
                           log::str{"error", error.message().c_str()});
+            return;
         }
 
-        Super::do_log(log_level::debug, log_kind::ioctl,
+        Super::do_log(log_level::debug, action::ioctl,
                       log::uinteger{"request", request},
                       log::integer{"fd", fd.native_handle()});
     }
@@ -116,12 +117,13 @@ struct layer_linux : public Super
         if (::ioctl(fd.native_handle(), request, arg) == -1)
         {
             error.assign(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::ioctl,
+            Super::do_log(log_level::error, action::ioctl,
                           log::uinteger{"request", request},
                           log::str{"error", error.message().c_str()});
+            return;
         }
 
-        Super::do_log(log_level::debug, log_kind::ioctl,
+        Super::do_log(log_level::debug, action::ioctl,
                       log::uinteger{"request", request},
                       log::integer{"fd", fd.native_handle()});
     }
@@ -139,14 +141,14 @@ struct layer_linux : public Super
         if (res < 0)
         {
             error = std::error_code(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::send,
+            Super::do_log(log_level::error, action::send,
                           log::uinteger{"size", size},
                           log::integer{"flags", flags},
                           log::str{"error", error.message().c_str()});
             return 0;
         }
 
-        Super::do_log(log_level::debug, log_kind::send,
+        Super::do_log(log_level::debug, action::send,
                       log::uinteger{"size", size}, log::integer{"flags", flags},
                       log::integer{"fd", fd.native_handle()},
                       log::integer{"res", res});
@@ -167,14 +169,14 @@ struct layer_linux : public Super
         if (res < 0)
         {
             error = std::error_code(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::recv,
+            Super::do_log(log_level::error, action::recv,
                           log::uinteger{"size", size},
                           log::integer{"flags", flags},
                           log::str{"error", error.message().c_str()});
             return 0;
         }
 
-        Super::do_log(log_level::debug, log_kind::recv,
+        Super::do_log(log_level::debug, action::recv,
                       log::uinteger{"size", size}, log::integer{"flags", flags},
                       log::integer{"fd", fd.native_handle()},
                       log::integer{"res", res});
@@ -195,14 +197,14 @@ struct layer_linux : public Super
         if (res < 0)
         {
             error = std::error_code(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::bind,
+            Super::do_log(log_level::error, action::bind,
                           log::uinteger{"addrlen", addrlen},
                           log::str{"error", error.message().c_str()});
             return 0;
         }
 
         Super::do_log(
-            log_level::debug, log_kind::bind, log::uinteger{"addrlen", addrlen},
+            log_level::debug, action::bind, log::uinteger{"addrlen", addrlen},
             log::integer{"fd", fd.native_handle()}, log::integer{"res", res});
 
         return res;
@@ -219,7 +221,7 @@ struct layer_linux : public Super
         if (current_offset < 0)
         {
             error = std::error_code(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::size,
+            Super::do_log(log_level::error, action::size,
                           log::integer{"current_offset", current_offset},
                           log::str{"error", error.message().c_str()});
             return 0;
@@ -230,7 +232,7 @@ struct layer_linux : public Super
         if (offset < 0)
         {
             error = std::error_code(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::size,
+            Super::do_log(log_level::error, action::size,
                           log::integer{"offset", offset},
                           log::str{"error", error.message().c_str()});
             return 0;
@@ -242,13 +244,13 @@ struct layer_linux : public Super
         if (set_offset < 0)
         {
             error = std::error_code(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::size,
+            Super::do_log(log_level::error, action::size,
                           log::integer{"set_offset", set_offset},
                           log::str{"error", error.message().c_str()});
             return 0;
         }
 
-        Super::do_log(log_level::debug, log_kind::size,
+        Super::do_log(log_level::debug, action::size,
                       log::integer{"offset", offset},
                       log::integer{"fd", fd.native_handle()});
 
@@ -268,14 +270,14 @@ struct layer_linux : public Super
         if (res == -1)
         {
             error = std::error_code(errno, std::generic_category());
-            Super::do_log(log_level::error, log_kind::read,
+            Super::do_log(log_level::error, action::read,
                           log::uinteger{"size", size},
                           log::str{"error", error.message().c_str()});
             return 0;
         }
 
         Super::do_log(
-            log_level::debug, log_kind::read, log::uinteger{"size", size},
+            log_level::debug, action::read, log::uinteger{"size", size},
             log::integer{"fd", fd.native_handle()}, log::integer{"res", res});
 
         return res;

@@ -6,7 +6,31 @@ every change, see the Git log.
 
 Latest
 ------
-* Major: change interface  from seperate args to a struct
+* tbd
+
+18.1.0
+------
+* Minor: Prefix actions.
+
+18.0.0
+------
+* Major: Update poke to version 15.
+
+17.0.0
+------
+* Major: Update poke to version 14.
+
+16.0.0
+------
+* Major: Merged the tun_interface and tap_interface classes into a single
+  class called interface. The interface class can now create both TUN and TAP
+  interfaces based on the interface_type parameter provided to the create methods
+  config argument.
+
+15.0.0
+------
+* Minor: Add initial macos/Darwin support.
+* Major: Change interface from seperate args to a struct
 
 14.1.1
 ------
@@ -14,7 +38,7 @@ Latest
 
 14.1.0
 ------
-* Minor: Add tap support and proper in repository testing 
+* Minor: Add tap support and proper in repository testing
 
 14.0.0
 ------

@@ -12,8 +12,6 @@ namespace tunnel
 {
 namespace detail
 {
-namespace platform_linux
-{
 /// RAII (Resource Allocation Is Initialization) wrapper for a file
 /// descriptor. Ensures that the file descriptor gets closed.
 // template<class ClosePolicy = close_policy>
@@ -98,6 +96,5 @@ private:
     int m_file_descriptor;
 };
 
-}
 }
 }

@@ -32,11 +32,3 @@ bld.program(
     linkflags=linkflags,
     use=["tunnel", "asio_includes", "cli11"],
 )
-
-bld.program(
-    features="cxx",
-    source=["backtobacktun.cpp"],
-    target="backtobacktun",
-    linkflags=linkflags,
-    use=["tunnel"],
-)

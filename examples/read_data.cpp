@@ -3,7 +3,7 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
-#include <tunnel/tun_interface.hpp>
+#include <tunnel/interface.hpp>
 
 #include <cassert>
 #include <iostream>
@@ -22,17 +22,15 @@
 
 int main()
 {
-    auto log = [](auto, const std::string& message, auto)
+    auto log = [](auto, const std::string_view& message)
     { std::cout << message << std::endl; };
 
-    tunnel::tun_interface iface;
-    iface.set_log_callback(log);
-    iface.monitor().enable_log();
+    tunnel::interface iface;
+    iface.monitor().enable_log(log);
 
     iface.create({});
     iface.set_ipv4("10.0.0.1");
     iface.set_ipv4_netmask("255.255.255.0");
-    iface.set_persistent();
     iface.set_mtu(1500);
     iface.up();
 

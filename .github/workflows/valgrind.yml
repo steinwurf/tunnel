@@ -34,6 +34,7 @@ jobs:
           echo "::add-matcher::.github/gcc-problem-matcher.json"
           python3 waf
       - name: Valgrind Test
+<<<<<<< HEAD
         run: valgrind --leak-check=full --error-exitcode=1 ./tunnel_tests
         working-directory: build_current/cmake_default
 
@@ -45,6 +46,9 @@ jobs:
     steps:
       - uses: liskin/gh-workflow-keepalive@v1
 
+=======
+        run: valgrind build_current/tunnel_tests
+>>>>>>> master
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true

@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Steinwurf ApS
+// Copyright (c) 2017 Steinwurf ApS
 // All Rights Reserved
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
@@ -6,32 +6,70 @@
 #pragma once
 
 #include <memory>
+#include <platform/config.hpp>
 #include <string>
 #include <system_error>
 
-#include "interface_config.hpp"
 #include "monitor.hpp"
 
 namespace tunnel
 {
-class tap_interface
+class interface
 {
+public:
+    enum class type
+    {
+        tun,
+        tap
+    };
 
+#if defined(PLATFORM_LINUX)
+    struct config
+    {
+        /// The mode of the interface
+        type interface_type = type::tun;
+
+        /// The name of the interface
+        std::string interface_name;
+
+        /// If true the interface will be created with
+        /// Virtual Network Device Header enabled.
+        bool vnet_hdr = false;
+
+        /// If true the interface will be created with IFF_NO_PI enabled.
+        bool iff_no_pi = true;
+    };
+#elif defined(PLATFORM_MAC)
+    struct config
+    {
+        /// The mode of the interface
+        type interface_type = type::tun;
+
+        // On MacOS we don't have any specific configuration (setting the name
+        // on macos is not possible)
+    };
+#else
+    struct config
+    {
+        /// The mode of the interface
+        type interface_type;
+    };
+#endif
 public:
     /// Constructor
-    tap_interface();
-    tap_interface(tap_interface&&);
-    tap_interface& operator=(tap_interface&&);
+    interface();
+    interface(interface&&);
+    interface& operator=(interface&&);
 
     /// Destructor
-    ~tap_interface();
+    ~interface();
 
     /// Create the interface
-    void create(const config& config);
+    void create(const interface::config& config);
 
     /// Create the interface
     /// @param the config for the interface
-    void create(const config& config, std::error_code& error);
+    void create(const interface::config& config, std::error_code& error);
 
     /// Rename the interface
     /// @param interface_name The new name of the interface
@@ -86,7 +124,7 @@ public:
     /// @param error The error code in case of failure
     auto interface_name(std::error_code& error) const -> std::string;
 
-    /// @return The native file descriptor of the TUN interface. This
+    /// @return The native file descriptor of the interface. This
     ///         can be used for reading and writing data to and from
     ///         the interface.
     auto native_handle() const -> int;
@@ -219,10 +257,6 @@ public:
 
     /// @return The monitor for the interface
     auto monitor() -> tunnel::monitor&;
-
-    /// Set the log callback
-    /// @param callback The log callback
-    void set_log_callback(const tunnel::log_callback& callback);
 
     /// Return true if the platform is supported, otherwise false
     static auto is_platform_supported() -> bool;
