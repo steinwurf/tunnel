@@ -109,7 +109,7 @@ def integration_test(ctx):
         return
 
     tunnel_app_binary = os.path.relpath(
-        os.path.join("build_cmake", "apps", "app", "tunnel_test_app")
+        os.path.join("build_cmake", "apps", "app", "tunnel_app")
     )
     if not os.path.exists(tunnel_app_binary):
         ctx.fatal(
