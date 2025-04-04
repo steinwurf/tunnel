@@ -1,4 +1,4 @@
-name: Raspberry Pi
+name: Aarch64 Linux Musl
 on:
   workflow_dispatch:
     inputs:
@@ -16,30 +16,29 @@ jobs:
     timeout-minutes: 45
     strategy:
       fail-fast: false
-    runs-on: [self-hosted, docker, builder]
+    runs-on: [self-hosted, vm, ubuntu-current]
     name: Raspberry Pi Cross-compile
-    container:
-      image: ghcr.io/steinwurf/gcc-8.3.0-raspberrypi-aarch64:1.0.0
-      options: --user 0:0
-      volumes:
-        - /home/buildbot/.ssh:/root/.ssh
     steps:
+      - name: Ensure correct owner of repository
+        run: sudo chown -R actions-runner:actions-runner .
       - name: Checkout source code
         uses: actions/checkout@v4
-      - name: Waf Configure
+      - name: Clone toolchains
+        run: rm -rf ~/toolchains && git clone --depth 1 git@github.com:steinwurf/cmake-toolchains.git ~/toolchains
+      - name: CMake Cleanup
+        run: cmake -E remove_directory cmake_build
+      - name: CMake Configure
         uses: nick-fields/retry@v3
         with:
           max_attempts: 3
           timeout_minutes: 15
-          command: python3 waf configure --git_protocol=git@ --cxx_debug ${{ inputs.extra_resolve_options}}
-      - name: Waf Build
-        run: |
-          echo "::add-matcher::.github/gcc-problem-matcher.json"
-          python3 waf
+          command: cmake -B cmake_build -DCMAKE_BUILD_TYPE=Debug -DSTEINWURF_RESOLVE_OPTIONS="--git_protocol=git@ $EXTRA_RESOLVE_OPTIONS" -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -DCMAKE_C_COMPILER=${{ matrix.config.cc }} -DCMAKE_BUILD_TYPE=WurfRelease -DCMAKE_TOOLCHAIN_FILE=~/toolchains/zig-toolchain-aarch64-linux-musl.cmake -GNinja
+      - name: CMake Build
+        run: cmake --build cmake_build -j
       - name: Gather Test Binary and Input files
         run: |
           mkdir artifact
-          mv build_current/tunnel_tests ./artifact
+          mv cmake_build/tunnel_tests ./artifact
       - name: Upload Test Binary Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -51,7 +50,7 @@ jobs:
     strategy:
       fail-fast: false
     runs-on: [self-hosted, raspberry_pi_4]
-    name: Run Tests
+    name: Run Tests on Raspberry Pi
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
@@ -71,6 +70,14 @@ jobs:
             exit 1
           fi
 
+  workflow-keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: [self-hosted, vm, ubuntu-current]
+    permissions:
+      actions: write
+    steps:
+      - uses: liskin/gh-workflow-keepalive@v1
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
+

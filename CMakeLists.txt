@@ -61,6 +61,10 @@ else()
         steinwurf::tunnel)
 endif()
 
+find_package(Threads REQUIRED)
+
+target_link_libraries(tunnel PUBLIC Threads::Threads)
+
 # Link header only dependencies
 target_link_libraries(tunnel PRIVATE platform)
 target_link_libraries(tunnel PRIVATE poke)

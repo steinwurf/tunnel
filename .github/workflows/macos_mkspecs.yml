@@ -1,15 +1,15 @@
 name: MacOS C++ make-specs
-'on':
+"on":
   workflow_dispatch:
     inputs:
       extra_resolve_options:
         description: Extra Resolve Options
         required: false
   schedule:
-  - cron: 0 1 * * *
+    - cron: 0 1 * * *
   push:
     branches:
-    - master
+      - master
   pull_request:
 jobs:
   MacOS-mkspecs:
@@ -19,9 +19,8 @@ jobs:
       matrix:
         config:
           - arch: ARM64
-            os: big_sur
-            name: Apple Big Sur (ARM)
-    runs-on: [self-hosted, macOS, "${{ matrix.config.os }}", "${{ matrix.config.arch }}", builder]
+            name: Apple (ARM)
+    runs-on: [self-hosted, macOS, "${{ matrix.config.arch }}", builder]
     name: ${{ matrix.config.name }}
     steps:
       - name: Checkout
@@ -42,7 +41,15 @@ jobs:
           echo "::add-matcher::.github/gcc-problem-matcher.json"
           python3 waf
       - name: Test
-        run: echo ${{ secrets.MACOS_RUNNER_PASS }} | sudo -S ./build_current/tunnel_tests
+        run: python3 waf --run_tests
+
+  workflow-keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: [self-hosted, vm, ubuntu-current]
+    permissions:
+      actions: write
+    steps:
+      - uses: liskin/gh-workflow-keepalive@v1
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
