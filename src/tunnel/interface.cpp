@@ -11,18 +11,6 @@
 #include <platform/config.hpp>
 
 #if defined(PLATFORM_LINUX)
-<<<<<<< HEAD:src/tunnel/tun_interface.cpp
-
-#include "detail/platform_linux/stack_tun_interface.hpp"
-using platform_tun_interface =
-    tunnel::detail::platform_linux::stack_tun_interface;
-
-#elif defined(PLATFORM_MAC)
-
-#include "detail/platform_macos/tun_interface.hpp"
-using platform_tun_interface = tunnel::detail::platform_macos::tun_interface;
-
-=======
 #include "detail/platform_linux/stack_interface.hpp"
 using platform_interface = tunnel::detail::platform_linux::stack_interface;
 static constexpr bool platform_supported = true;
@@ -30,7 +18,6 @@ static constexpr bool platform_supported = true;
 #include "detail/platform_macos/interface.hpp"
 using platform_interface = tunnel::detail::platform_macos::interface;
 static constexpr bool platform_supported = true;
->>>>>>> master:src/tunnel/interface.cpp
 #else
 #include "detail/platform_unsupported/unsupported.hpp"
 using platform_interface = tunnel::detail::platform_unsupported::unsupported;

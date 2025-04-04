@@ -93,33 +93,9 @@ def install(ctx):
         "build_cmake",
     )
 
-<<<<<<< HEAD
     ctx.exec_command(
         f"cmake --build {cmake_dir} --target install",
     )
-=======
-    if bld.is_toplevel():
-        # Collect the source files but exclude the platform specific ones
-        sources = bld.path.ant_glob(
-            "test/src/**/*.cpp", excl=["test/**/platform_*/**/*.cpp"]
-        ) + bld.path.ant_glob("test/src/**/*.cc")
-
-        if platform.system() == "Linux":
-            sources += bld.path.ant_glob("test/src/**/platform_linux/**/*.cpp")
-        elif platform.system() == "Darwin":
-            sources += bld.path.ant_glob("test/src/**/platform_macos/**/*.cpp")
-        sources += bld.path.ant_glob("test/src/**/platform_unsupported/**/*.cpp")
-        bld.program(
-            features="cxx test",
-            source=["test/tunnel_tests.cpp"] + sources,
-            target="tunnel_tests",
-            use=["tunnel", "gtest"],
-        )
-
-        if platform.system() == "Linux" or platform.system() == "Darwin":
-            bld.recurse("examples")
-            bld.recurse("apps/app/")
->>>>>>> master
 
 
 class IntegrationContext(BuildContext):
