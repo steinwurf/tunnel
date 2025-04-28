@@ -41,7 +41,7 @@
         "internal": true,
         "resolver": "git",
         "method": "semver",
-        "major": 2,
+        "major": 3,
         "sources": [
             "github.com/steinwurf/asio.git"
         ]
