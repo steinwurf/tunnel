@@ -10,14 +10,14 @@
         "sha1": "d1447e30e2da0697d0ff07a6513a93734691dbdc"
     },
     "asio": {
-        "commit_id": "e17f46a631fac2c9181553ec6b7971b6c9987d0d",
-        "resolver_info": "2.0.1",
-        "sha1": "744549192663ff615bc3a59793bb3f92d143ce75"
+        "commit_id": "4d8b20130eed41bbb27570192514029b53c9f6da",
+        "resolver_info": "3.0.0",
+        "sha1": "939f27ad7766ed0924ddfa22dca123f6177644fe"
     },
     "asio-source": {
-        "commit_id": "147f7225a96d45a2807a64e443177f621844e51c",
-        "resolver_info": "asio-1-24-0",
-        "sha1": "bb0e4dc8f3c4f60822b15c54003556ef448c22e8"
+        "commit_id": "12e0ce9e0500bf0f247dbd1ae894272656456079",
+        "resolver_info": "asio-1-30-2",
+        "sha1": "92335e88366200b45048869bb28668e46f01192b"
     },
     "bourne": {
         "commit_id": "1288fa220b92e6910d9e09643b92ccf8f7f99b4e",
