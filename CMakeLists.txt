@@ -16,8 +16,10 @@ if(NOT DEFINED STEINWURF_RESOLVE)
     endif()
 
     set(STEINWURF_RESOLVE "${CMAKE_CURRENT_SOURCE_DIR}/resolve_symlinks")
-    set(STEINWURF_TOP_NAME tunnel)
 endif()
+
+# Include common CMake settings
+include("${STEINWURF_RESOLVE}/toolchains/common_settings.cmake")
 
 # platform dependency
 if(NOT TARGET steinwurf::platform)
@@ -46,7 +48,7 @@ endif()
 file(GLOB_RECURSE tunnel_sources ./src/*.cpp)
 
 # Is this the top-level steinwurf project?
-if(${PROJECT_NAME} STREQUAL ${STEINWURF_TOP_NAME})
+if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
     # Create static library
     add_library(tunnel STATIC ${tunnel_sources})
 
@@ -90,7 +92,7 @@ install(
     PATTERN ./src/tunnel/detail EXCLUDE)
 
 # Is top level project?
-if (${PROJECT_NAME} STREQUAL ${STEINWURF_TOP_NAME})
+if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
     if (UNIX)
 	  if(UNIX AND NOT APPLE)
 		set(LINUX TRUE)
@@ -112,8 +114,7 @@ if (${PROJECT_NAME} STREQUAL ${STEINWURF_TOP_NAME})
     endif ()
 
     # Google Test dependency
-    add_subdirectory("${STEINWURF_RESOLVE}/gtest-source" gtest_main
-            EXCLUDE_FROM_ALL)
+    aadd_subdirectory("${STEINWURF_RESOLVE}/gtest")
 
     # Define library
     file(GLOB_RECURSE tunnel_test_sources test/**/*.cpp)
@@ -135,7 +136,7 @@ if (${PROJECT_NAME} STREQUAL ${STEINWURF_TOP_NAME})
 
     # Build test executable
     add_executable(tunnel_tests ${tunnel_test_sources})
-    target_link_libraries(tunnel_tests gtest_main)
+    target_link_libraries(tunnel_tests steinwurf::gtest)
     target_link_libraries(tunnel_tests steinwurf::tunnel)
 	target_link_libraries(tunnel_tests steinwurf::platform)
 	target_link_libraries(tunnel_tests steinwurf::poke)

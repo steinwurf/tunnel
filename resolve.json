@@ -1,18 +1,9 @@
 [
     {
-        "name": "waf-tools",
-        "resolver": "git",
-        "method": "semver",
-        "major": 5,
-        "sources": [
-            "github.com/steinwurf/waf-tools.git"
-        ]
-    },
-    {
         "name": "platform",
         "resolver": "git",
         "method": "semver",
-        "major": 5,
+        "major": 6,
         "sources": [
             "github.com/steinwurf/platform.git"
         ]
@@ -21,19 +12,19 @@
         "name": "poke",
         "resolver": "git",
         "method": "semver",
-        "major": 15,
+        "major": 16,
         "sources": [
             "github.com/steinwurf/poke.git"
         ]
     },
     {
-        "name": "CLI11",
-        "resolver": "git",
+        "name": "cli11-source",
         "internal": true,
-        "method": "semver",
-        "major": 2,
+        "resolver": "git",
+        "method": "checkout",
+        "checkout": "f862849488557eeee0397814a47449ecfdae0383",
         "sources": [
-            "github.com/steinwurf/CLI11.git"
+            "github.com:CLIUtils/CLI11.git"
         ]
     },
     {
@@ -41,7 +32,7 @@
         "internal": true,
         "resolver": "git",
         "method": "semver",
-        "major": 2,
+        "major": 4,
         "sources": [
             "github.com/steinwurf/asio.git"
         ]
@@ -51,9 +42,19 @@
         "internal": true,
         "resolver": "git",
         "method": "semver",
-        "major": 5,
+        "major": 6,
         "sources": [
             "github.com/steinwurf/gtest.git"
+        ]
+    },
+    {
+        "name": "toolchains",
+        "internal": true,
+        "resolver": "git",
+        "method": "semver",
+        "major": 1,
+        "sources": [
+        "github.com/steinwurf/cmake-toolchains.git"
         ]
     }
 ]

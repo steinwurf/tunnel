@@ -1,92 +1,116 @@
 {
-    "CLI11": {
-        "commit_id": "b1003a44f018255c409c43d5f35e71ab8f7eef62",
-        "resolver_info": "2.0.1",
-        "sha1": "ab7745dea45fcc70fbc0177dcf7d9fc65089fffa"
-    },
     "abacus": {
-        "commit_id": "3fa7876b5f859ce0f5edabef90c97ed6196f4766",
-        "resolver_info": "7.0.0",
-        "sha1": "d1447e30e2da0697d0ff07a6513a93734691dbdc"
+        "commit_id": "964e2035583b77d8bdb4eb30f1e95db0ba2577a4",
+        "resolver_info": "8.0.0",
+        "sha1": "81811cbb1887f87ef86cd7b1022280663b55c8a9",
+        "source": "github.com/steinwurf/abacus.git"
+    },
+    "abseil": {
+        "commit_id": "d6a9562e974b409cbc8d1e44b40f713a80ff7d6c",
+        "resolver_info": "1.0.2",
+        "sha1": "fbbadb116d16047bce4ad8e1726804a01eb8e98a",
+        "source": "github.com/steinwurf/abseil-cpp.git"
+    },
+    "abseil-source": {
+        "commit_id": "bc257a88f7c1939f24e0379f14a3589e926c950c",
+        "resolver_info": "20250512.0",
+        "sha1": "8e016b57dd5361fe7f66ae47f3df42ab634321c5",
+        "source": "github.com/abseil/abseil-cpp.git"
     },
     "asio": {
-        "commit_id": "e17f46a631fac2c9181553ec6b7971b6c9987d0d",
-        "resolver_info": "2.0.1",
-        "sha1": "744549192663ff615bc3a59793bb3f92d143ce75"
+        "commit_id": "caf7e44bf02a0231f2d6b51e00a6135fc80476c5",
+        "resolver_info": "4.0.0",
+        "sha1": "b14d3e96c9c89a1f09fa9e381a6b4f283a89ba97",
+        "source": "github.com/steinwurf/asio.git"
     },
     "asio-source": {
-        "commit_id": "147f7225a96d45a2807a64e443177f621844e51c",
-        "resolver_info": "asio-1-24-0",
-        "sha1": "bb0e4dc8f3c4f60822b15c54003556ef448c22e8"
+        "commit_id": "12e0ce9e0500bf0f247dbd1ae894272656456079",
+        "resolver_info": "asio-1-30-2",
+        "sha1": "92335e88366200b45048869bb28668e46f01192b",
+        "source": "github.com/chriskohlhoff/asio.git"
     },
     "bourne": {
-        "commit_id": "1288fa220b92e6910d9e09643b92ccf8f7f99b4e",
-        "resolver_info": "10.1.0",
-        "sha1": "9c4ea9c707dda31fbd3e0c7b326ab97263e06ca3"
+        "commit_id": "cf4fed3ea15525a6608722db56f10ff4314c2354",
+        "resolver_info": "11.0.0",
+        "sha1": "f705097630cc09ecd747eaf3b5eef8966cfa4fba",
+        "source": "github.com/steinwurf/bourne.git"
     },
     "cli11-source": {
         "commit_id": "f862849488557eeee0397814a47449ecfdae0383",
         "resolver_info": "f862849488557eeee0397814a47449ecfdae0383",
-        "sha1": "c907ae8559530944e520e22d1382be32d290ca77"
+        "sha1": "c907ae8559530944e520e22d1382be32d290ca77",
+        "source": "github.com:CLIUtils/CLI11.git"
     },
     "endian": {
-        "commit_id": "4fedffac0c05181bcdf70c4d1e1f47794e7bd967",
-        "resolver_info": "13.0.0",
-        "sha1": "de39fa280dabb242134e095a1473495341165b70"
+        "commit_id": "b3702d8d134a06b5829119934718a75f4e171699",
+        "resolver_info": "14.0.0",
+        "sha1": "ebfaeeec96922b484b061fd860c46ee1264eca21",
+        "source": "github.com/steinwurf/endian.git"
     },
     "fmt": {
-        "commit_id": "c979a433b8ec677d75bd0745f1b5e295bd958b6b",
-        "resolver_info": "4.0.0",
-        "sha1": "91da6d979ff2e86c5b94d0711d71d001a7c66923"
+        "commit_id": "5d5eb0f166979fa523704114620a40b3e9e6bb08",
+        "resolver_info": "5.0.0",
+        "sha1": "160978c7e6571cc06d6c8a590e5e0c4f3c826fba",
+        "source": "github.com/steinwurf/fmt.git"
     },
     "fmt-source": {
         "commit_id": "0c9fce2ffefecfdce794e1859584e25877b7b592",
         "resolver_info": "11.0.2",
-        "sha1": "f39ff778b3283f543cdfc9b1662ec101c453efce"
+        "sha1": "f39ff778b3283f543cdfc9b1662ec101c453efce",
+        "source": "github.com/fmtlib/fmt.git"
     },
     "gtest": {
-        "commit_id": "da24468d2c5deb601d0f67196abe83d78a00f972",
-        "resolver_info": "5.0.0",
-        "sha1": "11e35e3559b3844fbe2fa6f045854cd2dcdf0f86"
+        "commit_id": "8e1f80ae8618fdba4389f1b56c811ea7241569d1",
+        "resolver_info": "6.0.2",
+        "sha1": "44c35f8798a738692c902fe2b67dc0cb76a1df53",
+        "source": "github.com/steinwurf/gtest.git"
     },
     "gtest-source": {
-        "commit_id": "e2239ee6043f73722e7aa812a459f54a28552929",
-        "resolver_info": "release-1.11.0",
-        "sha1": "ca969a1500e88a09de1cbfb8d8d3307a7773abfd"
+        "commit_id": "52eb8108c5bdec04579160ae17225d66034bd723",
+        "resolver_info": "v1.17.0",
+        "sha1": "8600eafa3daedc694d3115677da0dda3af6a8633",
+        "source": "github.com/google/googletest.git"
     },
     "platform": {
-        "commit_id": "c2543dd5e613fb86d8dee530c0f1c142a310e1f0",
-        "resolver_info": "5.1.1",
-        "sha1": "f6bc772cf920c024726ebd12a5a38f123d057adb"
+        "commit_id": "7740600dfa6c8800819737dd85fb89c16c1c0c01",
+        "resolver_info": "6.0.0",
+        "sha1": "7a014ba5a95cf7f0193213e95d3d2d8fcfa313b7",
+        "source": "github.com/steinwurf/platform.git"
     },
     "poke": {
-        "commit_id": "1a4aa1ad78a2c3ecbb6055197807485b0c277da1",
-        "resolver_info": "15.0.0",
-        "sha1": "55f4dfad5db131a8a2e1fe392d43d1ae4cdaf0a5"
+        "commit_id": "97669413ea61728f6c0971558e66ae7d383ba85a",
+        "resolver_info": "16.0.2",
+        "sha1": "779b0b9b6ef137a2e7672d88c582136ee28c0610",
+        "source": "github.com/steinwurf/poke.git"
     },
     "protobuf": {
-        "commit_id": "1e7b3114dd9ed4fcfe5f0969033235d7295004c7",
-        "resolver_info": "2.0.12",
-        "sha1": "1cbce41d76e6829eb713e60eb7c3f46a1a350a32"
+        "commit_id": "a32b1956282c0e89a8e24cecfcb1e46606071750",
+        "resolver_info": "3.0.0",
+        "sha1": "4423b2b25fe48344a027237e34317898651b99cf",
+        "source": "github.com/steinwurf/protobuf.git"
     },
     "protobuf-source": {
-        "commit_id": "ee1355459c9ce7ffe264bc40cfdc7b7623d37e99",
-        "resolver_info": "v24.3",
-        "sha1": "d174e67f0c9d5baa3b731bdccab4471c272bbb82"
+        "commit_id": "3d4adad5c4c4e6a6f9f038769b8c90716065b0e4",
+        "resolver_info": "v31.0",
+        "sha1": "93bde6d21d12c24893dc159f0a51bbb717118abb",
+        "source": "github.com/protocolbuffers/protobuf.git"
     },
     "source_location": {
-        "commit_id": "9c9657769e8b5b51f9dbde6cbe6088e066b4d43e",
-        "resolver_info": "1.0.0",
-        "sha1": "b66d7e4d2c9393df9bae6d68cca1a8f4d01d2196"
+        "commit_id": "c2dbc1e904f3900e881c98e0569d23e044a48246",
+        "resolver_info": "2.0.0",
+        "sha1": "1a08be8297afc59e088f710950b95ec073f032df",
+        "source": "github.com/steinwurf/source_location.git"
     },
     "source_location-source": {
         "commit_id": "e3849453a302b52305a146eaa3809bd797679233",
         "resolver_info": "e384945",
-        "sha1": "67edfd49ad879868b7d6a48b4e72d7f0cd969b46"
+        "sha1": "67edfd49ad879868b7d6a48b4e72d7f0cd969b46",
+        "source": "github.com/flagarde/source_location.git"
     },
-    "waf-tools": {
-        "commit_id": "807915941436a61f45e89aefb385392f628b8a29",
-        "resolver_info": "5.4.1",
-        "sha1": "9dd4ab1d52c916572f45237d4e7450abc7c19a14"
+    "toolchains": {
+        "commit_id": "f7b9747ab22d7dbbeb23c9f863e735bac883566e",
+        "resolver_info": "1.0.3",
+        "sha1": "443cb23b0570dffd39283d8679ec393ed809302f",
+        "source": "github.com/steinwurf/cmake-toolchains.git"
     }
 }
