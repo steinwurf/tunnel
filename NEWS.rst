@@ -6,6 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+19.0.0
+------
 * Major: Only use cmake to build
 * Major: bumped Platform v6
 * Major: bumped Poke v16

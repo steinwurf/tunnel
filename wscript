@@ -10,7 +10,7 @@ import os.path
 from waflib.Build import BuildContext
 
 APPNAME = "tunnel"
-VERSION = "18.1.0"
+VERSION = "19.0.0"
 
 
 def options(ctx):
