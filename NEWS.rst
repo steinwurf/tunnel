@@ -6,7 +6,11 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Major: Only use cmake to build
+* Major: bumped Platform v6
+* Major: bumped Poke v16
+* Major: bumped Asio v4
+* Major: bumped gtest v6
 
 18.1.0
 ------
