@@ -100,7 +100,7 @@ jobs:
       - name: Waf Clean
         run: python3 waf clean --no_resolve
       - name: Waf Configure with Zig Toolchain
-        run: python3 waf configure --git_protocol=git@ --cmake_toolchain=../resolve_symlinks/toolchains/zig-toolchain-x86_64-linux-musl.cmake --cmake_verbose
+        run: python3 waf configure --git_protocol=git@ --cmake_toolchain=./resolve_symlinks/toolchains/zig-toolchain-x86_64-linux-musl.cmake --cmake_verbose
       - name: Waf Build with Zig Toolchain
         run: python3 waf build --run_tests
 
