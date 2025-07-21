@@ -114,7 +114,7 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
     endif ()
 
     # Google Test dependency
-    aadd_subdirectory("${STEINWURF_RESOLVE}/gtest")
+    add_subdirectory("${STEINWURF_RESOLVE}/gtest")
 
     # Define library
     file(GLOB_RECURSE tunnel_test_sources test/**/*.cpp)
