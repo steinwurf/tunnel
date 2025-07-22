@@ -150,13 +150,6 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
     set_property(TARGET tunnel_tests PROPERTY CXX_STANDARD 17)
     set_property(TARGET tunnel_tests PROPERTY CXX_EXTENSIONS OFF)
 
-    # Enable pedantic errors
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        # GCC is throwing ISO errors from abseil that we can't fix
-    else ()
-        target_compile_options(tunnel_tests PUBLIC -pedantic-errors)
-    endif ()
-
     add_test(tunnel_tests tunnel_tests)
 
     add_subdirectory("apps/app")
