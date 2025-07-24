@@ -6,6 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+19.0.1
+------
 * Patch: Removed pedantic error flag when building
 * Patch: Updated waf such that the unit tests are running correctly
 * Patch: Added cleanup after protobuf in tests
