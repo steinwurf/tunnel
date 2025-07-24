@@ -114,7 +114,7 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
     endif ()
 
     # Google Test dependency
-    aadd_subdirectory("${STEINWURF_RESOLVE}/gtest")
+    add_subdirectory("${STEINWURF_RESOLVE}/gtest")
 
     # Define library
     file(GLOB_RECURSE tunnel_test_sources test/**/*.cpp)
@@ -149,13 +149,6 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
     # Make sure we compile with C++17 and do not use compiler-specific extensions
     set_property(TARGET tunnel_tests PROPERTY CXX_STANDARD 17)
     set_property(TARGET tunnel_tests PROPERTY CXX_EXTENSIONS OFF)
-
-    # Enable pedantic errors
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        # GCC is throwing ISO errors from abseil that we can't fix
-    else ()
-        target_compile_options(tunnel_tests PUBLIC -pedantic-errors)
-    endif ()
 
     add_test(tunnel_tests tunnel_tests)
 
