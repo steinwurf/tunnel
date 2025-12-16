@@ -6,7 +6,7 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Major: bumped Poke v17
 
 19.0.1
 ------
