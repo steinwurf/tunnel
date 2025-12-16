@@ -1,8 +1,8 @@
 {
     "abacus": {
-        "commit_id": "964e2035583b77d8bdb4eb30f1e95db0ba2577a4",
-        "resolver_info": "8.0.0",
-        "sha1": "81811cbb1887f87ef86cd7b1022280663b55c8a9",
+        "commit_id": "2761617d06945fec60041bc40d32d91eb5c7af7a",
+        "resolver_info": "9.0.0",
+        "sha1": "660facfca3b2b4e7c870318f2d10047b25b6c103",
         "source": "github.com/steinwurf/abacus.git"
     },
     "abseil": {
@@ -18,8 +18,8 @@
         "source": "github.com/abseil/abseil-cpp.git"
     },
     "asio": {
-        "commit_id": "caf7e44bf02a0231f2d6b51e00a6135fc80476c5",
-        "resolver_info": "4.0.0",
+        "commit_id": "af54bc82e770350d5b68e8d8c26854fbf80ade78",
+        "resolver_info": "4.0.1",
         "sha1": "b14d3e96c9c89a1f09fa9e381a6b4f283a89ba97",
         "source": "github.com/steinwurf/asio.git"
     },
@@ -71,6 +71,12 @@
         "sha1": "8600eafa3daedc694d3115677da0dda3af6a8633",
         "source": "github.com/google/googletest.git"
     },
+    "libassert-source": {
+        "commit_id": "60667829264ae01241257df7f1c7d6dba668eb9d",
+        "resolver_info": "v2.1.5",
+        "sha1": "650d881b8cb6cc1adf354d47d6353db6ec4fd6a5",
+        "source": "github.com:jeremy-rifkin/libassert.git"
+    },
     "platform": {
         "commit_id": "7740600dfa6c8800819737dd85fb89c16c1c0c01",
         "resolver_info": "6.0.0",
@@ -78,9 +84,9 @@
         "source": "github.com/steinwurf/platform.git"
     },
     "poke": {
-        "commit_id": "97669413ea61728f6c0971558e66ae7d383ba85a",
-        "resolver_info": "16.0.2",
-        "sha1": "779b0b9b6ef137a2e7672d88c582136ee28c0610",
+        "commit_id": "08f354b5e559a03238d57f9cdd3826d2a32190ec",
+        "resolver_info": "17.0.0",
+        "sha1": "26bfb0923f6668c93d72f6955e9f39d3dba0ce01",
         "source": "github.com/steinwurf/poke.git"
     },
     "protobuf": {
@@ -108,9 +114,21 @@
         "source": "github.com/flagarde/source_location.git"
     },
     "toolchains": {
-        "commit_id": "f7b9747ab22d7dbbeb23c9f863e735bac883566e",
-        "resolver_info": "1.0.3",
+        "commit_id": "d771e98c84304735f43db13d50edffd8e7d5a9d6",
+        "resolver_info": "1.0.5",
         "sha1": "443cb23b0570dffd39283d8679ec393ed809302f",
         "source": "github.com/steinwurf/cmake-toolchains.git"
+    },
+    "verify": {
+        "commit_id": "27b970938379a5a1bc1c9f4377c2686943763893",
+        "resolver_info": "6.0.4",
+        "sha1": "fed379602b6ea7bd611fc249daffa11b9e593800",
+        "source": "github.com/steinwurf/verify.git"
+    },
+    "zlib-source": {
+        "commit_id": "51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf",
+        "resolver_info": "51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf",
+        "sha1": "33283130debb8bf95a98929ff6cadd5bd9cb6a92",
+        "source": "github.com/madler/zlib.git"
     }
 }
