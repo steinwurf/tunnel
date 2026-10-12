@@ -6,7 +6,14 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Major: A tun interface created with ``vnet_hdr`` now only enables checksum
+  offload (``TUN_F_CSUM``) instead of ``TUN_F_CSUM | TUN_F_TSO4 | TUN_F_UFO``.
+  Segmentation offloads can be enabled with ``interface::set_offload()``.
+  Checksum offload is always kept enabled so that applications using
+  ``UDP_SEGMENT`` over the interface work on Linux before 6.11, where sends
+  otherwise fail with ``EIO``.
+* Minor: Added ``interface::set_offload()`` for enabling TCP/UDP
+  segmentation offload on tun interfaces created with ``vnet_hdr``.
 
 20.0.0
 ------
