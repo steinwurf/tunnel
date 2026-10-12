@@ -126,17 +126,17 @@ public:
 
     /// Set the offload features of the interface. The available offloads
     /// are platform specific, see offload. On Linux only tun interfaces
-    /// created with vnet_hdr are supported, and enabling segmentation offloads means the
-    /// kernel may read and write packets larger than the MTU, which the
-    /// user must handle using the virtio-net-header.
+    /// created with vnet_hdr are supported, and enabling segmentation
+    /// offloads means the kernel may read and write packets larger than the
+    /// MTU, which the user must handle using the virtio-net-header.
     /// @param offload The offloads to enable
     void set_offload(const offload& offload) const;
 
     /// Set the offload features of the interface. The available offloads
     /// are platform specific, see offload. On Linux only tun interfaces
-    /// created with vnet_hdr are supported, and enabling segmentation offloads means the
-    /// kernel may read and write packets larger than the MTU, which the
-    /// user must handle using the virtio-net-header.
+    /// created with vnet_hdr are supported, and enabling segmentation
+    /// offloads means the kernel may read and write packets larger than the
+    /// MTU, which the user must handle using the virtio-net-header.
     /// @param offload The offloads to enable
     /// @param error The error code in case of failure. If the kernel does
     ///        not support a requested offload the error is set and the
