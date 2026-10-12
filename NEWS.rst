@@ -6,6 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+21.0.0
+------
 * Major: A tun interface created with ``vnet_hdr`` now only enables checksum
   offload (``TUN_F_CSUM``) instead of ``TUN_F_CSUM | TUN_F_TSO4 | TUN_F_UFO``.
   Segmentation offloads can be enabled with ``interface::set_offload()``.
