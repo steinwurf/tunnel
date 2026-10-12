@@ -34,10 +34,26 @@ public:
 
         /// If true the interface will be created with
         /// Virtual Network Device Header enabled.
+        ///
+        /// For tun interfaces only checksum offload (TUN_F_CSUM) is
+        /// enabled. Segmentation offloads (TSO/USO) can be enabled with
+        /// set_offload().
         bool vnet_hdr = false;
 
         /// If true the interface will be created with IFF_NO_PI enabled.
         bool iff_no_pi = true;
+    };
+
+    /// The segmentation offloads to enable on a tun interface created with
+    /// vnet_hdr. Checksum offload (TUN_F_CSUM) is always enabled.
+    struct offload
+    {
+        /// Enable TCP segmentation offload (TUN_F_TSO4 | TUN_F_TSO6)
+        bool tcp = false;
+
+        /// Enable UDP segmentation offload (TUN_F_USO4 | TUN_F_USO6),
+        /// requires Linux 6.2 or newer.
+        bool udp = false;
     };
 #elif defined(PLATFORM_MAC)
     struct config
@@ -48,11 +64,20 @@ public:
         // On MacOS we don't have any specific configuration (setting the name
         // on macos is not possible)
     };
+
+    struct offload
+    {
+        // On MacOS offloading is not supported
+    };
 #else
     struct config
     {
         /// The mode of the interface
         type interface_type;
+    };
+
+    struct offload
+    {
     };
 #endif
 public:
@@ -98,6 +123,25 @@ public:
     /// @param group The group the interface belongs to
     /// @param error The error code in case of failure
     void set_group(const std::string& group, std::error_code& error) const;
+
+    /// Set the offload features of the interface. The available offloads
+    /// are platform specific, see offload. On Linux only tun interfaces
+    /// created with vnet_hdr are supported, and enabling segmentation
+    /// offloads means the kernel may read and write packets larger than the
+    /// MTU, which the user must handle using the virtio-net-header.
+    /// @param offload The offloads to enable
+    void set_offload(const offload& offload) const;
+
+    /// Set the offload features of the interface. The available offloads
+    /// are platform specific, see offload. On Linux only tun interfaces
+    /// created with vnet_hdr are supported, and enabling segmentation
+    /// offloads means the kernel may read and write packets larger than the
+    /// MTU, which the user must handle using the virtio-net-header.
+    /// @param offload The offloads to enable
+    /// @param error The error code in case of failure. If the kernel does
+    ///        not support a requested offload the error is set and the
+    ///        previous offload features are kept.
+    void set_offload(const offload& offload, std::error_code& error) const;
 
     /// @return The owner of the interface or an empty string if no
     ///         is specified.

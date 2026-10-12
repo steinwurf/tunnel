@@ -125,7 +125,13 @@ struct layer_interface : public Super
         {
             if (config.interface_type == tunnel::interface::type::tun)
             {
-                int offload_flags = TUN_F_CSUM | TUN_F_TSO4 | TUN_F_UFO;
+                // Only request checksum offload. It is accepted by every
+                // kernel supporting IFF_VNET_HDR and is a prerequisite for
+                // all segmentation offloads. It also ensures UDP_SEGMENT
+                // sends routed over this device work on kernels before
+                // 6.11. Segmentation offloads are enabled separately with
+                // set_offload().
+                int offload_flags = TUN_F_CSUM;
                 Super::ioctl(m_interface_fd, TUNSETOFFLOAD, offload_flags,
                              error);
                 if (error)
@@ -135,8 +141,9 @@ struct layer_interface : public Super
             }
             else if (config.interface_type == tunnel::interface::type::tap)
             {
-                // there are some support for offloading but it is not clear how
-                // and if they work
+                // The kernel supports the same offloads for tap, but
+                // offloading is currently only supported for tun interfaces
+                // in this library.
             }
         }
 
@@ -248,6 +255,65 @@ struct layer_interface : public Super
 
         Super::ioctl(m_interface_fd, TUNSETGROUP, (void*)(intptr_t)grp->gr_gid,
                      error);
+    }
+
+    void set_offload(const tunnel::interface::offload& offload,
+                     std::error_code& error) const
+    {
+        assert(!error);
+        assert(m_interface_fd);
+
+        Super::do_log(log_level::debug, action::set_offload,
+                      log::boolean{"tcp", offload.tcp},
+                      log::boolean{"udp", offload.udp});
+
+        struct ifreq ifr
+        {
+        };
+        Super::ioctl(m_interface_fd, TUNGETIFF, (void*)&ifr, error);
+        if (error)
+        {
+            return;
+        }
+
+        // Offloading is currently only supported for tun interfaces
+        if ((ifr.ifr_flags & (IFF_TUN | IFF_TAP)) != IFF_TUN)
+        {
+            error = make_error_code(linux_error::invalid_interface_type);
+            return;
+        }
+
+        // Offloads are only meaningful with the virtio-net-header, as it is
+        // what carries the checksum and segmentation metadata.
+        if (!(ifr.ifr_flags & IFF_VNET_HDR))
+        {
+            error = make_error_code(linux_error::vnet_hdr_required);
+            return;
+        }
+
+        // TUNSETOFFLOAD replaces the full feature set on every call, so
+        // checksum offload must always be included to keep the guarantee
+        // given at creation. It is also a prerequisite for all
+        // segmentation offloads.
+        int offload_flags = TUN_F_CSUM;
+
+        if (offload.tcp)
+        {
+            offload_flags |= TUN_F_TSO4 | TUN_F_TSO6;
+        }
+
+        if (offload.udp)
+        {
+#if defined(TUN_F_USO4) && defined(TUN_F_USO6)
+            offload_flags |= TUN_F_USO4 | TUN_F_USO6;
+#else
+            // Built against kernel headers older than 6.2
+            error = std::make_error_code(std::errc::not_supported);
+            return;
+#endif
+        }
+
+        Super::ioctl(m_interface_fd, TUNSETOFFLOAD, offload_flags, error);
     }
 
     auto is_persistent(std::error_code& error) const -> bool

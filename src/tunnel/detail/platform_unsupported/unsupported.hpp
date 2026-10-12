@@ -39,6 +39,12 @@ struct unsupported
         error = std::make_error_code(std::errc::not_supported);
     }
 
+    void set_offload(const tunnel::interface::offload&,
+                     std::error_code& error) const
+    {
+        error = std::make_error_code(std::errc::not_supported);
+    }
+
     std::string owner(std::error_code& error) const
     {
         error = std::make_error_code(std::errc::not_supported);

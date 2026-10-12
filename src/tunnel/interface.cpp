@@ -142,6 +142,21 @@ void interface::set_group(const std::string& group,
     m_impl->set_group(group, error);
 }
 
+void interface::set_offload(const interface::offload& offload) const
+{
+    assert(m_impl);
+
+    std::error_code error;
+    set_offload(offload, error);
+    throw_if_error(error);
+}
+void interface::set_offload(const interface::offload& offload,
+                            std::error_code& error) const
+{
+    assert(m_impl);
+    m_impl->set_offload(offload, error);
+}
+
 auto interface::interface_name() const -> std::string
 {
     assert(m_impl);

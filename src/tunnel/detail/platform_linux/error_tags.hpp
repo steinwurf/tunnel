@@ -11,6 +11,8 @@ ERROR_TAG(mtu_too_large, "The MTU value specified is too large.")
 ERROR_TAG(nlmsg_ok, "Got false from NLMSG_OK macro.")
 ERROR_TAG(nlmsg_error, "Got a NLMSG_ERROR.")
 ERROR_TAG(invalid_interface_type, "Invalid interface type.")
+ERROR_TAG(vnet_hdr_required,
+          "The operation requires an interface created with vnet_hdr.")
 #else
 #error "Missing ERROR_TAG"
 #endif

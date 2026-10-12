@@ -589,6 +589,14 @@ public:
         error = std::make_error_code(std::errc::not_supported);
     }
 
+    void set_offload(const tunnel::interface::offload&,
+                     std::error_code& error) const
+    {
+        assert(!error);
+        do_log(log_level::error, action::unsupported_platform);
+        error = std::make_error_code(std::errc::not_supported);
+    }
+
     bool is_persistent(std::error_code& error) const
     {
         assert(!error);
