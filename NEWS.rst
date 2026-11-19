@@ -6,7 +6,13 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Patch: On macOS the utun unit is now chosen by the kernel. Previously
+  ``interface::create()`` always requested ``utun6`` and failed if it was
+  already in use, so only one interface could exist per machine.
+* Patch: On macOS failures now report the actual system error instead of
+  ``io_error``, and an invalid address string reports ``invalid_argument``.
+* Patch: On macOS ``ipv4()``, ``ipv4_netmask()``, ``mtu()`` and ``is_up()``
+  now report errors instead of silently returning empty values.
 
 21.0.0
 ------
