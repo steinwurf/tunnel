@@ -30,8 +30,8 @@
         "source": "github.com/chriskohlhoff/asio.git"
     },
     "bourne": {
-        "commit_id": "cf4fed3ea15525a6608722db56f10ff4314c2354",
-        "resolver_info": "11.0.0",
+        "commit_id": "b824b289f1d8cbfeecc26743ea5579e5d3051c8c",
+        "resolver_info": "11.1.0",
         "sha1": "f705097630cc09ecd747eaf3b5eef8966cfa4fba",
         "source": "github.com/steinwurf/bourne.git"
     },
@@ -48,8 +48,8 @@
         "source": "github.com/steinwurf/endian.git"
     },
     "fmt": {
-        "commit_id": "5d5eb0f166979fa523704114620a40b3e9e6bb08",
-        "resolver_info": "5.0.0",
+        "commit_id": "3fba272021d507b310f4d059e3a4c1883b65fbc4",
+        "resolver_info": "5.0.1",
         "sha1": "160978c7e6571cc06d6c8a590e5e0c4f3c826fba",
         "source": "github.com/steinwurf/fmt.git"
     },
@@ -78,14 +78,14 @@
         "source": "github.com:jeremy-rifkin/libassert.git"
     },
     "platform": {
-        "commit_id": "7740600dfa6c8800819737dd85fb89c16c1c0c01",
-        "resolver_info": "6.0.0",
+        "commit_id": "9dacaa6bba5ff933d126620c073ddfe09e993336",
+        "resolver_info": "6.1.0",
         "sha1": "7a014ba5a95cf7f0193213e95d3d2d8fcfa313b7",
         "source": "github.com/steinwurf/platform.git"
     },
     "poke": {
-        "commit_id": "08f354b5e559a03238d57f9cdd3826d2a32190ec",
-        "resolver_info": "17.0.0",
+        "commit_id": "87382bb55cba4d0b3d5b573b83f4b1c8352a4e14",
+        "resolver_info": "17.3.0",
         "sha1": "26bfb0923f6668c93d72f6955e9f39d3dba0ce01",
         "source": "github.com/steinwurf/poke.git"
     },
@@ -114,14 +114,14 @@
         "source": "github.com/flagarde/source_location.git"
     },
     "toolchains": {
-        "commit_id": "d771e98c84304735f43db13d50edffd8e7d5a9d6",
-        "resolver_info": "1.0.5",
+        "commit_id": "4874350653689f06062b9da1ba5179f54d69f9ad",
+        "resolver_info": "1.2.0",
         "sha1": "443cb23b0570dffd39283d8679ec393ed809302f",
         "source": "github.com/steinwurf/cmake-toolchains.git"
     },
     "verify": {
-        "commit_id": "27b970938379a5a1bc1c9f4377c2686943763893",
-        "resolver_info": "6.0.4",
+        "commit_id": "afd1e65274b32c83c82d8949a958ca9748c9bbc7",
+        "resolver_info": "6.2.0",
         "sha1": "fed379602b6ea7bd611fc249daffa11b9e593800",
         "source": "github.com/steinwurf/verify.git"
     },

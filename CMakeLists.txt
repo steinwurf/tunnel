@@ -101,7 +101,10 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
 	  endif()
 
 	  # This is not a lib dependency but only for the app and should not be included onless build is toplevel
-    add_subdirectory("${STEINWURF_RESOLVE}/cli11-source" CLI11 EXCLUDE_FROM_ALL)
+    # (a dependency such as poke may already have added it)
+    if(NOT TARGET CLI11::CLI11)
+        add_subdirectory("${STEINWURF_RESOLVE}/cli11-source" CLI11 EXCLUDE_FROM_ALL)
+    endif()
 
     enable_testing()
 
