@@ -165,7 +165,8 @@ public:
     }
 
     // Check if the device is open
-    bool is_open() const
+    bool
+    is_open() const
     {
         return static_cast<bool>(m_interface_fd);
     }
