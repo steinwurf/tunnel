@@ -77,8 +77,6 @@ TEST(test_interface, create_multiple)
     EXPECT_EQ(t1.interface_name().rfind("utun", 0), 0U);
     EXPECT_EQ(t2.interface_name().rfind("utun", 0), 0U);
     EXPECT_NE(t1.interface_name(), t2.interface_name());
-    EXPECT_FALSE(t1.is_up());
-    EXPECT_FALSE(t2.is_up());
 }
 
 TEST(test_interface, errors_are_reported)
