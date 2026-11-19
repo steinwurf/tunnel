@@ -6,6 +6,9 @@ every change, see the Git log.
 
 Latest
 ------
+* Patch: Fix CMake configure failing with duplicate ``CLI11`` targets when a
+  dependency (poke 17.3.0) has already added CLI11.
+* Patch: Update locked dependency versions.
 * Patch: On macOS the utun unit is now chosen by the kernel. Previously
   ``interface::create()`` always requested ``utun6`` and failed if it was
   already in use, so only one interface could exist per machine.
