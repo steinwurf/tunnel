@@ -6,6 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+21.0.1
+------
 * Patch: Fix CMake configure failing with duplicate ``CLI11`` targets when a
   dependency (poke 17.3.0) has already added CLI11.
 * Patch: Update locked dependency versions.
