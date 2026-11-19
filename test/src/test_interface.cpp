@@ -49,6 +49,60 @@ TEST(test_interface, create_no_su_expect_fail)
     tunnel::interface t;
     EXPECT_THROW(t.create({}), std::system_error);
 }
+
+TEST(test_interface, create_no_su_reports_permission_error)
+{
+    if (getuid() == 0)
+    {
+        GTEST_SKIP();
+    }
+    tunnel::interface t;
+    std::error_code error;
+    t.create({}, error);
+    EXPECT_EQ(error, std::errc::operation_not_permitted);
+}
+
+TEST(test_interface, create_multiple)
+{
+    if (getuid() != 0)
+    {
+        GTEST_SKIP();
+    }
+    // Several interfaces must be able to exist at the same time, also when
+    // other utun interfaces (VPNs, system services) are already present.
+    tunnel::interface t1;
+    tunnel::interface t2;
+    t1.create({});
+    t2.create({});
+    EXPECT_EQ(t1.interface_name().rfind("utun", 0), 0U);
+    EXPECT_EQ(t2.interface_name().rfind("utun", 0), 0U);
+    EXPECT_NE(t1.interface_name(), t2.interface_name());
+    EXPECT_FALSE(t1.is_up());
+    EXPECT_FALSE(t2.is_up());
+}
+
+TEST(test_interface, errors_are_reported)
+{
+    if (getuid() != 0)
+    {
+        GTEST_SKIP();
+    }
+    tunnel::interface t;
+    t.create({});
+
+    // No address has been assigned yet, so reading it must fail
+    std::error_code error;
+    EXPECT_EQ(t.ipv4(error), "");
+    EXPECT_TRUE(error);
+
+    error.clear();
+    t.set_ipv4("not-an-address", error);
+    EXPECT_EQ(error, std::errc::invalid_argument);
+
+    error.clear();
+    t.set_ipv4_netmask("not-a-netmask", error);
+    EXPECT_EQ(error, std::errc::invalid_argument);
+}
 #endif
 
 #if defined(PLATFORM_LINUX) || defined(PLATFORM_MAC)
